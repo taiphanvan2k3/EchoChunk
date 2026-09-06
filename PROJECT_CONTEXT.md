@@ -134,3 +134,64 @@
 - **Vấn đề Permission**: Khi truy cập từ điện thoại qua mạng LAN bằng HTTP (`http://192.168.x.x:3000`), trình duyệt coi là Insecure Context và thu hồi quyền Micro sau mỗi lần `stop()`.
   - Đã tích hợp `ensureMicrophonePermission()` (giữ Audio Stream ở background).
   - Khuyến nghị chạy `pnpm dev:https` (`next dev --experimental-https`) để cấp chứng chỉ SSL cục bộ, cho phép chọn "Luôn cho phép" (Always Allow) trên điện thoại.
+
+---
+
+## 🧭 8. Tài Liệu Nghiên Cứu & Thiết Kế Mở Rộng
+
+- **Nghiên cứu phương pháp "My 24 Hours" (AlexD):** Xem chi tiết tại [docs/RESEARCH_ALEXD_MY_24_HOURS.md](docs/RESEARCH_ALEXD_MY_24_HOURS.md) — *Nguồn gốc: Video bài giảng [AlexD YouTube](https://youtu.be/-Z1ad2a_BCo?si=3kLAvVcD_v2HXXzK) (Sơ đồ 6 bước tại mốc [17:42 / t=1062s](https://youtu.be/-Z1ad2a_BCo?si=3RiuPnyCjVAHLTxe&t=1062))*.
+  - Phân tích tâm lý học hành vi (Atomic Habits, Decision Fatigue, 5 phút buổi sáng).
+  - Đặc tả 3 cơ chế giải quyết bài toán phát sinh câu mới (Quick Capture 1-chạm bằng tiếng Việt, Branching Moments, Evening Reflection).
+  - Lộ trình tích hợp chế độ **Dictation Lab** (Nghe chép chính tả bắt từ chức năng và nối âm) vào EchoChunk.
+- **Nghiên cứu phương pháp "Echoing vs. Shadowing" (AlexD):** Xem chi tiết tại [docs/RESEARCH_ALEXD_ECHOING_METHOD.md](docs/RESEARCH_ALEXD_ECHOING_METHOD.md).
+  - Phân biệt Shadowing (nói đè máy móc, giới hạn ý thức 10%) vs. Echoing (dội âm có khoảng lặng, khai phóng tiềm thức 90%).
+  - Công thức đưa ngôn ngữ vào phản xạ tự nhiên: **SỐC + LẶP** (Shock & Repetition).
+  - Kỹ thuật tương tác với AI làm Huấn luyện viên kiên nhẫn (Patient AI Coach) — không phán xét, rất phù hợp cho người hướng nội.
+  - Rèn luyện các từ nối dẫn đường (Signpost Words: *First, Then, Next, Finally*) trong các quy trình thực chiến.
+- **Tính năng học qua Video YouTube (YouTube Study Suite):** Xem chi tiết tại [docs/FEATURE_YOUTUBE_STUDY_SUITE.md](docs/FEATURE_YOUTUBE_STUDY_SUITE.md).
+  - Luồng nhập URL YouTube ➔ Cắt đoạn 1–2 phút (150–200 từ) ➔ Dẫn dắt qua Lộ trình 6 bước chuẩn hóa (Vào tai ➔ Hiểu nghĩa ➔ Bắt chi tiết ➔ Tư duy ➔ Phản xạ ➔ Thực chiến).
+
+
+---
+
+## 🚀 9. Danh Sách Tính Năng Dự Định Triển Khai (Planned Features Backlog)
+
+> **Giai đoạn hiện tại:** Đang tổng hợp ý tưởng, thiết kế kiến trúc và luồng người dùng (Brainstorming & Architecture Phase). Chưa tiến hành code.
+
+1. **🌟 Phân Tầng Thư Viện Album (Library Categorization):**
+   - **Tầng 1 (My Personal Hub):** Đặt trên cùng gồm `My 24 Hours`, `YouTube Decks`, `Từ vựng của tôi` và `Sổ tay SRS`.
+   - **Tầng 2 (Curated Library):** 12 Topic bài học có sẵn theo chuyên đề.
+2. **🌅 Hệ Sinh Thái "My 24 Hours":**
+   - Bộ thẻ 10 khoảnh khắc kinh điển của AlexD / Susan.
+   - **Quick Capture 1-chạm:** Gõ/nói tiếng Việt ➔ AI tự sinh Speaking Chunk, câu mẫu, IPA và ghi chú nối âm.
+   - **Branching Moments:** 1 nút bấm sinh 3–5 biến thể tình huống quanh 1 khoảnh khắc.
+   - **Evening 30s Reflection:** Gợi ý cuối ngày để chuẩn bị bài học sáng mai.
+   - **5-Minute Morning Quick Start:** Nút 1-chạm học 5 phút buổi sáng tránh suy kiệt quyết định (*Decision Fatigue*) kèm cảnh báo *Never Miss Twice*.
+3. **🎧 Chế Độ "Dictation Lab" (Nghe Chép Chính Tả):**
+   - Nghe audio câu mẫu (1.0x / 0.75x) ➔ Đục lỗ che từ chức năng và cụm nối âm bị nuốt ➔ Gõ để bắt âm và hiểu quy tắc ngữ âm.
+4. **🗣️ Chuẩn Hóa "Echoing Lab" & Patient AI Speaking Coach:**
+   - Định danh lại chế độ luyện tập: Nghe câu ➔ Khoảng lặng tiêu hóa (Echoic Memory) ➔ Bật mic dội âm lại.
+   - Chú trọng hiển thị và bắt lỗi các âm đuôi micro (`/z/`, `/s/`, `/ed/`) trên Word Inspector Bar.
+   - Tích hợp AI Speaking Coach kiên nhẫn 1-1 không sợ phán xét cho người hướng nội.
+5. **🎬 Bộ Công Cụ Học Video YouTube (YouTube Study Suite):**
+   - Dán link YouTube ➔ Chọn đoạn 1–2 phút (150–200 từ) ➔ Dẫn dắt qua **Lộ trình 6 bước chuẩn hóa (6-Step Guided Flow)** (theo mốc video AlexD tại phút [17:42 / t=1062s](https://youtu.be/-Z1ad2a_BCo?si=3RiuPnyCjVAHLTxe&t=1062)):
+     - `Bước 1: Vào tai` (Focus Listening / Nghe ngấm âm thanh).
+     - `Bước 2: Hiểu nghĩa` (Bảng song ngữ Side-by-Side 2 cột EN - VI in đậm từ mới đối xứng + Tra IPA).
+     - `Bước 3: Bắt chi tiết` (Dictation Lab đục lỗ bắt từ chức năng và nối âm).
+     - `Bước 4: Tư duy` (Sắp xếp câu theo từ dẫn đường *First, Then, Next, Finally* / Chat logic text với AI).
+     - `Bước 5: Phản xạ` (Echoing Lab dội âm có khoảng lặng 2–3s + Web Speech chấm điểm).
+     - `Bước 6: Thực chiến` (AI Live Voice đàm thoại trực tiếp 2 chiều về nội dung video).
+
+---
+
+## 🌐 10. Tầm Nhìn Mở Rộng Đa Ngôn Ngữ (Future Multi-Language Vision)
+
+> **Chiến lược trọng tâm (Current Focus):** Tập trung **100% vào Tiếng Anh (`en-US`)** cho mục đích học tập trước mắt, tối ưu hóa triệt để trải nghiệm của bộ tính năng cốt lõi (My 24 Hours, Echoing Lab, Dictation Lab, YouTube Study Suite).
+
+- **Ý tưởng mở rộng tương lai (Future Horizons):**
+  - **Tiếng Nhật (🇯🇵 `ja-JP`):** Rất phù hợp vì ngữ pháp tiếng Nhật phụ thuộc vào trợ từ và mẫu câu cố định (*Sentence Frames*), học theo Chunk giúp nói mượt mà không bị khựng chia thể. Tích hợp Furigana trên đầu Kanji và tách từ tự nhiên qua `Intl.Segmenter`.
+  - **Tiếng Hàn (🇰🇷 `ko-KR`):** Cấu trúc khối câu và văn hóa giao tiếp lặp lại hàng ngày tương tự tiếng Nhật, tận dụng bảng chữ cái tượng thanh Hangul.
+- **Chuẩn bị kiến trúc (Architectural Readiness):**
+  - Thiết kế cấu trúc dữ liệu và API độc lập với ngôn ngữ (`language?: 'en' | 'ja' | 'ko'`).
+  - Web Speech API trên trình duyệt đã hỗ trợ sẵn nhận diện và phát âm cho cả `ja-JP` và `ko-KR`.
+  - Khi hoàn thiện phiên bản Tiếng Anh, hệ thống có thể mở rộng sang các ngôn ngữ này một cách dễ dàng mà không cần thay đổi kiến trúc gốc.
