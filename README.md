@@ -4,6 +4,10 @@
 
 Được đồng bộ trực tiếp từ **12 chủ đề Notion English Speaking Hub** và **385 thẻ PrepTalk Brainscape**.
 
+<p align="center">
+  <img src="public/demo-shadowing.png" alt="EchoChunk Shadowing Mode Interface" width="850" style="border-radius: 10px; border: 1px solid #e3e2de; box-shadow: 0 4px 20px rgba(0,0,0,0.06);" />
+</p>
+
 ---
 
 ## 🌟 4 Chế độ Luyện tập Đột phá

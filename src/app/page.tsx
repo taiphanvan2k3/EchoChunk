@@ -357,12 +357,14 @@ export default function HomePage() {
                 topics={dynamicTopics}
                 selectedTopicId={selectedTopicId}
                 onSelectTopic={(tId) => {
+                  soundManager.playClick();
                   setSelectedTopicId(tId);
                   setShuffleSeed(0);
                   setQueueIndex(0);
                 }}
                 selectedLevel={selectedLevel}
                 onSelectLevel={(lvl) => {
+                  soundManager.playClick();
                   setSelectedLevel(lvl);
                   setShuffleSeed(0);
                   setQueueIndex(0);

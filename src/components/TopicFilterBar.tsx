@@ -1,5 +1,7 @@
 'use client';
 
+import { soundManager } from '@/lib/sound';
+
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { TopicMeta } from '@/types';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -43,6 +45,7 @@ export const TopicFilterBar: React.FC<TopicFilterBarProps> = ({
   }, [checkScrollBounds, topics]);
 
   const handleScroll = (direction: 'left' | 'right') => {
+    soundManager.playClick();
     if (!scrollRef.current) return;
     const scrollAmount = 280;
     scrollRef.current.scrollBy({

@@ -190,7 +190,7 @@ export const TopicExplorerMode: React.FC<TopicExplorerModeProps> = ({
                     <button
                       type="button"
                       className={`studied-tab ${studiedFilter === 'ALL' ? 'active' : ''}`}
-                      onClick={() => setStudiedFilter('ALL')}
+                      onClick={() => { soundManager.playClick(); setStudiedFilter('ALL'); }}
                     >
                       Tất cả <span className="tab-num">{studiedChunks.length}</span>
                     </button>
@@ -200,7 +200,7 @@ export const TopicExplorerMode: React.FC<TopicExplorerModeProps> = ({
                       className={`studied-tab ${studiedFilter === 'DUE' ? 'active' : ''} ${
                         dueChunks.length > 0 ? 'has-due' : ''
                       }`}
-                      onClick={() => setStudiedFilter('DUE')}
+                      onClick={() => { soundManager.playClick(); setStudiedFilter('DUE'); }}
                     >
                       Cần ôn <span className="tab-num">{dueChunks.length}</span>
                     </button>
@@ -208,7 +208,7 @@ export const TopicExplorerMode: React.FC<TopicExplorerModeProps> = ({
                     <button
                       type="button"
                       className={`studied-tab ${studiedFilter === 'LEARNING' ? 'active' : ''}`}
-                      onClick={() => setStudiedFilter('LEARNING')}
+                      onClick={() => { soundManager.playClick(); setStudiedFilter('LEARNING'); }}
                     >
                       Đang học <span className="tab-num">{learningChunks.length}</span>
                     </button>
@@ -216,7 +216,7 @@ export const TopicExplorerMode: React.FC<TopicExplorerModeProps> = ({
                     <button
                       type="button"
                       className={`studied-tab ${studiedFilter === 'MASTERED' ? 'active' : ''}`}
-                      onClick={() => setStudiedFilter('MASTERED')}
+                      onClick={() => { soundManager.playClick(); setStudiedFilter('MASTERED'); }}
                     >
                       Thành thạo <span className="tab-num">{masteredChunks.length}</span>
                     </button>
