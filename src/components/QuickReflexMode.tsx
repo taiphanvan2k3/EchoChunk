@@ -206,7 +206,6 @@ export const QuickReflexMode: React.FC<QuickReflexModeProps> = ({
       }
     } else {
       setSpokenTranscript('');
-      soundManager.playClick();
       setIsRecording(true);
 
       speechService.startListening(

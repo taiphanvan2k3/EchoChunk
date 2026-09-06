@@ -1,14 +1,20 @@
-// Speech Synthesis (TTS) & Web Speech Recognition (STT) + Continuous Stream & Mobile Deduplication
+// Speech Synthesis (TTS) & Web Speech Recognition (STT) + Mobile-Optimized Deduplication
 import { SpeechEvalResult, WordMatchToken } from '@/types';
 
+interface SpeechRecognitionResultLike {
+  isFinal: boolean;
+  length: number;
+  [index: number]: { transcript: string };
+}
+
+interface SpeechRecognitionResultListLike {
+  length: number;
+  [index: number]: SpeechRecognitionResultLike;
+}
+
 interface SpeechRecognitionEventLike {
-  results: {
-    length: number;
-    [index: number]: {
-      isFinal: boolean;
-      [index: number]: { transcript: string };
-    };
-  };
+  resultIndex: number;
+  results: SpeechRecognitionResultListLike;
 }
 
 interface SpeechRecognitionErrorEventLike {
@@ -25,6 +31,7 @@ interface SpeechRecognitionInstance {
   onend: (() => void) | null;
   start: () => void;
   stop: () => void;
+  abort: () => void;
 }
 
 interface CustomWindow extends Window {
@@ -32,12 +39,14 @@ interface CustomWindow extends Window {
   webkitSpeechRecognition?: new () => SpeechRecognitionInstance;
 }
 
+/**
+ * Remove consecutive identical words caused by mobile STT stutter
+ */
 function cleanDuplicateWords(text: string): string {
   if (!text) return '';
   const words = text.trim().split(/\s+/);
   const cleaned: string[] = [];
   for (let i = 0; i < words.length; i++) {
-    // If consecutive identical word (case-insensitive) caused by mobile STT stutter
     if (i > 0 && words[i].toLowerCase() === words[i - 1].toLowerCase()) {
       continue;
     }
@@ -46,45 +55,97 @@ function cleanDuplicateWords(text: string): string {
   return cleaned.join(' ');
 }
 
-function mergeAndDeduplicate(finalText: string, interimText: string): string {
-  const f = finalText.trim();
-  const i = interimText.trim();
+/**
+ * Process event.results from Web Speech API.
+ * Solves:
+ * 1. Android Chrome cumulative results where each final result contains the previous phrase.
+ * 2. Desktop discrete results where each final result is a separate chunk.
+ * 3. Overlapping interim and final transcripts.
+ */
+function processSpeechResults(results: SpeechRecognitionResultListLike): string {
+  const finalPieces: string[] = [];
+  const interimPieces: string[] = [];
 
-  if (!f) return cleanDuplicateWords(i);
-  if (!i) return cleanDuplicateWords(f);
-
-  // Case 1: Interim re-emits entire sentence starting with finalText
-  if (i.toLowerCase().startsWith(f.toLowerCase())) {
-    return cleanDuplicateWords(i);
-  }
-
-  // Case 2: Final text already contains the interim
-  if (f.toLowerCase().endsWith(i.toLowerCase())) {
-    return cleanDuplicateWords(f);
-  }
-
-  // Case 3: Overlap between end of finalText and start of interimText
-  const fWords = f.split(/\s+/);
-  const iWords = i.split(/\s+/);
-
-  let maxOverlap = 0;
-  const maxCheck = Math.min(fWords.length, iWords.length);
-  for (let len = maxCheck; len >= 1; len--) {
-    const fSub = fWords.slice(-len).join(' ').toLowerCase();
-    const iSub = iWords.slice(0, len).join(' ').toLowerCase();
-    if (fSub === iSub) {
-      maxOverlap = len;
-      break;
+  for (let i = 0; i < results.length; i++) {
+    const res = results[i];
+    const text = res[0]?.transcript?.trim() || '';
+    if (!text) continue;
+    if (res.isFinal) {
+      finalPieces.push(text);
+    } else {
+      interimPieces.push(text);
     }
   }
 
-  if (maxOverlap > 0) {
-    const remainingInterim = iWords.slice(maxOverlap).join(' ');
-    const merged = remainingInterim ? `${f} ${remainingInterim}` : f;
-    return cleanDuplicateWords(merged);
+  // 1. Merge final pieces intelligently to handle Android cumulative results
+  let mergedFinal = '';
+  if (finalPieces.length > 0) {
+    mergedFinal = finalPieces[0];
+    for (let j = 1; j < finalPieces.length; j++) {
+      const piece = finalPieces[j];
+      if (piece.toLowerCase().startsWith(mergedFinal.toLowerCase())) {
+        mergedFinal = piece;
+      } else if (mergedFinal.toLowerCase().endsWith(piece.toLowerCase())) {
+        continue;
+      } else {
+        const mWords = mergedFinal.split(/\s+/);
+        const pWords = piece.split(/\s+/);
+        let overlap = 0;
+        const maxCheck = Math.min(mWords.length, pWords.length);
+        for (let k = maxCheck; k >= 1; k--) {
+          const mSub = mWords.slice(-k).join(' ').toLowerCase();
+          const pSub = pWords.slice(0, k).join(' ').toLowerCase();
+          if (mSub === pSub) {
+            overlap = k;
+            break;
+          }
+        }
+        if (overlap > 0) {
+          mergedFinal = `${mergedFinal} ${pWords.slice(overlap).join(' ')}`;
+        } else {
+          mergedFinal = `${mergedFinal} ${piece}`;
+        }
+      }
+    }
   }
 
-  return cleanDuplicateWords(`${f} ${i}`);
+  // 2. Latest interim piece
+  let mergedInterim = '';
+  if (interimPieces.length > 0) {
+    mergedInterim = interimPieces[interimPieces.length - 1];
+  }
+
+  // 3. Combine final + interim
+  let combined = '';
+  if (!mergedFinal) {
+    combined = mergedInterim;
+  } else if (!mergedInterim) {
+    combined = mergedFinal;
+  } else if (mergedInterim.toLowerCase().startsWith(mergedFinal.toLowerCase())) {
+    combined = mergedInterim;
+  } else if (mergedFinal.toLowerCase().endsWith(mergedInterim.toLowerCase())) {
+    combined = mergedFinal;
+  } else {
+    const mWords = mergedFinal.split(/\s+/);
+    const iWords = mergedInterim.split(/\s+/);
+    let overlap = 0;
+    const maxCheck = Math.min(mWords.length, iWords.length);
+    for (let k = maxCheck; k >= 1; k--) {
+      const mSub = mWords.slice(-k).join(' ').toLowerCase();
+      const iSub = iWords.slice(0, k).join(' ').toLowerCase();
+      if (mSub === iSub) {
+        overlap = k;
+        break;
+      }
+    }
+    if (overlap > 0) {
+      combined = `${mergedFinal} ${iWords.slice(overlap).join(' ')}`;
+    } else {
+      combined = `${mergedFinal} ${mergedInterim}`;
+    }
+  }
+
+  return cleanDuplicateWords(combined);
 }
 
 class SpeechService {
@@ -92,8 +153,7 @@ class SpeechService {
   private isListening = false;
   private silenceTimer: ReturnType<typeof setTimeout> | null = null;
   private lastCombinedTranscript = '';
-  private silenceTimeoutMs = 2500; // 2.5s natural pause tolerance for snappy feedback
-  private persistentStream: MediaStream | null = null;
+  private silenceTimeoutMs = 2500; // 2.5s pause tolerance
   private hasFinalized = false;
 
   private onInterimCb: ((text: string) => void) | null = null;
@@ -101,55 +161,24 @@ class SpeechService {
   private onErrorCb: ((err: string) => void) | null = null;
   private onEndCb: (() => void) | null = null;
 
-  constructor() {
-    this.initRecognition();
-  }
-
-  private initRecognition() {
-    if (typeof window !== 'undefined') {
-      const win = window as CustomWindow;
-      const SpeechRecognitionConstructor = win.SpeechRecognition || win.webkitSpeechRecognition;
-      if (SpeechRecognitionConstructor) {
-        this.recognition = new SpeechRecognitionConstructor();
-        this.recognition.continuous = true;
-        this.recognition.interimResults = true;
-        this.recognition.lang = 'en-US';
-        this.recognition.maxAlternatives = 1;
-
-        this.setupRecognitionHandlers();
-      }
-    }
-  }
-
   private setupRecognitionHandlers() {
     if (!this.recognition) return;
 
     this.recognition.onresult = (event: SpeechRecognitionEventLike) => {
-      let finalStr = '';
-      let interimStr = '';
+      const combined = processSpeechResults(event.results);
+      if (!combined) return;
 
-      for (let i = 0; i < event.results.length; ++i) {
-        const res = event.results[i];
-        const text = res[0]?.transcript || '';
-        if (res.isFinal) {
-          finalStr += text + ' ';
-        } else {
-          interimStr += text + ' ';
-        }
-      }
-
-      const combined = mergeAndDeduplicate(finalStr, interimStr);
       this.lastCombinedTranscript = combined;
 
       if (this.onInterimCb) {
         this.onInterimCb(combined);
       }
 
-      // Reset silence timer on any speech detected
       this.resetSilenceTimer();
     };
 
     this.recognition.onerror = (event: SpeechRecognitionErrorEventLike) => {
+      // 'no-speech' is a standard transient pause event in Web Speech API; ignore it
       if (event.error === 'no-speech') {
         return;
       }
@@ -157,20 +186,27 @@ class SpeechService {
       this.isListening = false;
       this.hasFinalized = true;
 
+      let errorMsg = `Lỗi nhận diện âm thanh: ${event.error}`;
+      if (event.error === 'not-allowed') {
+        errorMsg = 'Quyền micro bị từ chối. Vui lòng cho phép quyền micro trên trình duyệt của bạn.';
+      } else if (event.error === 'audio-capture') {
+        errorMsg = 'Không tìm thấy hoặc không thể kết nối tới Micro.';
+      } else if (event.error === 'network') {
+        errorMsg = 'Lỗi kết nối mạng nhận diện giọng nói.';
+      }
+
       if (this.onErrorCb) {
-        this.onErrorCb(event.error || 'Lỗi nhận diện âm thanh');
+        this.onErrorCb(errorMsg);
       }
     };
 
     this.recognition.onend = () => {
-      // Trigger finalization if not already done by timer or stopListening
-      this.finalizeRecognition();
+      if (this.isListening) {
+        this.finalizeRecognition();
+      }
     };
   }
 
-  /**
-   * Finalize recognition safely and trigger onFinalCb for evaluation.
-   */
   private finalizeRecognition() {
     this.clearSilenceTimer();
 
@@ -182,7 +218,6 @@ class SpeechService {
 
     const finalResult = this.lastCombinedTranscript.trim();
 
-    // Call onFinalCb so evaluation runs reliably
     if (this.onFinalCb) {
       const cb = this.onFinalCb;
       this.onFinalCb = null;
@@ -211,7 +246,6 @@ class SpeechService {
     if (this.silenceTimeoutMs > 0 && hasSpoken) {
       this.silenceTimer = setTimeout(() => {
         if (this.isListening) {
-          // Natural silence timeout reached -> finalize & evaluate!
           this.finalizeRecognition();
         }
       }, this.silenceTimeoutMs);
@@ -226,22 +260,9 @@ class SpeechService {
   }
 
   isRecognitionSupported(): boolean {
-    return !!this.recognition;
-  }
-
-  async ensureMicrophonePermission(): Promise<boolean> {
-    if (typeof window === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
-      return true;
-    }
-    if (this.persistentStream && this.persistentStream.active) {
-      return true;
-    }
-    try {
-      this.persistentStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      return true;
-    } catch {
-      return false;
-    }
+    if (typeof window === 'undefined') return false;
+    const win = window as CustomWindow;
+    return !!(win.SpeechRecognition || win.webkitSpeechRecognition);
   }
 
   speak(text: string, rate: number = 1.0, onEnd?: () => void) {
@@ -284,26 +305,37 @@ class SpeechService {
     }
   }
 
-  async startListening(
+  /**
+   * Start listening synchronously within user gesture tick.
+   * STRICTLY SYNCHRONOUS: Avoid any 'await' or async calls before recognition.start()
+   * to guarantee Mobile Safari and Chrome do not drop user activation token or lock audio.
+   */
+  startListening(
     onInterimResult: (transcript: string) => void,
     onFinalResult: (transcript: string) => void,
     onError: (error: string) => void,
     onEnd: () => void,
     silenceTimeoutMs: number = 2500
   ) {
-    if (!this.recognition) {
-      this.initRecognition();
-    }
-    if (!this.recognition) {
-      onError('Trình duyệt không hỗ trợ Web Speech API. Bạn nên dùng Google Chrome hoặc Microsoft Edge.');
+    if (typeof window === 'undefined') return;
+
+    const win = window as CustomWindow;
+    const SpeechRecognitionConstructor = win.SpeechRecognition || win.webkitSpeechRecognition;
+    if (!SpeechRecognitionConstructor) {
+      onError('Trình duyệt không hỗ trợ nhận diện giọng nói (Web Speech API). Hãy dùng Google Chrome hoặc Safari.');
       return;
     }
 
-    if (this.isListening) {
-      this.finalizeRecognition();
-    }
+    this.clearSilenceTimer();
 
-    await this.ensureMicrophonePermission();
+    // Abort previous session if still running
+    if (this.recognition) {
+      try {
+        this.recognition.abort();
+      } catch {
+        // ignore
+      }
+    }
 
     this.lastCombinedTranscript = '';
     this.hasFinalized = false;
@@ -315,6 +347,15 @@ class SpeechService {
     this.isListening = true;
 
     try {
+      // Re-instantiate fresh instance to avoid stale state on mobile browsers
+      this.recognition = new SpeechRecognitionConstructor();
+      this.recognition.continuous = true;
+      this.recognition.interimResults = true;
+      this.recognition.lang = 'en-US';
+      this.recognition.maxAlternatives = 1;
+      this.setupRecognitionHandlers();
+
+      // Must be invoked synchronously inside user gesture!
       this.recognition.start();
     } catch (e: unknown) {
       this.isListening = false;
@@ -363,7 +404,7 @@ class SpeechService {
         matchCount++;
         tokens.push({ word, status: 'correct' });
       } else {
-        tokens.push({ word, status: 'missing' });
+        tokens.push({ word: word, status: 'missing' });
       }
     });
 

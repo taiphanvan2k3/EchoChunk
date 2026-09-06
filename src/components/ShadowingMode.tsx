@@ -71,8 +71,8 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
   }, [chunk.cleanExample, chunk.chunk, playbackSpeed]);
 
   const evaluate = useCallback((transcript: string) => {
-    
-    const result = speechService.evaluatePronunciation(chunk.cleanExample, transcript);
+    const target = chunk.cleanExample || chunk.chunk;
+    const result = speechService.evaluatePronunciation(target, transcript);
     setEvalResult(result);
 
     if (result.accuracy >= 80) {
@@ -87,7 +87,7 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
     } else {
       soundManager.playError();
     }
-  }, [chunk.cleanExample]);
+  }, [chunk.cleanExample, chunk.chunk]);
 
   const toggleRecording = useCallback(() => {
     if (isRecording) {
@@ -105,7 +105,6 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
       setInspectedWord(null);
       setDrilledSuccessWords(new Set());
       setDrillingWord(null);
-      soundManager.playClick();
       setIsRecording(true);
 
       speechService.startListening(
