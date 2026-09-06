@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "dev:https": "next dev --experimental-https"
   },
   "dependencies": {
     "@types/canvas-confetti": "^1.9.0",

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { ChunkProgress, SpeakingChunk, SpeechEvalResult, SRSRating } from '@/types';
 import { speechService } from '@/lib/speech';
 import { soundManager } from '@/lib/sound';
@@ -32,6 +32,7 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
   const [playbackSpeed, setPlaybackSpeed] = useState<number>(1.0);
   const [isRecording, setIsRecording] = useState(false);
   const [spokenTranscript, setSpokenTranscript] = useState('');
+  const latestSpokenTranscriptRef = useRef('');
   const [evalResult, setEvalResult] = useState<SpeechEvalResult | null>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [recordingError, setRecordingError] = useState<string | null>(null);
@@ -92,13 +93,14 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
     if (isRecording) {
       const captured = speechService.stopListening();
       setIsRecording(false);
-      const textToEval = (captured || spokenTranscript).trim();
+      const textToEval = (captured || latestSpokenTranscriptRef.current || spokenTranscript).trim();
       if (textToEval.length > 0) {
         evaluate(textToEval);
       }
     } else {
-            setRecordingError(null);
+      setRecordingError(null);
       setSpokenTranscript('');
+      latestSpokenTranscriptRef.current = '';
       setEvalResult(null);
       setInspectedWord(null);
       setDrilledSuccessWords(new Set());
@@ -108,11 +110,12 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
 
       speechService.startListening(
         (interimText) => {
+          latestSpokenTranscriptRef.current = interimText;
           setSpokenTranscript(interimText);
         },
         (finalText) => {
           setIsRecording(false);
-          const textToEval = (finalText || spokenTranscript).trim();
+          const textToEval = (finalText || latestSpokenTranscriptRef.current || spokenTranscript).trim();
           if (textToEval.length > 0) {
             evaluate(textToEval);
           }
@@ -125,7 +128,7 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
         () => {
           setIsRecording(false);
         },
-        3500
+        2500
       );
     }
   }, [isRecording, spokenTranscript, evaluate]);
@@ -379,7 +382,7 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
             </span>
             <span className="mic-hint-desc">
               {isRecording ? (
-                'Bạn cứ thong thả nói (thoải mái lấy hơi giữa các vế). Đọc xong bấm nút dưới hoặc dừng 3.5s để chấm.'
+                'Bạn cứ thong thả nói (thoải mái lấy hơi giữa các vế). Đọc xong bấm nút dưới hoặc dừng 2.5s để chấm.'
               ) : (
                 '💡 Hệ thống lắng nghe liên tục, cho phép dừng nghỉ tự nhiên không lo bị tắt giữa chừng.'
               )}

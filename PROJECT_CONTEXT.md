@@ -128,3 +128,9 @@
 - **React 19 & ESLint Rules:**
   - Không gọi `setState` đồng bộ trong `useEffect` để tránh cascading renders (sử dụng render-phase state adjustment `prevProps`).
   - Kiểm tra code sạch qua: `pnpm eslint <file>` và `pnpm tsc --noEmit`.
+
+### 11. Mobile Web Speech & Permissions (Android / iOS)
+- **Vấn đề Duplicate**: Mobile Chrome gặp lỗi nhận diện luồng lặp lại kết quả `interim` và `final` tích luỹ. Đã giải quyết bằng thuật toán `mergeAndDeduplicate()` và `cleanDuplicateWords()` trong `src/lib/speech.ts`.
+- **Vấn đề Permission**: Khi truy cập từ điện thoại qua mạng LAN bằng HTTP (`http://192.168.x.x:3000`), trình duyệt coi là Insecure Context và thu hồi quyền Micro sau mỗi lần `stop()`.
+  - Đã tích hợp `ensureMicrophonePermission()` (giữ Audio Stream ở background).
+  - Khuyến nghị chạy `pnpm dev:https` (`next dev --experimental-https`) để cấp chứng chỉ SSL cục bộ, cho phép chọn "Luôn cho phép" (Always Allow) trên điện thoại.

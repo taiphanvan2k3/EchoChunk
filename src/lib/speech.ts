@@ -1,13 +1,100 @@
-// Speech Synthesis (TTS) & Web Speech Recognition (STT) + Continuous Stream
+// Speech Synthesis (TTS) & Web Speech Recognition (STT) + Continuous Stream & Mobile Deduplication
 import { SpeechEvalResult, WordMatchToken } from '@/types';
 
+interface SpeechRecognitionEventLike {
+  results: {
+    length: number;
+    [index: number]: {
+      isFinal: boolean;
+      [index: number]: { transcript: string };
+    };
+  };
+}
+
+interface SpeechRecognitionErrorEventLike {
+  error: string;
+}
+
+interface SpeechRecognitionInstance {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  maxAlternatives: number;
+  onresult: ((event: SpeechRecognitionEventLike) => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEventLike) => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+  stop: () => void;
+}
+
+interface CustomWindow extends Window {
+  SpeechRecognition?: new () => SpeechRecognitionInstance;
+  webkitSpeechRecognition?: new () => SpeechRecognitionInstance;
+}
+
+function cleanDuplicateWords(text: string): string {
+  if (!text) return '';
+  const words = text.trim().split(/\s+/);
+  const cleaned: string[] = [];
+  for (let i = 0; i < words.length; i++) {
+    // If consecutive identical word (case-insensitive) caused by mobile STT stutter
+    if (i > 0 && words[i].toLowerCase() === words[i - 1].toLowerCase()) {
+      continue;
+    }
+    cleaned.push(words[i]);
+  }
+  return cleaned.join(' ');
+}
+
+function mergeAndDeduplicate(finalText: string, interimText: string): string {
+  const f = finalText.trim();
+  const i = interimText.trim();
+
+  if (!f) return cleanDuplicateWords(i);
+  if (!i) return cleanDuplicateWords(f);
+
+  // Case 1: Interim re-emits entire sentence starting with finalText
+  if (i.toLowerCase().startsWith(f.toLowerCase())) {
+    return cleanDuplicateWords(i);
+  }
+
+  // Case 2: Final text already contains the interim
+  if (f.toLowerCase().endsWith(i.toLowerCase())) {
+    return cleanDuplicateWords(f);
+  }
+
+  // Case 3: Overlap between end of finalText and start of interimText
+  const fWords = f.split(/\s+/);
+  const iWords = i.split(/\s+/);
+
+  let maxOverlap = 0;
+  const maxCheck = Math.min(fWords.length, iWords.length);
+  for (let len = maxCheck; len >= 1; len--) {
+    const fSub = fWords.slice(-len).join(' ').toLowerCase();
+    const iSub = iWords.slice(0, len).join(' ').toLowerCase();
+    if (fSub === iSub) {
+      maxOverlap = len;
+      break;
+    }
+  }
+
+  if (maxOverlap > 0) {
+    const remainingInterim = iWords.slice(maxOverlap).join(' ');
+    const merged = remainingInterim ? `${f} ${remainingInterim}` : f;
+    return cleanDuplicateWords(merged);
+  }
+
+  return cleanDuplicateWords(`${f} ${i}`);
+}
+
 class SpeechService {
-  private recognition: any = null;
+  private recognition: SpeechRecognitionInstance | null = null;
   private isListening = false;
-  private silenceTimer: any = null;
-  private accumulatedFinalTranscript = '';
-  private currentInterimTranscript = '';
-  private silenceTimeoutMs = 3500; // 3.5s natural pause tolerance
+  private silenceTimer: ReturnType<typeof setTimeout> | null = null;
+  private lastCombinedTranscript = '';
+  private silenceTimeoutMs = 2500; // 2.5s natural pause tolerance for snappy feedback
+  private persistentStream: MediaStream | null = null;
+  private hasFinalized = false;
 
   private onInterimCb: ((text: string) => void) | null = null;
   private onFinalCb: ((text: string) => void) | null = null;
@@ -20,11 +107,10 @@ class SpeechService {
 
   private initRecognition() {
     if (typeof window !== 'undefined') {
-      const SpeechRecognition =
-        (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      if (SpeechRecognition) {
-        this.recognition = new SpeechRecognition();
-        // Continuous mode = TRUE: Do not abort when user pauses or takes a breath
+      const win = window as CustomWindow;
+      const SpeechRecognitionConstructor = win.SpeechRecognition || win.webkitSpeechRecognition;
+      if (SpeechRecognitionConstructor) {
+        this.recognition = new SpeechRecognitionConstructor();
         this.recognition.continuous = true;
         this.recognition.interimResults = true;
         this.recognition.lang = 'en-US';
@@ -38,78 +124,95 @@ class SpeechService {
   private setupRecognitionHandlers() {
     if (!this.recognition) return;
 
-    this.recognition.onresult = (event: any) => {
-      let finalBatch = '';
-      let interim = '';
+    this.recognition.onresult = (event: SpeechRecognitionEventLike) => {
+      let finalStr = '';
+      let interimStr = '';
 
-      for (let i = event.resultIndex; i < event.results.length; ++i) {
+      for (let i = 0; i < event.results.length; ++i) {
         const res = event.results[i];
+        const text = res[0]?.transcript || '';
         if (res.isFinal) {
-          finalBatch += res[0].transcript + ' ';
+          finalStr += text + ' ';
         } else {
-          interim += res[0].transcript;
+          interimStr += text + ' ';
         }
       }
 
-      if (finalBatch) {
-        this.accumulatedFinalTranscript = (this.accumulatedFinalTranscript + ' ' + finalBatch).trim();
-      }
-      this.currentInterimTranscript = interim.trim();
-
-      const combinedText = [this.accumulatedFinalTranscript, this.currentInterimTranscript]
-        .filter(Boolean)
-        .join(' ')
-        .trim();
+      const combined = mergeAndDeduplicate(finalStr, interimStr);
+      this.lastCombinedTranscript = combined;
 
       if (this.onInterimCb) {
-        this.onInterimCb(combinedText);
+        this.onInterimCb(combined);
       }
 
-      // Reset silence timer on any speech detection
+      // Reset silence timer on any speech detected
       this.resetSilenceTimer();
     };
 
-    this.recognition.onerror = (event: any) => {
-      // 'no-speech' is a normal transient pause event in Web Speech API; ignore it
+    this.recognition.onerror = (event: SpeechRecognitionErrorEventLike) => {
       if (event.error === 'no-speech') {
         return;
       }
-      this.isListening = false;
       this.clearSilenceTimer();
+      this.isListening = false;
+      this.hasFinalized = true;
+
       if (this.onErrorCb) {
         this.onErrorCb(event.error || 'Lỗi nhận diện âm thanh');
       }
     };
 
     this.recognition.onend = () => {
-      const wasListening = this.isListening;
-      this.isListening = false;
-      this.clearSilenceTimer();
-
-      const combinedText = [this.accumulatedFinalTranscript, this.currentInterimTranscript]
-        .filter(Boolean)
-        .join(' ')
-        .trim();
-
-      if (wasListening && this.onFinalCb) {
-        this.onFinalCb(combinedText);
-      }
-
-      if (this.onEndCb) {
-        this.onEndCb();
-      }
+      // Trigger finalization if not already done by timer or stopListening
+      this.finalizeRecognition();
     };
+  }
+
+  /**
+   * Finalize recognition safely and trigger onFinalCb for evaluation.
+   */
+  private finalizeRecognition() {
+    this.clearSilenceTimer();
+
+    if (this.hasFinalized) {
+      return;
+    }
+    this.hasFinalized = true;
+    this.isListening = false;
+
+    const finalResult = this.lastCombinedTranscript.trim();
+
+    // Call onFinalCb so evaluation runs reliably
+    if (this.onFinalCb) {
+      const cb = this.onFinalCb;
+      this.onFinalCb = null;
+      cb(finalResult);
+    }
+
+    if (this.recognition) {
+      try {
+        this.recognition.stop();
+      } catch {
+        // ignore
+      }
+    }
+
+    if (this.onEndCb) {
+      const endCb = this.onEndCb;
+      this.onEndCb = null;
+      endCb();
+    }
   }
 
   private resetSilenceTimer() {
     this.clearSilenceTimer();
-    const hasSpoken = (this.accumulatedFinalTranscript || this.currentInterimTranscript).trim().length > 0;
-    
+    const hasSpoken = this.lastCombinedTranscript.trim().length > 0;
+
     if (this.silenceTimeoutMs > 0 && hasSpoken) {
       this.silenceTimer = setTimeout(() => {
         if (this.isListening) {
-          // 3.5s silence after speaking -> auto-finalize
-          this.stopListening();
+          // Natural silence timeout reached -> finalize & evaluate!
+          this.finalizeRecognition();
         }
       }, this.silenceTimeoutMs);
     }
@@ -124,6 +227,21 @@ class SpeechService {
 
   isRecognitionSupported(): boolean {
     return !!this.recognition;
+  }
+
+  async ensureMicrophonePermission(): Promise<boolean> {
+    if (typeof window === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
+      return true;
+    }
+    if (this.persistentStream && this.persistentStream.active) {
+      return true;
+    }
+    try {
+      this.persistentStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   speak(text: string, rate: number = 1.0, onEnd?: () => void) {
@@ -166,16 +284,12 @@ class SpeechService {
     }
   }
 
-  /**
-   * Start listening with continuous stream & silence timeout.
-   * Does NOT prematurely stop when the speaker takes a breath between clauses.
-   */
-  startListening(
+  async startListening(
     onInterimResult: (transcript: string) => void,
     onFinalResult: (transcript: string) => void,
     onError: (error: string) => void,
     onEnd: () => void,
-    silenceTimeoutMs: number = 3500
+    silenceTimeoutMs: number = 2500
   ) {
     if (!this.recognition) {
       this.initRecognition();
@@ -186,11 +300,13 @@ class SpeechService {
     }
 
     if (this.isListening) {
-      this.stopListening();
+      this.finalizeRecognition();
     }
 
-    this.accumulatedFinalTranscript = '';
-    this.currentInterimTranscript = '';
+    await this.ensureMicrophonePermission();
+
+    this.lastCombinedTranscript = '';
+    this.hasFinalized = false;
     this.silenceTimeoutMs = silenceTimeoutMs;
     this.onInterimCb = onInterimResult;
     this.onFinalCb = onFinalResult;
@@ -200,32 +316,18 @@ class SpeechService {
 
     try {
       this.recognition.start();
-    } catch (e: any) {
+    } catch (e: unknown) {
       this.isListening = false;
-      onError(e.message || 'Không thể mở micro.');
+      this.hasFinalized = true;
+      const msg = e instanceof Error ? e.message : 'Không thể mở micro.';
+      onError(msg);
     }
   }
 
-  /**
-   * Stop listening and trigger final evaluation.
-   */
   stopListening(): string {
-    this.clearSilenceTimer();
-    const combinedText = [this.accumulatedFinalTranscript, this.currentInterimTranscript]
-      .filter(Boolean)
-      .join(' ')
-      .trim();
-
-    if (this.recognition && this.isListening) {
-      try {
-        this.recognition.stop();
-      } catch (e) {
-        // ignore
-      }
-      this.isListening = false;
-    }
-
-    return combinedText;
+    const result = this.lastCombinedTranscript.trim();
+    this.finalizeRecognition();
+    return result;
   }
 
   evaluatePronunciation(targetSentence: string, spokenText: string): SpeechEvalResult {
