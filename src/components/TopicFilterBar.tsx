@@ -1,8 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { TopicMeta } from '@/types';
-import { Search, Shuffle, Plus } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface TopicFilterBarProps {
   topics: TopicMeta[];
@@ -12,8 +12,6 @@ interface TopicFilterBarProps {
   onSelectLevel: (level: string) => void;
   searchQuery: string;
   onSearchChange: (q: string) => void;
-  onShuffle: () => void;
-  totalFiltered: number;
   onOpenAddChunk?: () => void;
 }
 
@@ -25,75 +23,141 @@ export const TopicFilterBar: React.FC<TopicFilterBarProps> = ({
   onSelectLevel,
   searchQuery,
   onSearchChange,
-  onShuffle,
-  totalFiltered,
-  onOpenAddChunk,
 }) => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+
+  // Check scroll bounds to show/hide navigation arrows and fade masks
+  const checkScrollBounds = useCallback(() => {
+    if (!scrollRef.current) return;
+    const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+    setCanScrollLeft(scrollLeft > 5);
+    setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 5);
+  }, []);
+
+  useEffect(() => {
+    checkScrollBounds();
+    window.addEventListener('resize', checkScrollBounds);
+    return () => window.removeEventListener('resize', checkScrollBounds);
+  }, [checkScrollBounds, topics]);
+
+  const handleScroll = (direction: 'left' | 'right') => {
+    if (!scrollRef.current) return;
+    const scrollAmount = 280;
+    scrollRef.current.scrollBy({
+      left: direction === 'left' ? -scrollAmount : scrollAmount,
+      behavior: 'smooth',
+    });
+    setTimeout(checkScrollBounds, 300);
+  };
+
+  // Enable mouse wheel horizontal scrolling
+  const handleWheel = (e: React.WheelEvent) => {
+    if (scrollRef.current && Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+      scrollRef.current.scrollLeft += e.deltaY;
+      checkScrollBounds();
+    }
+  };
+
+  const levelOptions = [
+    { id: 'ALL', label: 'Tất cả' },
+    { id: 'A2', label: 'A2' },
+    { id: 'B1', label: 'B1' },
+    { id: 'B2', label: 'B2' },
+  ];
+
   return (
     <div className="filter-bar-wrapper">
-      {/* Search and Level Controls */}
+      {/* Search and Level Controls Row */}
       <div className="filter-top-row">
+        {/* Clean Notion Search Box */}
         <div className="search-box">
-          <Search size={16} className="search-icon" />
+          <Search size={15} className="search-icon" />
           <input
             type="text"
-            placeholder="Tìm theo cụm từ, nghĩa tiếng Việt, hoặc từ khóa IT..."
+            placeholder="Tìm theo cụm từ, nghĩa tiếng Việt, câu ví dụ..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             className="search-input"
           />
           {searchQuery && (
-            <button className="clear-search" onClick={() => onSearchChange('')}>
+            <button className="clear-search" onClick={() => onSearchChange('')} title="Xóa tìm kiếm">
               ×
             </button>
           )}
         </div>
 
-        <div className="level-pills">
-          {['ALL', 'A2', 'B1', 'B2'].map((lvl) => (
+        {/* Premium Notion-style Segmented Level Switcher */}
+        <div className="notion-segmented-control" role="group" aria-label="Lọc theo cấp độ CEFR">
+          {levelOptions.map((lvl) => (
             <button
-              key={lvl}
-              className={`pill-btn ${selectedLevel === lvl ? 'active' : ''}`}
-              onClick={() => onSelectLevel(lvl)}
+              key={lvl.id}
+              type="button"
+              className={`segmented-tab ${selectedLevel === lvl.id ? 'active' : ''} tab-${lvl.id.toLowerCase()}`}
+              onClick={() => onSelectLevel(lvl.id)}
             >
-              {lvl}
+              {lvl.label}
             </button>
           ))}
         </div>
 
-        <button className="action-btn shuffle-btn" onClick={onShuffle} title="Xáo trộn danh sách chunks">
-          <Shuffle size={16} />
-          <span>Xáo trộn ({totalFiltered})</span>
-        </button>
 
-        {onOpenAddChunk && (
-          <button className="action-btn add-inline-btn" onClick={onOpenAddChunk} title="Thêm chunk mới">
-            <Plus size={16} />
-            <span>Thêm mới</span>
-          </button>
-        )}
       </div>
 
-      {/* Horizontal Scroll Topics */}
-      <div className="topics-scroll-row">
-        <button
-          className={`topic-pill ${selectedTopicId === 'ALL' ? 'active' : ''}`}
-          onClick={() => onSelectTopic('ALL')}
-        >
-          ✨ Tất cả chủ đề ({topics.reduce((acc, t) => acc + t.chunkCount, 0)})
-        </button>
-
-        {topics.map((t) => (
+      {/* Horizontal Scroll Topics Row with Navigation Controls */}
+      <div className="topics-carousel-container">
+        {canScrollLeft && (
           <button
-            key={t.topicId}
-            className={`topic-pill ${selectedTopicId === t.topicId ? 'active' : ''}`}
-            onClick={() => onSelectTopic(t.topicId)}
+            type="button"
+            className="carousel-arrow-btn arrow-left"
+            onClick={() => handleScroll('left')}
+            title="Cuộn sang trái"
           >
-            <span className="topic-emoji">{t.icon}</span>
-            <span className="topic-name">{t.topicName}</span>
-            <span className="topic-count">{t.chunkCount}</span>
+            <ChevronLeft size={16} />
           </button>
-        ))}
+        )}
+
+        <div
+          ref={scrollRef}
+          onScroll={checkScrollBounds}
+          onWheel={handleWheel}
+          className="topics-scroll-row"
+        >
+          <button
+            type="button"
+            className={`topic-pill ${selectedTopicId === 'ALL' ? 'active' : ''}`}
+            onClick={() => onSelectTopic('ALL')}
+          >
+            <span className="topic-emoji">✨</span>
+            <span className="topic-name">Tất cả chủ đề</span>
+            <span className="topic-count">{topics.reduce((acc, t) => acc + t.chunkCount, 0)}</span>
+          </button>
+
+          {topics.map((t) => (
+            <button
+              key={t.topicId}
+              type="button"
+              className={`topic-pill ${selectedTopicId === t.topicId ? 'active' : ''}`}
+              onClick={() => onSelectTopic(t.topicId)}
+            >
+              <span className="topic-emoji">{t.icon}</span>
+              <span className="topic-name">{t.topicName}</span>
+              <span className="topic-count">{t.chunkCount}</span>
+            </button>
+          ))}
+        </div>
+
+        {canScrollRight && (
+          <button
+            type="button"
+            className="carousel-arrow-btn arrow-right"
+            onClick={() => handleScroll('right')}
+            title="Cuộn sang phải"
+          >
+            <ChevronRight size={16} />
+          </button>
+        )}
       </div>
     </div>
   );

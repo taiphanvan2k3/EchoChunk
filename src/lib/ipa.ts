@@ -26,7 +26,7 @@ export function getAmericanIpa(rawWord: string): string {
     try {
       const cached = localStorage.getItem(`echo_ipa_${clean}`);
       if (cached) return cached;
-    } catch (e) {
+    } catch {
       // ignore
     }
   }
@@ -54,11 +54,15 @@ export async function fetchMissingAmericanIpa(rawWord: string): Promise<string> 
     if (!res.ok) return '';
     const data = await res.json();
     if (Array.isArray(data) && data.length > 0) {
-      const phonetics = data[0].phonetics || [];
+      interface PhoneticItem {
+        audio?: string;
+        text?: string;
+      }
+      const phonetics: PhoneticItem[] = data[0].phonetics || [];
       // Prioritize US phonetic or first available transcription
       const usPhonetic =
-        phonetics.find((p: any) => (p.audio?.includes('-us') || p.audio?.includes('/us/')) && p.text) ||
-        phonetics.find((p: any) => p.text) ||
+        phonetics.find((p) => (p.audio?.includes('-us') || p.audio?.includes('/us/')) && p.text) ||
+        phonetics.find((p) => p.text) ||
         (data[0].phonetic ? { text: data[0].phonetic } : null);
 
       if (usPhonetic && usPhonetic.text) {
@@ -69,16 +73,37 @@ export async function fetchMissingAmericanIpa(rawWord: string): Promise<string> 
         if (typeof window !== 'undefined') {
           try {
             localStorage.setItem(`echo_ipa_${clean}`, text);
-          } catch (e) {
+          } catch {
             // ignore
           }
         }
         return text;
       }
     }
-  } catch (e) {
+  } catch {
     // ignore
   }
 
   return '';
+}
+
+/**
+ * Returns American English (General American) IPA for a full phrase/chunk,
+ * e.g. "Hands-on experience with" -> "/ˈhændz ˈɑn ɪkspˈɪriəns ˈwɪð/"
+ */
+export function getPhraseIpa(phrase: string): string {
+  if (!phrase) return '';
+  const words = phrase
+    .replace(/[–—]/g, ' ')
+    .replace(/[^a-zA-Z0-9\s'-]/g, ' ')
+    .split(/\s+/)
+    .filter(Boolean);
+
+  const ipaParts = words.map((w) => {
+    const rawIpa = getAmericanIpa(w);
+    return rawIpa ? rawIpa.replace(/^\/|\/$/g, '') : w.toLowerCase();
+  });
+
+  if (ipaParts.length === 0) return '';
+  return `/${ipaParts.join(' ')}/`;
 }

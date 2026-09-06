@@ -5,7 +5,7 @@ import { ChunkProgress, SpeakingChunk, SpeechEvalResult, SRSRating } from '@/typ
 import { speechService } from '@/lib/speech';
 import { soundManager } from '@/lib/sound';
 import { getAmericanIpa } from '@/lib/ipa';
-import { Volume2, Mic, MicOff, CheckCircle2, Eye, EyeOff, Edit2, RotateCcw } from 'lucide-react';
+import { Volume2, Mic, MicOff, CheckCircle2, Eye, EyeOff, Edit2, RotateCcw, Shuffle } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { formatMarkdown } from '@/lib/formatMarkdown';
 
@@ -14,6 +14,7 @@ interface ShadowingModeProps {
   progress?: ChunkProgress;
   onRate: (rating: SRSRating, accuracy: number) => void;
   onNext?: () => void;
+  onShuffle?: () => void;
   currentIndex: number;
   totalInQueue: number;
   onEditChunk?: (chunk: SpeakingChunk) => void;
@@ -22,6 +23,7 @@ interface ShadowingModeProps {
 export const ShadowingMode: React.FC<ShadowingModeProps> = ({
   chunk,
   onRate,
+  onShuffle,
   currentIndex,
   totalInQueue,
   onEditChunk,
@@ -257,8 +259,20 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
         </div>
 
         <div className="card-top-actions">
+          {onShuffle && (
+            <button
+              type="button"
+              className="card-quick-edit-btn card-shuffle-btn"
+              onClick={onShuffle}
+              title="Xáo trộn ngẫu nhiên thứ tự các câu trong chủ đề này"
+            >
+              <Shuffle size={13} />
+              <span>Xáo trộn</span>
+            </button>
+          )}
           {onEditChunk && (
             <button
+              type="button"
               className="card-quick-edit-btn"
               onClick={() => onEditChunk(chunk)}
               title="Chỉnh sửa chunk này"
@@ -275,12 +289,16 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
 
       {/* Target Speaking Chunk */}
       <div className="target-chunk-hero">
-        <h2 className="chunk-text-heading">{chunk.chunk}</h2>
-        <div className="ipa-row">
-          <button className="ipa-speaker-btn" onClick={() => speechService.speak(chunk.chunk, 0.85)}>
-            <Volume2 size={16} />
+        <div className="chunk-heading-wrap">
+          <h2 className="chunk-text-heading">{chunk.chunk}</h2>
+          <button
+            type="button"
+            className="chunk-title-speaker-btn"
+            onClick={() => speechService.speak(chunk.chunk, 0.85)}
+            title="Nghe phát âm riêng cụm từ này"
+          >
+            <Volume2 size={22} />
           </button>
-          <span className="ipa-display">{chunk.ipa || '/speaking-chunk/'}</span>
         </div>
         <p className="core-meaning-text">➜ {chunk.detailMeaning || chunk.meaning}</p>
       </div>
@@ -314,6 +332,13 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
         <p className="example-content">
           &ldquo;{formatMarkdown(chunk.exampleSentence || chunk.cleanExample)}&rdquo;
         </p>
+
+        {/* Full Sentence IPA correctly positioned right under the example sentence */}
+        {chunk.ipa && (
+          <div className="sentence-ipa-box" title="Phiên âm IPA của câu ví dụ thực chiến">
+            <span className="sentence-ipa-content">{chunk.ipa}</span>
+          </div>
+        )}
 
         {/* Translation & Context Reveal */}
         <div className="context-reveal-wrap">

@@ -60,10 +60,13 @@
   - Hỗ trợ cả 2 phương thức trả lời: **Bật Mic nói trực tiếp** hoặc **Gõ phím**.
   - So sánh đối chiếu song ngữ, chấm điểm và tự động đánh giá độ thuần thục theo thang điểm SRS (Again / Hard / Good / Easy).
 
-### 📁 4. Topic Explorer & Quản Lý Từ Vựng Tự Tạo
-- Gom nhóm theo **12 chủ đề thực chiến** (IT/Work, Meetings, Business, Brainscape PrepTalk, Daily Casual...).
-- Accordion riêng biệt nổi bật trên cùng: `⭐ Từ vựng của tôi` chứa tất cả các Chunks do người dùng tự tạo.
-- Thống kê tổng số chunk và số chunk cần ôn tập hôm nay (SRS Due).
+### 📁 4. Topic Explorer & Sổ Tay Tiến Độ Học Tập
+- **🧠 Sổ tay Từ Vựng Đã Luyện Tập (SRS Recall):** Accordion chuyên biệt ở vị trí số 1 hiển thị tất cả các cụm từ bạn đã từng luyện tập kèm:
+  - Phân loại 4 tab con: `Tất cả đã học`, `🚨 Cần ôn hôm nay (SRS Due)`, `⭐ Đã thành thạo`, `🌱 Đang rèn luyện`.
+  - Huy hiệu số liệu SRS: Điểm phát âm cao nhất (`bestAccuracy %`), số lần lặp lại (`repetitions`), lịch hẹn ôn tập (`dueDate`).
+  - Nút **"Luyện câu này"**: Cho phép nhảy ngay vào chế độ Shadowing để luyện lại câu cụ thể.
+- **⭐ Từ vựng của tôi (Custom Chunks):** Quản lý toàn bộ các cụm do người dùng tự thêm mới/chỉnh sửa.
+- **12 Chủ đề cốt lõi:** Duyệt theo từng chủ đề với thanh tiến độ hoàn thành (% và số câu).
 
 ---
 

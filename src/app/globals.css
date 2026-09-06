@@ -1565,15 +1565,15 @@ html, body {
 .card-action-icon-btn {
   width: 26px;
   height: 26px;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
-  border: 1px solid var(--border-subtle);
-  background: transparent;
+  border-radius: 5px;
+  border: 1px solid rgba(55, 53, 47, 0.12);
+  background: #f7f6f3;
   cursor: pointer;
   transition: all 0.15s ease;
-  color: var(--text-muted);
+  color: #5a5957;
 }
 
 .card-action-icon-btn.edit:hover {
@@ -1619,17 +1619,25 @@ html, body {
 }
 
 .card-quick-edit-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0.2rem 0.5rem;
-  background: transparent;
-  border: 1px solid var(--border-subtle);
-  border-radius: 4px;
-  color: var(--text-secondary);
+  gap: 0.35rem;
+  padding: 0.25rem 0.6rem;
+  background: #f7f6f3;
+  border: 1px solid rgba(55, 53, 47, 0.14);
+  border-radius: 6px;
+  color: #37352f;
   font-size: 0.75rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.15s;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: all 0.15s ease;
+}
+
+.card-quick-edit-btn:hover {
+  background: #ededeb;
+  color: #1a1917;
+  border-color: rgba(55, 53, 47, 0.25);
 }
 
 .card-quick-edit-btn:hover {
@@ -2864,15 +2872,26 @@ html, body {
 }
 
 .notion-btn-secondary {
-  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #f7f6f3;
   border: 1px solid rgba(55, 53, 47, 0.14);
-  color: var(--text-secondary);
+  color: #37352f;
   border-radius: 6px;
-  padding: 0.5rem 0.95rem;
+  padding: 0.5rem 1rem;
   font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.15s;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: all 0.15s ease;
+}
+
+.notion-btn-secondary:hover {
+  background: #ededeb;
+  color: #1a1917;
+  border-color: rgba(55, 53, 47, 0.25);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .notion-btn-secondary:hover {
@@ -3799,4 +3818,922 @@ html, body {
   gap: 0.35rem;
   margin-bottom: 1.15rem;
   margin-top: 0.15rem;
+}
+
+/* --- Notion Skeleton Loading State (Prevents Hydration Flickering) --- */
+.notion-skeleton-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 0.5rem 0 2rem;
+}
+
+.skeleton-filter-bar {
+  width: 100%;
+  height: 44px;
+  background: #f7f6f3;
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(55, 53, 47, 0.06);
+}
+
+.notion-skeleton-card {
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid rgba(55, 53, 47, 0.08);
+  border-radius: 12px;
+  padding: 2.25rem 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  position: relative;
+  overflow: hidden;
+  min-height: 380px;
+}
+
+.skeleton-line {
+  background: #ededeb;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton-badge {
+  width: 130px;
+  height: 24px;
+  border-radius: 6px;
+}
+
+.skeleton-title {
+  width: 60%;
+  height: 38px;
+  border-radius: 6px;
+}
+
+.skeleton-ipa {
+  width: 30%;
+  height: 18px;
+}
+
+.skeleton-box {
+  width: 100%;
+  background: #f7f6f3;
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton-sentence {
+  height: 110px;
+}
+
+.skeleton-row {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.skeleton-actions {
+  height: 44px;
+  width: 100%;
+  background: #ededeb;
+  border-radius: 8px;
+}
+
+/* Shimmer pulse animation */
+@keyframes notion-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.skeleton-filter-bar::after,
+.skeleton-line::after,
+.skeleton-box::after,
+.skeleton-actions::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.8) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: notion-shimmer 1.5s infinite;
+}
+
+/* --- Premium Topic Filter Bar & Notion Segmented Controls --- */
+.filter-bar-wrapper {
+  margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.filter-top-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: nowrap;
+}
+
+.search-box {
+  flex: 1;
+  min-width: 220px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 0.75rem;
+  color: #9b9a97;
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.45rem 2rem 0.45rem 2.2rem;
+  background: #ffffff;
+  border: 1px solid rgba(55, 53, 47, 0.12);
+  border-radius: 8px;
+  font-size: 0.84rem;
+  color: #37352f;
+  outline: none;
+  font-family: inherit;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.search-input:focus {
+  border-color: #2383e2;
+  box-shadow: 0 0 0 2px rgba(35, 131, 226, 0.15);
+}
+
+.search-input::placeholder {
+  color: #b0afab;
+}
+
+.clear-search {
+  position: absolute;
+  right: 0.6rem;
+  background: transparent;
+  border: none;
+  color: #9b9a97;
+  font-size: 1.1rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.clear-search:hover {
+  background: #f1f1ef;
+  color: #37352f;
+}
+
+/* Notion Segmented Level Switcher */
+.notion-segmented-control {
+  display: inline-flex;
+  align-items: center;
+  background: #f1f1ef;
+  padding: 3px;
+  border-radius: 8px;
+  border: 1px solid rgba(55, 53, 47, 0.08);
+  gap: 2px;
+  shrink: 0;
+  user-select: none;
+}
+
+.segmented-tab {
+  border: none;
+  background: transparent;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  color: #787774;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+}
+
+.segmented-tab:hover {
+  color: #37352f;
+}
+
+.segmented-tab.active {
+  background: #ffffff;
+  color: #1a1917;
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.segmented-tab.active.tab-a2 {
+  color: #0f7b6c;
+}
+
+.segmented-tab.active.tab-b1 {
+  color: #0b6e99;
+}
+
+.segmented-tab.active.tab-b2 {
+  color: #6940a5;
+}
+
+/* Action Button: Shuffle */
+.shuffle-btn {
+  white-space: nowrap;
+  shrink: 0;
+  height: 34px;
+  padding: 0 0.85rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+}
+
+/* Topics Carousel & Clean Horizontal Scroll */
+.topics-carousel-container {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.topics-scroll-row {
+  display: flex;
+  gap: 0.45rem;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: none; /* Hide scrollbar Firefox */
+  -ms-overflow-style: none; /* Hide scrollbar Edge/IE */
+  padding: 0.25rem 0.15rem;
+  width: 100%;
+  align-items: center;
+}
+
+.topics-scroll-row::-webkit-scrollbar {
+  display: none; /* Hide scrollbar Chrome, Safari, Opera */
+}
+
+/* Carousel Navigation Arrows */
+.carousel-arrow-btn {
+  position: absolute;
+  z-index: 10;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid rgba(55, 53, 47, 0.12);
+  color: #5a5957;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: all 0.15s ease;
+}
+
+.carousel-arrow-btn:hover {
+  background: #fbfbfa;
+  color: #1a1917;
+  transform: scale(1.08);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+}
+
+.arrow-left {
+  left: -12px;
+}
+
+.arrow-right {
+  right: -12px;
+}
+
+/* Topic Pills */
+.topic-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.38rem 0.75rem;
+  background: #ffffff;
+  border: 1px solid rgba(55, 53, 47, 0.09);
+  border-radius: 20px;
+  color: #5a5957;
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.topic-pill:hover {
+  background: #f7f6f3;
+  color: #1a1917;
+  border-color: rgba(55, 53, 47, 0.18);
+}
+
+.topic-pill.active {
+  background: #ebf5fb;
+  border-color: #2383e2;
+  color: #0b6e99;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(35, 131, 226, 0.15);
+}
+
+.topic-emoji {
+  font-size: 0.92rem;
+  line-height: 1;
+}
+
+.topic-name {
+  font-size: 0.8rem;
+}
+
+.topic-count {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.1rem 0.4rem;
+  background: rgba(55, 53, 47, 0.06);
+  border-radius: 10px;
+  color: #787774;
+  line-height: 1.2;
+}
+
+.topic-pill.active .topic-count {
+  background: rgba(35, 131, 226, 0.18);
+  color: #0b6e99;
+}
+
+/* --- Notion Clean Empty State --- */
+.notion-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: #ffffff;
+  border: 1px solid rgba(55, 53, 47, 0.09);
+  border-radius: 16px;
+  padding: 3.5rem 2.5rem;
+  max-width: 520px;
+  margin: 1.5rem auto 3rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.02);
+  transition: all 0.2s ease;
+}
+
+.empty-state-icon-badge {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: #f7f6f3;
+  border: 1px solid rgba(55, 53, 47, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+}
+
+.empty-state-icon {
+  color: #787774;
+}
+
+.empty-state-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1a1917;
+  margin-bottom: 0.55rem;
+  letter-spacing: -0.015em;
+}
+
+.empty-state-desc {
+  font-size: 0.88rem;
+  color: #787774;
+  line-height: 1.6;
+  max-width: 420px;
+  margin-bottom: 1.85rem;
+}
+
+.empty-state-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* --- Studied Chunks SRS Notebook in Explorer Mode (Clean Notion Light) --- */
+.explorer-header-card {
+  background: #ffffff;
+  border: 1px solid rgba(55, 53, 47, 0.09);
+  border-radius: 10px;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  margin-bottom: 0.5rem;
+}
+
+.explorer-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.explorer-progress-bar-wrap {
+  margin-top: 0.75rem;
+  width: 100%;
+  max-width: 540px;
+}
+
+.progress-info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: #787774;
+  margin-bottom: 0.35rem;
+}
+
+.due-alert-pill {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #eb5757;
+  background: #fdf3f2;
+  padding: 0.15rem 0.5rem;
+  border-radius: 12px;
+  border: 1px solid #f8cfcb;
+}
+
+.progress-track {
+  width: 100%;
+  height: 5px;
+  background: #ededeb;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #2383e2;
+  border-radius: 10px;
+  transition: width 0.4s ease;
+}
+
+/* Studied Accordion Styling */
+.studied-accordion {
+  border: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+.studied-accordion.expanded {
+  border-color: rgba(35, 131, 226, 0.25);
+}
+
+.studied-badge {
+  background: #f0fdf4 !important;
+  color: #166534 !important;
+}
+
+.badge-count-pill {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #787774;
+  background: rgba(55, 53, 47, 0.06);
+  padding: 0.1rem 0.45rem;
+  border-radius: 10px;
+}
+
+.badge-due-pill {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #eb5757;
+  background: #fdf3f2;
+  border: 1px solid #f8cfcb;
+  padding: 0.1rem 0.45rem;
+  border-radius: 10px;
+}
+
+.btn-studied-review {
+  background: #2383e2 !important;
+  color: #ffffff !important;
+  font-weight: 600;
+  border: none !important;
+}
+
+.btn-studied-review:hover {
+  background: #1b6ec2 !important;
+}
+
+/* Studied Filter Sub-Tabs - Clean Notion Segmented Control */
+.studied-filters-row {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.85rem;
+  background: #f7f6f3;
+  padding: 0.25rem;
+  border-radius: 8px;
+  width: fit-content;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.studied-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
+  color: #787774;
+  font-size: 0.76rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.studied-tab:hover {
+  color: #37352f;
+  background: rgba(55, 53, 47, 0.04);
+}
+
+.studied-tab.active {
+  background: #ffffff;
+  color: #37352f;
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.studied-tab .tab-num {
+  font-size: 0.7rem;
+  opacity: 0.75;
+}
+
+.studied-tab.has-due .tab-num {
+  color: #eb5757;
+  font-weight: 700;
+}
+
+/* Studied Card Minimalist Styling */
+.studied-chunk-card {
+  background: #ffffff;
+  border: 1px solid rgba(55, 53, 47, 0.09);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.studied-chunk-card:hover {
+  border-color: rgba(55, 53, 47, 0.2);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+}
+
+.card-status-due {
+  border-top: 2px solid #eb5757 !important;
+}
+
+.card-status-mastered {
+  border-top: 2px solid #0f7b6c !important;
+}
+
+.badge-due-tag {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #eb5757;
+  background: #fdf3f2;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+}
+
+.badge-mastered-tag {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #0f7b6c;
+  background: #f0fdf4;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+}
+
+/* Streamlined Inline SRS Metadata */
+.studied-meta-line {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.72rem;
+  color: #787774;
+  padding-top: 0.45rem;
+  margin-top: 0.35rem;
+  border-top: 1px dashed rgba(55, 53, 47, 0.08);
+}
+
+.meta-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  white-space: nowrap;
+}
+
+.meta-dot {
+  font-size: 0.6rem;
+  color: #d3d2cf;
+}
+
+/* Practice Button & Action Buttons */
+.card-action-icon-btn.practice-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: #ebf5fb;
+  color: #0b6e99;
+  border: 1px solid #d4eaf7;
+  padding: 0.22rem 0.55rem;
+  border-radius: 5px;
+  font-size: 0.73rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.card-action-icon-btn.practice-btn:hover {
+  background: #2383e2;
+  color: #ffffff;
+  border-color: #2383e2;
+}
+
+.studied-empty-notice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  background: #fbfbfa;
+  border: 1px dashed rgba(55, 53, 47, 0.14);
+  border-radius: 8px;
+  color: #787774;
+}
+
+.studied-empty-notice h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #37352f;
+  margin-bottom: 0.25rem;
+}
+
+.studied-empty-notice p {
+  font-size: 0.82rem;
+  line-height: 1.5;
+  max-width: 480px;
+}
+
+/* Card Quick Shuffle Button */
+.card-shuffle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.6rem;
+  background: #f7f6f3;
+  color: #37352f;
+  border: 1px solid rgba(55, 53, 47, 0.14);
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: all 0.15s ease;
+}
+
+.card-shuffle-btn:hover {
+  background: #ebf5fb;
+  color: #0b6e99;
+  border-color: #2383e2;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* --- Target Chunk Heading & IPA Enhancements --- */
+.chunk-heading-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  margin-bottom: 0.35rem;
+}
+
+.chunk-text-heading {
+  font-size: 2.1rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #1a1917;
+  margin: 0;
+  line-height: 1.25;
+}
+
+.chunk-title-speaker-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #f7f6f3;
+  border: 1px solid rgba(55, 53, 47, 0.14);
+  color: #2383e2;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.chunk-title-speaker-btn:hover {
+  background: #ebf5fb;
+  color: #0b6e99;
+  border-color: #2383e2;
+  transform: scale(1.06);
+}
+
+.chunk-ipa-badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  color: #0b6e99;
+  background: #f7f6f3;
+  padding: 0.2rem 0.65rem;
+  border-radius: 6px;
+  border: 1px solid rgba(55, 53, 47, 0.09);
+  margin-bottom: 0.65rem;
+}
+
+.sentence-ipa-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  background: rgba(55, 53, 47, 0.03);
+  padding: 0.45rem 0.75rem;
+  border-radius: 6px;
+  border: 1px dashed rgba(55, 53, 47, 0.12);
+  margin-top: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: #5a5957;
+  line-height: 1.45;
+}
+
+.sentence-ipa-tag {
+  font-weight: 700;
+  color: #787774;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding-top: 0.1rem;
+  white-space: nowrap;
+}
+
+.sentence-ipa-content {
+  color: #0b6e99;
+  word-break: break-word;
+}
+
+/* --- Target Chunk Heading & Speaker Button --- */
+.chunk-heading-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  margin-bottom: 0.45rem;
+}
+
+.chunk-text-heading {
+  font-size: 2.15rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #1a1917;
+  margin: 0;
+  line-height: 1.25;
+}
+
+.chunk-title-speaker-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #f7f6f3;
+  border: 1px solid rgba(55, 53, 47, 0.14);
+  color: #2383e2;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.chunk-title-speaker-btn:hover {
+  background: #ebf5fb;
+  color: #0b6e99;
+  border-color: #2383e2;
+  transform: scale(1.08);
+}
+
+/* --- Sentence IPA Box inside Example Sentence Box --- */
+.sentence-ipa-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  background: #fbfbfa;
+  padding: 0.5rem 0.85rem;
+  border-radius: 6px;
+  border: 1px solid rgba(55, 53, 47, 0.08);
+  margin-top: 0.65rem;
+  margin-bottom: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.sentence-ipa-tag {
+  font-weight: 700;
+  color: #787774;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding-top: 0.15rem;
+  white-space: nowrap;
+}
+
+.sentence-ipa-content {
+  color: #0b6e99;
+  word-break: break-word;
+}
+
+/* --- Mini Practice Button in Explorer Cards (Proper Auto-Width & Solid Background) --- */
+.mini-practice-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.35rem !important;
+  width: auto !important;
+  min-width: 60px !important;
+  height: 26px !important;
+  padding: 0 0.65rem !important;
+  background: #ebf5fb !important;
+  color: #0b6e99 !important;
+  border: 1px solid #d4eaf7 !important;
+  border-radius: 5px !important;
+  font-size: 0.74rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+  transition: all 0.15s ease !important;
+}
+
+.mini-practice-btn:hover {
+  background: #2383e2 !important;
+  color: #ffffff !important;
+  border-color: #2383e2 !important;
+  box-shadow: 0 1px 3px rgba(35, 131, 226, 0.25) !important;
+}
+
+.mini-practice-btn svg {
+  width: 12px !important;
+  height: 12px !important;
+  flex-shrink: 0 !important;
+  display: inline-block !important;
+}
+
+/* Fallback for any other practice-btn classes */
+.card-action-icon-btn.practice-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.35rem !important;
+  width: auto !important;
+  min-width: 60px !important;
+  height: 26px !important;
+  padding: 0 0.65rem !important;
+  background: #ebf5fb !important;
+  color: #0b6e99 !important;
+  border: 1px solid #d4eaf7 !important;
+  border-radius: 5px !important;
+  font-size: 0.74rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
 }

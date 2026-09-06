@@ -77,11 +77,41 @@ export function sortQueue(chunks: SpeakingChunk[], progressMap: Record<string, C
     // Priority 1: Unstudied chunks first
     if (!progA && progB) return -1;
     if (progA && !progB) return 1;
-    if (!progA && !progB) return a.number - b.number;
+    if (!progA && !progB) {
+      if (a.number !== b.number) return a.number - b.number;
+      return a.id.localeCompare(b.id);
+    }
 
     // Priority 2: Due date ascending (overdue first)
     const dueA = new Date(progA.dueDate).getTime();
     const dueB = new Date(progB.dueDate).getTime();
-    return dueA - dueB;
+    if (dueA !== dueB) return dueA - dueB;
+
+    return a.id.localeCompare(b.id);
   });
+}
+
+/**
+ * Deterministic Fisher-Yates shuffle using Mulberry32 PRNG (Pure function, safe for React 19).
+ */
+export function shuffleWithSeed<T>(array: T[], seed: number): T[] {
+  if (seed <= 0 || array.length <= 1) return array;
+  const arr = [...array];
+  let s = (seed * 12345 + 7) & 0xffffffff;
+
+  const random = () => {
+    s = (s + 0x6d2b79f5) & 0xffffffff;
+    let t = s;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    const temp = arr[i];
+    arr[i] = arr[j];
+    arr[j] = temp;
+  }
+  return arr;
 }

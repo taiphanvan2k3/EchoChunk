@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { SpeakingChunk, SRSRating } from '@/types';
 import { soundManager } from '@/lib/sound';
 import { speechService } from '@/lib/speech';
-import { getAmericanIpa } from '@/lib/ipa';
+import { getAmericanIpa, getPhraseIpa } from '@/lib/ipa';
 import {
   Volume2,
   Mic,
@@ -17,7 +17,8 @@ import {
   Keyboard,
   Sparkles,
   Eye,
-  EyeOff
+  EyeOff,
+  Shuffle
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { formatMarkdown } from '@/lib/formatMarkdown';
@@ -25,6 +26,7 @@ import { formatMarkdown } from '@/lib/formatMarkdown';
 interface QuickReflexModeProps {
   chunk: SpeakingChunk;
   onRate: (rating: SRSRating, accuracy: number) => void;
+  onShuffle?: () => void;
   currentIndex: number;
   totalInQueue: number;
   onEditChunk?: (chunk: SpeakingChunk) => void;
@@ -36,6 +38,7 @@ type InputMethod = 'voice' | 'text';
 export const QuickReflexMode: React.FC<QuickReflexModeProps> = ({
   chunk,
   onRate,
+  onShuffle,
   currentIndex,
   totalInQueue,
   onEditChunk,
@@ -236,8 +239,8 @@ export const QuickReflexMode: React.FC<QuickReflexModeProps> = ({
   };
 
   const chunkAmericanIpa = useMemo(() => {
-    return chunk.ipa || getAmericanIpa(chunk.chunk);
-  }, [chunk]);
+    return getPhraseIpa(chunk.chunk) || getAmericanIpa(chunk.chunk);
+  }, [chunk.chunk]);
 
   return (
     <div className="practice-card reflex-card">
@@ -256,8 +259,20 @@ export const QuickReflexMode: React.FC<QuickReflexModeProps> = ({
         </div>
 
         <div className="card-top-actions">
+          {onShuffle && (
+            <button
+              type="button"
+              className="card-quick-edit-btn card-shuffle-btn"
+              onClick={onShuffle}
+              title="Xáo trộn ngẫu nhiên thứ tự các câu trong chủ đề này"
+            >
+              <Shuffle size={13} />
+              <span>Xáo trộn</span>
+            </button>
+          )}
           {onEditChunk && (
             <button
+              type="button"
               className="card-quick-edit-btn"
               onClick={() => onEditChunk(chunk)}
               title="Chỉnh sửa chunk này"

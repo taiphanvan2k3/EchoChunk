@@ -4,13 +4,14 @@ import React, { useState, useMemo } from 'react';
 import { SpeakingChunk, SRSRating } from '@/types';
 import { soundManager } from '@/lib/sound';
 import { speechService } from '@/lib/speech';
-import { Volume2, CheckCircle2, HelpCircle, Edit2, Lightbulb, ArrowRight } from 'lucide-react';
+import { Volume2, CheckCircle2, HelpCircle, Edit2, Lightbulb, ArrowRight, Shuffle } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { formatMarkdown } from '@/lib/formatMarkdown';
 
 interface ChunkBlanksModeProps {
   chunk: SpeakingChunk;
   onRate: (rating: SRSRating, accuracy: number) => void;
+  onShuffle?: () => void;
   currentIndex: number;
   totalInQueue: number;
   onEditChunk?: (chunk: SpeakingChunk) => void;
@@ -25,6 +26,7 @@ interface MaskedParts {
 export const ChunkBlanksMode: React.FC<ChunkBlanksModeProps> = ({
   chunk,
   onRate,
+  onShuffle,
   currentIndex,
   totalInQueue,
   onEditChunk,
@@ -201,8 +203,20 @@ export const ChunkBlanksMode: React.FC<ChunkBlanksModeProps> = ({
         </div>
 
         <div className="card-top-actions">
+          {onShuffle && (
+            <button
+              type="button"
+              className="card-quick-edit-btn card-shuffle-btn"
+              onClick={onShuffle}
+              title="Xáo trộn ngẫu nhiên thứ tự các câu trong chủ đề này"
+            >
+              <Shuffle size={13} />
+              <span>Xáo trộn</span>
+            </button>
+          )}
           {onEditChunk && (
             <button
+              type="button"
               className="card-quick-edit-btn"
               onClick={() => onEditChunk(chunk)}
               title="Chỉnh sửa chunk này"
