@@ -338,6 +338,7 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
         {/* Full Sentence IPA correctly positioned right under the example sentence */}
         {chunk.ipa && (
           <div className="sentence-ipa-box" title="Phiên âm IPA của câu ví dụ thực chiến">
+            <span className="sentence-ipa-tag">IPA</span>
             <span className="sentence-ipa-content">{chunk.ipa}</span>
           </div>
         )}
