@@ -50,6 +50,8 @@ export const ChunkModal: React.FC<ChunkModalProps> = ({
   const [tagsStr, setTagsStr] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const [showAdvanced, setShowAdvanced] = useState(Boolean(chunkToEdit));
+
   // Track props to adjust state during render (React recommended pattern for state sync without effect)
   const [prevSyncKey, setPrevSyncKey] = useState<{ id?: string; isOpen: boolean }>({
     id: chunkToEdit?.id,
@@ -70,6 +72,7 @@ export const ChunkModal: React.FC<ChunkModalProps> = ({
       setDetailMeaning(chunkToEdit.detailMeaning || '');
       setContext(chunkToEdit.context || '');
       setTagsStr(chunkToEdit.tags?.join(', ') || '');
+      setShowAdvanced(true);
     } else {
       setChunkText('');
       setMeaning('');
@@ -82,6 +85,7 @@ export const ChunkModal: React.FC<ChunkModalProps> = ({
       setDetailMeaning('');
       setContext('');
       setTagsStr('');
+      setShowAdvanced(false);
     }
     setErrorMessage(null);
   }
@@ -151,7 +155,7 @@ export const ChunkModal: React.FC<ChunkModalProps> = ({
     const trimmedExample = exampleSentence.trim();
     const trimmedTranslation = translation.trim();
 
-    // STRICT VALIDATIONS: Enforce required fields with clear red indicator
+    // Quick Add validation: Only Chunk and Meaning are required
     if (!trimmedChunk) {
       setErrorMessage('Vui lòng nhập cụm từ tiếng Anh (trường bắt buộc).');
       return;
@@ -159,16 +163,6 @@ export const ChunkModal: React.FC<ChunkModalProps> = ({
 
     if (!trimmedMeaning) {
       setErrorMessage('Vui lòng nhập nghĩa cốt lõi tiếng Việt (trường bắt buộc).');
-      return;
-    }
-
-    if (!trimmedExample) {
-      setErrorMessage('Vui lòng nhập câu ví dụ thực tế (trường bắt buộc để luyện phát âm & ngữ điệu).');
-      return;
-    }
-
-    if (!trimmedTranslation) {
-      setErrorMessage('Vui lòng nhập bản dịch câu ví dụ (trường bắt buộc để luyện phản xạ dịch).');
       return;
     }
 
@@ -199,6 +193,8 @@ export const ChunkModal: React.FC<ChunkModalProps> = ({
       }
     }
 
+    const resolvedCleanExample = trimmedExample ? trimmedExample.replace(/[*_`]/g, '') : '';
+
     const updatedChunk: SpeakingChunk = {
       id: chunkToEdit?.id || `custom_chunk_${Date.now()}`,
       topicId: topicId,
@@ -211,7 +207,7 @@ export const ChunkModal: React.FC<ChunkModalProps> = ({
       level: level,
       detailMeaning: detailMeaning.trim() || trimmedMeaning,
       exampleSentence: trimmedExample,
-      cleanExample: trimmedExample.replace(/[*_`]/g, ''),
+      cleanExample: resolvedCleanExample,
       ipa: finalIpa,
       translation: trimmedTranslation,
       context: context.trim(),
@@ -264,7 +260,16 @@ export const ChunkModal: React.FC<ChunkModalProps> = ({
           </div>
         )}
 
-        <form onSubmit={handleSave} className="notion-page-form">
+        <form
+          onSubmit={handleSave}
+          onKeyDown={(e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+              e.preventDefault();
+              handleSave(e);
+            }
+          }}
+          className="notion-page-form"
+        >
           {/* Page Title (Chunk Name) with subtle red asterisk */}
           <div className="notion-title-row">
             <input
@@ -278,9 +283,8 @@ export const ChunkModal: React.FC<ChunkModalProps> = ({
             <span className="notion-required-star" title="Trường bắt buộc">*</span>
           </div>
 
-          {/* Notion Properties Grid (Key - Value Table style) */}
+          {/* Core Properties: Nghĩa tiếng Việt */}
           <div className="notion-properties-table">
-            {/* Property: Nghĩa tiếng Việt - REQUIRED */}
             <div className="notion-property-row">
               <div className="notion-prop-label">
                 <span>🎯</span>
@@ -296,218 +300,254 @@ export const ChunkModal: React.FC<ChunkModalProps> = ({
                 />
               </div>
             </div>
+          </div>
 
-            {/* Property: Chủ đề (Custom Notion Dropdown Selector) */}
-            <div className="notion-property-row">
-              <div className="notion-prop-label">
-                <span>📁</span>
-                <span>Chủ đề</span>
-              </div>
-              <div className="notion-prop-value" ref={topicDropdownRef}>
-                <div className="notion-custom-select">
-                  <button
-                    type="button"
-                    className="notion-select-trigger"
-                    onClick={() => setIsTopicMenuOpen(!isTopicMenuOpen)}
-                  >
-                    <span className="trigger-icon">{currentSelectedTopic.icon}</span>
-                    <span className="trigger-text">{currentSelectedTopic.topicName}</span>
-                    <ChevronDown size={14} className="trigger-arrow" />
-                  </button>
+          {/* Quick Add Helper Badge */}
+          {!showAdvanced && (
+            <div className="notion-quick-hint">
+              <span className="notion-quick-hint-icon">⚡</span>
+              <span>
+                <strong>Thêm nhanh:</strong> Chỉ cần nhập 2 ô trên và nhấn <em>Lưu</em> (hoặc <em>Enter</em>). Bạn có thể mở rộng tùy chỉnh bên dưới để thêm câu ví dụ hoặc ngữ cảnh bất kỳ lúc nào.
+              </span>
+            </div>
+          )}
 
-                  {/* Notion Floating Dropdown Menu */}
-                  {isTopicMenuOpen && (
-                    <div className="notion-dropdown-menu">
-                      <div
-                        className={`notion-menu-item ${topicId === 'CUSTOM' ? 'selected' : ''}`}
-                        onClick={() => {
-                          setTopicId('CUSTOM');
-                          setIsTopicMenuOpen(false);
-                        }}
+          {/* Collapsible Accordion Toggle */}
+          <div className="notion-toggle-advanced-wrap">
+            <button
+              type="button"
+              className="notion-toggle-advanced-btn"
+              onClick={() => setShowAdvanced(!showAdvanced)}
+            >
+              <ChevronDown
+                size={15}
+                className={`notion-toggle-chevron ${showAdvanced ? 'expanded' : ''}`}
+              />
+              <span>
+                {showAdvanced
+                  ? 'Thu gọn tùy chỉnh nâng cao'
+                  : 'Tùy chỉnh nâng cao (Chủ đề, Ví dụ câu, IPA, Cấp độ...)'}
+              </span>
+            </button>
+          </div>
+
+          {/* Advanced Section: Collapsible */}
+          {showAdvanced && (
+            <div className="notion-advanced-section">
+              <div className="notion-properties-table">
+                {/* Property: Chủ đề (Custom Notion Dropdown Selector) */}
+                <div className="notion-property-row">
+                  <div className="notion-prop-label">
+                    <span>📁</span>
+                    <span>Chủ đề</span>
+                  </div>
+                  <div className="notion-prop-value" ref={topicDropdownRef}>
+                    <div className="notion-custom-select">
+                      <button
+                        type="button"
+                        className="notion-select-trigger"
+                        onClick={() => setIsTopicMenuOpen(!isTopicMenuOpen)}
                       >
-                        <span className="menu-item-left">
-                          <span>⭐</span>
-                          <span>Từ vựng tự tạo / Khác</span>
-                        </span>
-                        {topicId === 'CUSTOM' && <Check size={14} className="check-icon" />}
-                      </div>
+                        <span className="trigger-icon">{currentSelectedTopic.icon}</span>
+                        <span className="trigger-text">{currentSelectedTopic.topicName}</span>
+                        <ChevronDown size={14} className="trigger-arrow" />
+                      </button>
 
-                      <div className="notion-menu-divider" />
-
-                      {existingTopics
-                        .filter((t) => t.topicId !== 'CUSTOM')
-                        .map((t) => (
+                      {/* Notion Floating Dropdown Menu */}
+                      {isTopicMenuOpen && (
+                        <div className="notion-dropdown-menu">
                           <div
-                            key={t.topicId}
-                            className={`notion-menu-item ${topicId === t.topicId ? 'selected' : ''}`}
+                            className={`notion-menu-item ${topicId === 'CUSTOM' ? 'selected' : ''}`}
                             onClick={() => {
-                              setTopicId(t.topicId);
+                              setTopicId('CUSTOM');
                               setIsTopicMenuOpen(false);
                             }}
                           >
                             <span className="menu-item-left">
-                              <span>{t.icon}</span>
-                              <span>{t.topicName}</span>
+                              <span>⭐</span>
+                              <span>Từ vựng tự tạo / Khác</span>
                             </span>
-                            {topicId === t.topicId && <Check size={14} className="check-icon" />}
+                            {topicId === 'CUSTOM' && <Check size={14} className="check-icon" />}
                           </div>
-                        ))}
+
+                          <div className="notion-menu-divider" />
+
+                          {existingTopics
+                            .filter((t) => t.topicId !== 'CUSTOM')
+                            .map((t) => (
+                              <div
+                                key={t.topicId}
+                                className={`notion-menu-item ${topicId === t.topicId ? 'selected' : ''}`}
+                                onClick={() => {
+                                  setTopicId(t.topicId);
+                                  setIsTopicMenuOpen(false);
+                                }}
+                              >
+                                <span className="menu-item-left">
+                                  <span>{t.icon}</span>
+                                  <span>{t.topicName}</span>
+                                </span>
+                                {topicId === t.topicId && <Check size={14} className="check-icon" />}
+                              </div>
+                            ))}
+                        </div>
+                      )}
                     </div>
-                  )}
+                  </div>
+                </div>
+
+                {topicId === 'CUSTOM' && (
+                  <div className="notion-property-row">
+                    <div className="notion-prop-label">
+                      <span>✏️</span>
+                      <span>Tên chủ đề riêng</span>
+                    </div>
+                    <div className="notion-prop-value">
+                      <input
+                        type="text"
+                        className="notion-inline-input"
+                        placeholder="Ví dụ: IT Chuyên ngành, Họp Khách Hàng, Du lịch..."
+                        value={customTopicName}
+                        onChange={(e) => setCustomTopicName(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Property: Cấp độ CEFR (Notion Status Pills) */}
+                <div className="notion-property-row">
+                  <div className="notion-prop-label">
+                    <span>🏷️</span>
+                    <span>Cấp độ CEFR</span>
+                  </div>
+                  <div className="notion-prop-value">
+                    <div className="notion-level-pills-row">
+                      {[
+                        { id: 'A2', label: 'A2 - Cơ bản' },
+                        { id: 'B1', label: 'B1 - Trung cấp' },
+                        { id: 'B2', label: 'B2 - Nâng cao' },
+                        { id: 'C1', label: 'C1 - Thành thạo' },
+                      ].map((lvl) => (
+                        <button
+                          key={lvl.id}
+                          type="button"
+                          className={`notion-level-pill ${level === lvl.id ? `active-${lvl.id.toLowerCase()}` : ''}`}
+                          onClick={() => setLevel(lvl.id)}
+                        >
+                          {lvl.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Property: Phiên âm IPA */}
+                <div className="notion-property-row">
+                  <div className="notion-prop-label">
+                    <span>🔤</span>
+                    <span>Phiên âm IPA Mỹ</span>
+                  </div>
+                  <div className="notion-prop-value flex items-center gap-2">
+                    <input
+                      type="text"
+                      className="notion-inline-input flex-1"
+                      placeholder="Ví dụ: /tʌtʃ beɪs wɪð/ (tự động sinh nếu để trống)"
+                      value={ipa}
+                      onChange={(e) => setIpa(e.target.value)}
+                    />
+                    {chunkText.trim() && (
+                      <button
+                        type="button"
+                        onClick={handleAutoGenerateIpa}
+                        className="notion-btn-inline-action"
+                        title="Tự động sinh phiên âm Anh - Mỹ từ từ điển offline"
+                      >
+                        <Wand2 size={13} />
+                        <span>Sinh IPA</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {topicId === 'CUSTOM' && (
-              <div className="notion-property-row">
-                <div className="notion-prop-label">
-                  <span>✏️</span>
-                  <span>Tên chủ đề riêng</span>
+              <div className="notion-content-divider" />
+
+              {/* Page Body Content (Notion Callout Box Style) */}
+              <div className="notion-callout-editor">
+                <div className="callout-editor-header">
+                  <div className="callout-label-row">
+                    <MessageSquare size={15} className="callout-icon" />
+                    <span className="callout-title">
+                      Câu ví dụ thực tế (tùy chọn)
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    className="callout-listen-btn"
+                    onClick={handleTestAudio}
+                    title="Nghe thử phát âm câu này"
+                  >
+                    <Volume2 size={14} />
+                    <span>Nghe thử phát âm</span>
+                  </button>
                 </div>
-                <div className="notion-prop-value">
+                <textarea
+                  className="notion-callout-textarea"
+                  rows={3}
+                  placeholder="Ví dụ: Let's touch base next Monday after the team meeting to align on deliverables."
+                  value={exampleSentence}
+                  onChange={(e) => setExampleSentence(e.target.value)}
+                />
+
+                {showContextWarning && (
+                  <div className="chunk-context-hint">
+                    <AlertTriangle size={14} className="shrink-0 text-amber-600" />
+                    <span>
+                      Gợi ý: Câu ví dụ nên chứa cụm từ <strong>&quot;{chunkText}&quot;</strong> để bài tập nhại câu và điền từ hoạt động chuẩn xác nhất.
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Additional Details (Translation, Context, Tags) */}
+              <div className="notion-sub-fields-grid">
+                <div className="sub-field col-full">
+                  <label className="sub-field-label">
+                    🇻🇳 Dịch nghĩa câu ví dụ (tùy chọn)
+                  </label>
                   <input
                     type="text"
-                    className="notion-inline-input"
-                    placeholder="Ví dụ: IT Chuyên ngành, Họp Khách Hàng, Du lịch..."
-                    value={customTopicName}
-                    onChange={(e) => setCustomTopicName(e.target.value)}
+                    className="notion-sub-input"
+                    placeholder="Ví dụ: Hãy trao đổi nhanh vào thứ Hai tới sau buổi họp nhóm để thống nhất kết quả..."
+                    value={translation}
+                    onChange={(e) => setTranslation(e.target.value)}
+                  />
+                </div>
+
+                <div className="sub-field col-full">
+                  <label className="sub-field-label">💡 Ghi chú ngữ cảnh (tùy chọn):</label>
+                  <input
+                    type="text"
+                    className="notion-sub-input"
+                    placeholder="Ví dụ: Thường dùng trong email công việc hoặc khi muốn trao đổi ngắn gọn"
+                    value={context}
+                    onChange={(e) => setContext(e.target.value)}
+                  />
+                </div>
+
+                <div className="sub-field col-full">
+                  <label className="sub-field-label">🏷️ Thẻ phân loại (tags):</label>
+                  <input
+                    type="text"
+                    className="notion-sub-input"
+                    placeholder="Ví dụ: work, meeting, business, casual (cách nhau bằng dấu phẩy)"
+                    value={tagsStr}
+                    onChange={(e) => setTagsStr(e.target.value)}
                   />
                 </div>
               </div>
-            )}
-
-            {/* Property: Cấp độ CEFR (Notion Status Pills) */}
-            <div className="notion-property-row">
-              <div className="notion-prop-label">
-                <span>🏷️</span>
-                <span>Cấp độ CEFR</span>
-              </div>
-              <div className="notion-prop-value">
-                <div className="notion-level-pills-row">
-                  {[
-                    { id: 'A2', label: 'A2 - Cơ bản' },
-                    { id: 'B1', label: 'B1 - Trung cấp' },
-                    { id: 'B2', label: 'B2 - Nâng cao' },
-                    { id: 'C1', label: 'C1 - Thành thạo' },
-                  ].map((lvl) => (
-                    <button
-                      key={lvl.id}
-                      type="button"
-                      className={`notion-level-pill ${level === lvl.id ? `active-${lvl.id.toLowerCase()}` : ''}`}
-                      onClick={() => setLevel(lvl.id)}
-                    >
-                      {lvl.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
             </div>
-
-            {/* Property: Phiên âm IPA */}
-            <div className="notion-property-row">
-              <div className="notion-prop-label">
-                <span>🔤</span>
-                <span>Phiên âm IPA Mỹ</span>
-              </div>
-              <div className="notion-prop-value flex items-center gap-2">
-                <input
-                  type="text"
-                  className="notion-inline-input flex-1"
-                  placeholder="Ví dụ: /tʌtʃ beɪs wɪð/ (tự động sinh nếu để trống)"
-                  value={ipa}
-                  onChange={(e) => setIpa(e.target.value)}
-                />
-                {chunkText.trim() && (
-                  <button
-                    type="button"
-                    onClick={handleAutoGenerateIpa}
-                    className="notion-btn-inline-action"
-                    title="Tự động sinh phiên âm Anh - Mỹ từ từ điển offline"
-                  >
-                    <Wand2 size={13} />
-                    <span>Sinh IPA</span>
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="notion-content-divider" />
-
-          {/* Page Body Content (Notion Callout Box Style) - REQUIRED */}
-          <div className="notion-callout-editor">
-            <div className="callout-editor-header">
-              <div className="callout-label-row">
-                <MessageSquare size={15} className="callout-icon" />
-                <span className="callout-title">
-                  Câu ví dụ thực tế <span className="notion-required-star">*</span>
-                </span>
-              </div>
-              <button
-                type="button"
-                className="callout-listen-btn"
-                onClick={handleTestAudio}
-                title="Nghe thử phát âm câu này"
-              >
-                <Volume2 size={14} />
-                <span>Nghe thử phát âm</span>
-              </button>
-            </div>
-            <textarea
-              className="notion-callout-textarea"
-              rows={3}
-              placeholder="Ví dụ: Let's touch base next Monday after the team meeting to align on deliverables."
-              value={exampleSentence}
-              onChange={(e) => setExampleSentence(e.target.value)}
-            />
-
-            {showContextWarning && (
-              <div className="chunk-context-hint">
-                <AlertTriangle size={14} className="shrink-0 text-amber-600" />
-                <span>
-                  Gợi ý: Câu ví dụ nên chứa cụm từ <strong>&quot;{chunkText}&quot;</strong> để bài tập nhại câu và điền từ hoạt động chuẩn xác nhất.
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Additional Details (Translation, Context, Tags) */}
-          <div className="notion-sub-fields-grid">
-            <div className="sub-field col-full">
-              <label className="sub-field-label">
-                🇻🇳 Dịch nghĩa câu ví dụ <span className="notion-required-star">*</span>
-              </label>
-              <input
-                type="text"
-                className="notion-sub-input"
-                placeholder="Ví dụ: Hãy trao đổi nhanh vào thứ Hai tới sau buổi họp nhóm để thống nhất kết quả..."
-                value={translation}
-                onChange={(e) => setTranslation(e.target.value)}
-              />
-            </div>
-
-            <div className="sub-field col-full">
-              <label className="sub-field-label">💡 Ghi chú ngữ cảnh (tùy chọn):</label>
-              <input
-                type="text"
-                className="notion-sub-input"
-                placeholder="Ví dụ: Thường dùng trong email công việc hoặc khi muốn trao đổi ngắn gọn"
-                value={context}
-                onChange={(e) => setContext(e.target.value)}
-              />
-            </div>
-
-            <div className="sub-field col-full">
-              <label className="sub-field-label">🏷️ Thẻ phân loại (tags):</label>
-              <input
-                type="text"
-                className="notion-sub-input"
-                placeholder="Ví dụ: work, meeting, business, casual (cách nhau bằng dấu phẩy)"
-                value={tagsStr}
-                onChange={(e) => setTagsStr(e.target.value)}
-              />
-            </div>
-          </div>
+          )}
 
           {/* Notion Page Footer Actions */}
           <div className="notion-modal-footer">

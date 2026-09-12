@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { ChunkProgress, SpeakingChunk, SpeechEvalResult, SRSRating } from '@/types';
-import { speechService } from '@/lib/speech';
-import { soundManager } from '@/lib/sound';
-import { getAmericanIpa } from '@/lib/ipa';
-import { Volume2, Mic, MicOff, CheckCircle2, Eye, EyeOff, Edit2, RotateCcw, Shuffle } from 'lucide-react';
-import confetti from 'canvas-confetti';
-import { formatMarkdown } from '@/lib/formatMarkdown';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { ChunkProgress, SpeakingChunk, SpeechEvalResult, SRSRating } from "@/types";
+import { speechService } from "@/lib/speech";
+import { soundManager } from "@/lib/sound";
+import { getAmericanIpa } from "@/lib/ipa";
+import { Volume2, Mic, MicOff, CheckCircle2, Eye, EyeOff, Edit2, RotateCcw, Shuffle } from "lucide-react";
+import confetti from "canvas-confetti";
+import { formatMarkdown } from "@/lib/formatMarkdown";
 
 interface ShadowingModeProps {
   chunk: SpeakingChunk;
@@ -26,13 +26,12 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
   onShuffle,
   currentIndex,
   totalInQueue,
-  onEditChunk,
+  onEditChunk
 }) => {
-  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
-  const [playbackSpeed, setPlaybackSpeed] = useState<number>(1.0);
+  const [playingAudioType, setPlayingAudioType] = useState<"normal" | "slow" | null>(null);
   const [isRecording, setIsRecording] = useState(false);
-  const [spokenTranscript, setSpokenTranscript] = useState('');
-  const latestSpokenTranscriptRef = useRef('');
+  const [spokenTranscript, setSpokenTranscript] = useState("");
+  const latestSpokenTranscriptRef = useRef("");
   const [evalResult, setEvalResult] = useState<SpeechEvalResult | null>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [recordingError, setRecordingError] = useState<string | null>(null);
@@ -45,14 +44,13 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
   const [drilledSuccessWords, setDrilledSuccessWords] = useState<Set<string>>(new Set());
   const [activeWordPlaying, setActiveWordPlaying] = useState<string | null>(null);
 
-
   // Synchronous state reset on chunk change (React recommended pattern)
   const [prevChunkId, setPrevChunkId] = useState(chunk.id);
   if (prevChunkId !== chunk.id) {
     setPrevChunkId(chunk.id);
     speechService.stopListening();
     setIsRecording(false);
-        setSpokenTranscript('');
+    setSpokenTranscript("");
     setEvalResult(null);
     setInspectedWord(null);
     setShowDetails(false);
@@ -60,34 +58,42 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
     setDrillingWord(null);
     setDrilledSuccessWords(new Set());
     setActiveWordPlaying(null);
+    setPlayingAudioType(null);
   }
 
-  const playAudio = useCallback(() => {
-    setIsPlayingAudio(true);
-    soundManager.playClick();
-    speechService.speak(chunk.cleanExample || chunk.chunk, playbackSpeed, () => {
-      setIsPlayingAudio(false);
-    });
-  }, [chunk.cleanExample, chunk.chunk, playbackSpeed]);
-
-  const evaluate = useCallback((transcript: string) => {
-    const target = chunk.cleanExample || chunk.chunk;
-    const result = speechService.evaluatePronunciation(target, transcript);
-    setEvalResult(result);
-
-    if (result.accuracy >= 80) {
-      soundManager.playSuccess();
-      confetti({
-        particleCount: 40,
-        spread: 60,
-        origin: { y: 0.7 },
+  const playAudio = useCallback(
+    (speed: number = 1.0) => {
+      const isSlow = speed < 1.0;
+      setPlayingAudioType(isSlow ? "slow" : "normal");
+      soundManager.playClick();
+      speechService.speak(chunk.cleanExample || chunk.chunk, speed, () => {
+        setPlayingAudioType(null);
       });
-    } else if (result.accuracy >= 50) {
-      soundManager.playSuccess();
-    } else {
-      soundManager.playError();
-    }
-  }, [chunk.cleanExample, chunk.chunk]);
+    },
+    [chunk.cleanExample, chunk.chunk]
+  );
+
+  const evaluate = useCallback(
+    (transcript: string) => {
+      const target = chunk.cleanExample || chunk.chunk;
+      const result = speechService.evaluatePronunciation(target, transcript);
+      setEvalResult(result);
+
+      if (result.accuracy >= 80) {
+        soundManager.playSuccess();
+        confetti({
+          particleCount: 40,
+          spread: 60,
+          origin: { y: 0.7 }
+        });
+      } else if (result.accuracy >= 50) {
+        soundManager.playSuccess();
+      } else {
+        soundManager.playError();
+      }
+    },
+    [chunk.cleanExample, chunk.chunk]
+  );
 
   const toggleRecording = useCallback(() => {
     if (isRecording) {
@@ -99,8 +105,8 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
       }
     } else {
       setRecordingError(null);
-      setSpokenTranscript('');
-      latestSpokenTranscriptRef.current = '';
+      setSpokenTranscript("");
+      latestSpokenTranscriptRef.current = "";
       setEvalResult(null);
       setInspectedWord(null);
       setDrilledSuccessWords(new Set());
@@ -132,32 +138,28 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
     }
   }, [isRecording, spokenTranscript, evaluate]);
 
-  // Keyboard shortcut listener (1, 2, 3, 4, Space)
+  // Keyboard shortcut listener (1 = Chưa thuộc, 2/Enter/ArrowRight = Tiếp tục, Space = nghe mẫu)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (["INPUT", "TEXTAREA"].includes((e.target as HTMLElement)?.tagName)) return;
 
-      if (e.code === 'Space') {
+      if (e.code === "Space") {
         e.preventDefault();
         playAudio();
-      } else if (e.key === '1') {
+      } else if (e.key === "1") {
         onRate(1, evalResult?.accuracy || 0);
-      } else if (e.key === '2') {
-        onRate(2, evalResult?.accuracy || 0);
-      } else if (e.key === '3') {
+      } else if (e.key === "2" || e.key === "Enter" || e.key === "ArrowRight") {
         onRate(3, evalResult?.accuracy || 0);
-      } else if (e.key === '4') {
-        onRate(4, evalResult?.accuracy || 0);
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [playAudio, onRate, evalResult]);
 
   // Play individual word audio
   const handlePlayWord = (word: string, rate: number = 0.8) => {
-    const clean = word.replace(/^[+*`]/, '').trim();
+    const clean = word.replace(/^[+*`]/, "").trim();
     if (!clean) return;
     setActiveWordPlaying(clean);
     soundManager.playClick();
@@ -168,7 +170,10 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
 
   // Drill a single mispronounced word
   const handleStartDrillWord = (targetWord: string) => {
-    const cleanTarget = targetWord.replace(/^[+*`]/, '').toLowerCase().trim();
+    const cleanTarget = targetWord
+      .replace(/^[+*`]/, "")
+      .toLowerCase()
+      .trim();
     if (drillingWord === cleanTarget) {
       speechService.stopListening();
       setDrillingWord(null);
@@ -214,14 +219,12 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
   // Extract missing & extra misheard tokens for the clinic
   const missingTokens = useMemo(() => {
     if (!evalResult) return [];
-    return evalResult.tokens.filter((t) => t.status === 'missing');
+    return evalResult.tokens.filter((t) => t.status === "missing");
   }, [evalResult]);
 
   const extraTokens = useMemo(() => {
     if (!evalResult) return [];
-    return evalResult.tokens
-      .filter((t) => t.status === 'extra')
-      .map((t) => t.word.replace(/^\+/, ''));
+    return evalResult.tokens.filter((t) => t.status === "extra").map((t) => t.word.replace(/^\+/, ""));
   }, [evalResult]);
 
   // Active word token being inspected in the Inspector Bar
@@ -230,21 +233,19 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
     const targetWord = inspectedWord || missingTokens[0]?.word || evalResult.tokens[0]?.word;
     if (!targetWord) return null;
 
-    const cleanTarget = targetWord.replace(/^[+*`]/, '').toLowerCase();
-    const found = evalResult.tokens.find(
-      (t) => t.word.replace(/^[+*`]/, '').toLowerCase() === cleanTarget
-    );
+    const cleanTarget = targetWord.replace(/^[+*`]/, "").toLowerCase();
+    const found = evalResult.tokens.find((t) => t.word.replace(/^[+*`]/, "").toLowerCase() === cleanTarget);
     if (!found) return null;
 
-    const clean = found.word.replace(/^[+*`]/, '').toLowerCase();
+    const clean = found.word.replace(/^[+*`]/, "").toLowerCase();
     const isFixed = drilledSuccessWords.has(clean);
-    const status = isFixed ? 'fixed-success' : found.status;
+    const status = isFixed ? "fixed-success" : found.status;
 
     return {
       rawWord: found.word,
       cleanWord: clean,
       status,
-      ipa: getAmericanIpa(found.word),
+      ipa: getAmericanIpa(found.word)
     };
   }, [evalResult, inspectedWord, missingTokens, drilledSuccessWords]);
 
@@ -309,30 +310,33 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
       <div className="example-sentence-box">
         <div className="example-label">
           <span>Câu ví dụ thực chiến (Shadowing Target):</span>
-          <div className="audio-controls-row">
+          <div className="duo-audio-controls-row">
+            {/* 1. Loa phát âm tốc độ bình thường (Duolingo Style Speaker) */}
             <button
-              className={`speed-pill ${playbackSpeed === 0.75 ? 'active' : ''}`}
-              onClick={() => setPlaybackSpeed(0.75)}
-              title="Tốc độ chậm để luyện phát âm"
+              type="button"
+              className={`duo-audio-btn duo-normal-btn ${playingAudioType === "normal" ? "is-playing" : ""}`}
+              onClick={() => playAudio(1.0)}
+              title="Phát âm tốc độ bình thường (Phím tắt: Space)"
+              aria-label="Phát âm tốc độ bình thường (Space)"
             >
-              0.75x
+              <span className="duo-speaker-icon" aria-hidden="true" />
             </button>
+
+            {/* 2. Loa hình con rùa (Duolingo Style Turtle Slow Audio - nằm sau loa bình thường) */}
             <button
-              className={`speed-pill ${playbackSpeed === 1.0 ? 'active' : ''}`}
-              onClick={() => setPlaybackSpeed(1.0)}
-              title="Tốc độ nói tự nhiên của người bản xứ"
+              type="button"
+              className={`duo-audio-btn duo-turtle-btn ${playingAudioType === "slow" ? "is-playing" : ""}`}
+              onClick={() => playAudio(0.6)}
+              title="Phát âm chậm rãi từng từ (Tốc độ con rùa 0.75x)"
+              aria-label="Phát âm chậm tốc độ con rùa"
             >
-              1x
-            </button>
-            <button className="play-audio-btn" onClick={playAudio} title="Phím tắt: Space">
-              <Volume2 size={16} />
-              <span>{isPlayingAudio ? 'Đang đọc...' : 'Nghe mẫu (Space)'}</span>
+              <span className="duo-turtle-icon" aria-hidden="true" />
             </button>
           </div>
         </div>
 
         <p className="example-content">
-          &ldquo;{formatMarkdown(chunk.exampleSentence || chunk.cleanExample)}&rdquo;
+          &ldquo;{formatMarkdown(chunk.exampleSentence || chunk.cleanExample || chunk.chunk)}&rdquo;
         </p>
 
         {/* Full Sentence IPA correctly positioned right under the example sentence */}
@@ -345,19 +349,20 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
 
         {/* Translation & Context Reveal */}
         <div className="context-reveal-wrap">
-          <button
-            className="toggle-reveal-btn"
-            onClick={() => setShowDetails(!showDetails)}
-          >
+          <button className="toggle-reveal-btn" onClick={() => setShowDetails(!showDetails)}>
             {showDetails ? <EyeOff size={15} /> : <Eye size={15} />}
-            <span>{showDetails ? 'Ẩn bản dịch & ngữ cảnh' : 'Hiện nghĩa tiếng Việt & ngữ cảnh'}</span>
+            <span>{showDetails ? "Ẩn bản dịch & ngữ cảnh" : "Hiện nghĩa tiếng Việt & ngữ cảnh"}</span>
           </button>
 
           {showDetails && (
             <div className="revealed-details">
-              <p className="detail-translation">➜ <em>{chunk.translation}</em></p>
+              <p className="detail-translation">
+                ➜ <em>{chunk.translation}</em>
+              </p>
               {chunk.context && (
-                <p className="detail-context">💡 <strong>Ngữ cảnh:</strong> {chunk.context}</p>
+                <p className="detail-context">
+                  💡 <strong>Ngữ cảnh:</strong> {chunk.context}
+                </p>
               )}
             </div>
           )}
@@ -369,23 +374,21 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
         <div className="mic-button-wrapper">
           <button
             type="button"
-            className={`main-mic-btn ${isRecording ? 'recording' : ''}`}
+            className={`main-mic-btn ${isRecording ? "recording" : ""}`}
             onClick={toggleRecording}
-            title={isRecording ? 'Dừng ghi âm & Chấm điểm ngay' : 'Bật Mic & Đọc theo câu trên'}
+            title={isRecording ? "Dừng ghi âm & Chấm điểm ngay" : "Bật Mic & Đọc theo câu trên"}
           >
             {isRecording ? <MicOff size={28} /> : <Mic size={28} />}
             <span className="mic-glow-ring"></span>
           </button>
           <div className="mic-hint-box">
             <span className="mic-hint-title">
-              {isRecording ? '🔴 Đang lắng nghe liên tục...' : 'Nhấn nút Micro và đọc to câu trên để chấm điểm'}
+              {isRecording ? "🔴 Đang lắng nghe liên tục..." : "Nhấn nút Micro và đọc to câu trên để chấm điểm"}
             </span>
             <span className="mic-hint-desc">
-              {isRecording ? (
-                'Bạn cứ thong thả nói (thoải mái lấy hơi giữa các vế). Đọc xong bấm nút dưới hoặc dừng 2.5s để chấm.'
-              ) : (
-                '💡 Hệ thống lắng nghe liên tục, cho phép dừng nghỉ tự nhiên không lo bị tắt giữa chừng.'
-              )}
+              {isRecording
+                ? "Bạn cứ thong thả nói (thoải mái lấy hơi giữa các vế). Đọc xong bấm nút dưới hoặc dừng 2.5s để chấm."
+                : "💡 Hệ thống lắng nghe liên tục, cho phép dừng nghỉ tự nhiên không lo bị tắt giữa chừng."}
             </span>
           </div>
         </div>
@@ -393,11 +396,7 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
         {/* Active Recording Action Panel & Live Stream */}
         {isRecording && (
           <div className="recording-active-panel">
-            <button
-              type="button"
-              className="finish-speaking-btn"
-              onClick={toggleRecording}
-            >
+            <button type="button" className="finish-speaking-btn" onClick={toggleRecording}>
               <CheckCircle2 size={18} />
               <span>Đã đọc xong câu ➔ Chấm điểm ngay</span>
             </button>
@@ -432,7 +431,9 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
                 <span className="result-title">Kết quả giọng nói của bạn:</span>
                 <span className="token-click-hint">(💡 Bấm vào từ bất kỳ để nghe phát âm & xem IPA)</span>
               </div>
-              <span className={`accuracy-badge ${evalResult.accuracy >= 80 ? 'high' : evalResult.accuracy >= 50 ? 'med' : 'low'}`}>
+              <span
+                className={`accuracy-badge ${evalResult.accuracy >= 80 ? "high" : evalResult.accuracy >= 50 ? "med" : "low"}`}
+              >
                 Độ chính xác: {evalResult.accuracy}%
               </span>
             </div>
@@ -440,16 +441,16 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
             {/* Clean, uniform word token pills (100% same height, smooth baseline) */}
             <div className="word-tokens-stream">
               {evalResult.tokens.map((tok, i) => {
-                const cleanWord = tok.word.replace(/^[+*`]/, '').toLowerCase();
+                const cleanWord = tok.word.replace(/^[+*`]/, "").toLowerCase();
                 const isWordFixed = drilledSuccessWords.has(cleanWord);
-                const statusClass = isWordFixed ? 'fixed-success' : tok.status;
+                const statusClass = isWordFixed ? "fixed-success" : tok.status;
                 const isSelected = activeInspectToken?.cleanWord === cleanWord;
 
                 return (
                   <button
                     key={i}
                     type="button"
-                    className={`word-token-btn ${statusClass} ${activeWordPlaying === cleanWord ? 'is-speaking' : ''} ${isSelected ? 'is-selected' : ''}`}
+                    className={`word-token-btn ${statusClass} ${activeWordPlaying === cleanWord ? "is-speaking" : ""} ${isSelected ? "is-selected" : ""}`}
                     onClick={() => {
                       setInspectedWord(cleanWord);
                       handlePlayWord(tok.word, 0.8);
@@ -457,8 +458,8 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
                     title={`Bấm để chọn & nghe từ "${cleanWord}" (0.8x)`}
                   >
                     <span>{tok.word}</span>
-                    {statusClass === 'missing' && <span className="word-sound-icon">🔊</span>}
-                    {statusClass === 'fixed-success' && <span className="word-check-icon">✓</span>}
+                    {statusClass === "missing" && <span className="word-sound-icon">🔊</span>}
+                    {statusClass === "fixed-success" && <span className="word-check-icon">✓</span>}
                   </button>
                 );
               })}
@@ -476,13 +477,13 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
                     </span>
                   )}
                   <span className={`inspector-status-badge ${activeInspectToken.status}`}>
-                    {activeInspectToken.status === 'missing'
-                      ? '⚠️ Chưa đọc chuẩn'
-                      : activeInspectToken.status === 'fixed-success'
-                      ? '✓ Đã sửa chuẩn'
-                      : activeInspectToken.status === 'extra'
-                      ? '⚠️ Máy nghe thừa'
-                      : '✓ Phát âm đúng'}
+                    {activeInspectToken.status === "missing"
+                      ? "⚠️ Chưa đọc chuẩn"
+                      : activeInspectToken.status === "fixed-success"
+                        ? "✓ Đã sửa chuẩn"
+                        : activeInspectToken.status === "extra"
+                          ? "⚠️ Máy nghe thừa"
+                          : "✓ Phát âm đúng"}
                   </span>
                 </div>
 
@@ -504,7 +505,7 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
                   >
                     <span>🐢 Chậm 0.7x</span>
                   </button>
-                  {activeInspectToken.status === 'missing' && (
+                  {activeInspectToken.status === "missing" && (
                     <button
                       type="button"
                       className="inspector-drill-btn"
@@ -530,11 +531,16 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
                 <div>
                   <h4 className="clinic-title">Hỗ trợ phát âm các từ chưa chuẩn ({missingTokens.length} từ)</h4>
                   <p className="clinic-desc">
-                    Tích hợp phiên âm <strong>IPA chuẩn Anh - Mỹ (General American)</strong>, bấm nghe chậm 0.7x để rõ khẩu hình hoặc luyện riêng từng từ:
+                    Tích hợp phiên âm <strong>IPA chuẩn Anh - Mỹ (General American)</strong>, bấm nghe chậm 0.7x để rõ
+                    khẩu hình hoặc luyện riêng từng từ:
                   </p>
                 </div>
               </div>
-              <button className="retry-whole-sentence-btn" onClick={toggleRecording} title="Bật lại mic để nói lại cả câu">
+              <button
+                className="retry-whole-sentence-btn"
+                onClick={toggleRecording}
+                title="Bật lại mic để nói lại cả câu"
+              >
                 <RotateCcw size={14} />
                 <span>Nói lại cả câu</span>
               </button>
@@ -548,7 +554,7 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
                 const americanIpa = getAmericanIpa(tok.word);
 
                 return (
-                  <div key={idx} className={`clinic-word-card ${isFixed ? 'is-fixed' : ''}`}>
+                  <div key={idx} className={`clinic-word-card ${isFixed ? "is-fixed" : ""}`}>
                     <div className="clinic-word-left">
                       <div className="clinic-word-title-group">
                         <span className="clinic-word-name">{tok.word}</span>
@@ -590,12 +596,12 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
                       {/* Drill This Single Word */}
                       <button
                         type="button"
-                        className={`clinic-drill-btn ${isCurrentlyDrilling ? 'drilling' : ''} ${isFixed ? 'passed' : ''}`}
+                        className={`clinic-drill-btn ${isCurrentlyDrilling ? "drilling" : ""} ${isFixed ? "passed" : ""}`}
                         onClick={() => handleStartDrillWord(tok.word)}
                         title={`Bật mic đọc riêng từ "${tok.word}" để kiểm tra`}
                       >
                         {isCurrentlyDrilling ? <MicOff size={14} /> : <Mic size={14} />}
-                        <span>{isCurrentlyDrilling ? 'Đang nghe...' : isFixed ? 'Đã chuẩn' : 'Luyện từ này'}</span>
+                        <span>{isCurrentlyDrilling ? "Đang nghe..." : isFixed ? "Đã chuẩn" : "Luyện từ này"}</span>
                       </button>
                     </div>
                   </div>
@@ -631,32 +637,39 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
         )}
       </div>
 
-      {/* SRS Rating Bar */}
+      {/* Streamlined Binary SRS Rating Bar */}
       <div className="srs-rating-container">
-        <span className="srs-label">Đánh giá mức độ thuộc (SRS Feedback):</span>
-        <div className="srs-buttons-grid">
-          <button className="srs-btn srs-again" onClick={() => onRate(1, evalResult?.accuracy || 0)}>
-            <span className="srs-num">1</span>
-            <span className="srs-text">Chưa thuộc</span>
-            <span className="srs-sub">&lt; 1 ngày</span>
+        <div className="srs-header-row">
+          <span className="srs-label">Đánh giá mức độ thuộc (SRS):</span>
+          <span className="srs-hint-text">
+            Bấm &ldquo;Tiếp tục&rdquo; để tự động dãn cách ngày ôn tập theo thuật toán
+          </span>
+        </div>
+        <div className="srs-buttons-grid-binary">
+          <button
+            type="button"
+            className="srs-btn srs-btn-forget"
+            onClick={() => onRate(1, evalResult?.accuracy || 0)}
+            title="Đánh dấu cần ôn lại sớm (Phím tắt: 1)"
+          >
+            <div className="srs-btn-top">
+              <span className="srs-text">Chưa thuộc</span>
+              <span className="srs-shortcut-badge">Phím 1</span>
+            </div>
+            <span className="srs-sub">Ôn lại sớm (&lt; 1 ngày)</span>
           </button>
 
-          <button className="srs-btn srs-hard" onClick={() => onRate(2, evalResult?.accuracy || 0)}>
-            <span className="srs-num">2</span>
-            <span className="srs-text">Hơi khó</span>
-            <span className="srs-sub">2 ngày</span>
-          </button>
-
-          <button className="srs-btn srs-good" onClick={() => onRate(3, evalResult?.accuracy || 0)}>
-            <span className="srs-num">3</span>
-            <span className="srs-text">Nhớ tốt</span>
-            <span className="srs-sub">4 ngày</span>
-          </button>
-
-          <button className="srs-btn srs-easy" onClick={() => onRate(4, evalResult?.accuracy || 0)}>
-            <span className="srs-num">4</span>
-            <span className="srs-text">Rất dễ</span>
-            <span className="srs-sub">7+ ngày</span>
+          <button
+            type="button"
+            className="srs-btn srs-btn-next"
+            onClick={() => onRate(3, evalResult?.accuracy || 0)}
+            title="Đã thuộc câu này, chuyển tiếp tục (Phím tắt: Enter hoặc 2)"
+          >
+            <div className="srs-btn-top">
+              <span className="srs-text">Tiếp tục ➔</span>
+              <span className="srs-shortcut-badge srs-badge-primary">Enter ↵</span>
+            </div>
+            <span className="srs-sub">Đã nhớ tốt • Tự động tăng chu kỳ SRS</span>
           </button>
         </div>
       </div>

@@ -167,7 +167,7 @@ export const QuickReflexMode: React.FC<QuickReflexModeProps> = ({
     };
   }, [isTimerRunning, speedOption, timeLeft, isRevealed, handleTimeUp]);
 
-  // Keyboard shortcut listener (Space = audio, 1,2,3,4 = rating)
+  // Keyboard shortcut listener (Space = audio, 1 = Chưa kịp, 2/Enter/ArrowRight = Tiếp tục)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) {
@@ -183,9 +183,7 @@ export const QuickReflexMode: React.FC<QuickReflexModeProps> = ({
         playAudio();
       } else if (isRevealed) {
         if (e.key === '1') onRate(1, reflexAccuracy || 40);
-        else if (e.key === '2') onRate(2, reflexAccuracy || 60);
-        else if (e.key === '3') onRate(3, reflexAccuracy || 85);
-        else if (e.key === '4') onRate(4, 100);
+        else if (e.key === '2' || e.key === 'Enter' || e.key === 'ArrowRight') onRate(3, reflexAccuracy || 85);
       }
     };
 
@@ -523,44 +521,37 @@ export const QuickReflexMode: React.FC<QuickReflexModeProps> = ({
             )}
           </div>
 
-          {/* SRS Rating Bar */}
+          {/* Streamlined Binary SRS Rating Bar */}
           <div className="srs-rating-container" style={{ marginTop: '1.5rem' }}>
-            <span className="srs-label">Đánh giá độ phản xạ của bạn (SRS):</span>
-            <div className="srs-buttons-grid">
+            <div className="srs-header-row">
+              <span className="srs-label">Đánh giá độ phản xạ (SRS):</span>
+              <span className="srs-hint-text">Bấm &ldquo;Tiếp tục&rdquo; để tự động tăng độ khó & khoảng cách ôn tập</span>
+            </div>
+            <div className="srs-buttons-grid-binary">
               <button
-                className="srs-btn srs-again"
+                type="button"
+                className="srs-btn srs-btn-forget"
                 onClick={() => onRate(1, reflexAccuracy || 30)}
+                title="Chưa kịp phản xạ hoặc còn vấp (Phím tắt: 1)"
               >
-                <span className="srs-num">1</span>
-                <span className="srs-text">Chưa kịp</span>
-                <span className="srs-sub">&lt; 1 ngày</span>
+                <div className="srs-btn-top">
+                  <span className="srs-text">Chưa kịp</span>
+                  <span className="srs-shortcut-badge">Phím 1</span>
+                </div>
+                <span className="srs-sub">Luyện lại sớm (&lt; 1 ngày)</span>
               </button>
 
               <button
-                className="srs-btn srs-hard"
-                onClick={() => onRate(2, reflexAccuracy || 60)}
-              >
-                <span className="srs-num">2</span>
-                <span className="srs-text">Hơi vấp</span>
-                <span className="srs-sub">2 ngày sau</span>
-              </button>
-
-              <button
-                className="srs-btn srs-good"
+                type="button"
+                className="srs-btn srs-btn-next"
                 onClick={() => onRate(3, reflexAccuracy || 85)}
+                title="Phản xạ tốt, chuyển tiếp tục (Phím tắt: Enter hoặc 2)"
               >
-                <span className="srs-num">3</span>
-                <span className="srs-text">Phản xạ tốt</span>
-                <span className="srs-sub">4 ngày sau</span>
-              </button>
-
-              <button
-                className="srs-btn srs-easy"
-                onClick={() => onRate(4, 100)}
-              >
-                <span className="srs-num">4</span>
-                <span className="srs-text">Bắn tự nhiên</span>
-                <span className="srs-sub">7+ ngày sau</span>
+                <div className="srs-btn-top">
+                  <span className="srs-text">Tiếp tục ➔</span>
+                  <span className="srs-shortcut-badge srs-badge-primary">Enter ↵</span>
+                </div>
+                <span className="srs-sub">Phản xạ mượt • Tự động tăng chu kỳ SRS</span>
               </button>
             </div>
           </div>
