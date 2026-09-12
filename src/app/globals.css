@@ -835,62 +835,105 @@ html, body {
 .target-chunk-hero {
   text-align: center;
   padding: 0.5rem 0 1.5rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+/* Line 1: Chunk Title + Speaker */
+.chunk-heading-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  width: 100%;
+  margin-bottom: 0.4rem;
+  flex-wrap: wrap;
 }
 
 .chunk-text-heading {
   font-family: var(--font-serif);
-  font-size: 2.3rem;
-  font-weight: 700;
-  letter-spacing: -0.015em;
+  font-size: 2.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
   color: #111827;
-  margin-bottom: 0.5rem;
+  margin: 0;
+  line-height: 1.25;
+  text-align: center;
+  word-break: break-word;
 }
 
-.chunk-ipa-badge {
+.chunk-title-speaker-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  background: rgba(11, 110, 153, 0.08);
-  border: 1px solid rgba(11, 110, 153, 0.2);
-  padding: 0.22rem 0.65rem;
-  border-radius: 6px;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  color: #0284c7;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.chunk-title-speaker-btn:hover {
+  background: #e0f2fe;
+  color: #0369a1;
+  transform: scale(1.08);
+}
+
+/* Line 2: Chunk IPA Subline (Clean Oxford/Cambridge dictionary style, never clumped) */
+.chunk-ipa-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
   margin-bottom: 0.55rem;
 }
 
-.chunk-ipa-tag {
-  font-family: var(--font-sans);
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  color: #0b6e99;
-  background: rgba(11, 110, 153, 0.12);
-  padding: 0.1rem 0.35rem;
-  border-radius: 4px;
-}
-
 .chunk-ipa-text {
-  font-family: var(--font-ipa);
-  font-size: 1.05rem;
-  color: #0b6e99;
+  font-family: var(--font-ipa, 'Gentium Plus', serif);
+  font-size: 1.15rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  color: #0284c7;
+  text-align: center;
+  word-break: break-word;
+}
+
+/* Line 3: Core Vietnamese Meaning */
+.core-meaning-text {
+  font-size: 1.15rem;
+  color: #0f766e;
   font-weight: 600;
-  letter-spacing: 0.02em;
+  line-height: 1.5;
+  margin: 0;
+  text-align: center;
+  max-width: 90%;
+  word-break: break-word;
 }
 
-.sentence-ipa-box {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: #f1f5f9;
+/* Responsive Phonetic Block for Example Sentence (Handles short and 40-word sentences gracefully) */
+.sentence-ipa-block {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  background: #f8fafc;
   border: 1px solid #e2e8f0;
-  padding: 0.3rem 0.75rem;
+  border-left: 3px solid #0284c7;
   border-radius: 6px;
-  margin-bottom: 0.85rem;
-  flex-wrap: wrap;
+  padding: 0.55rem 0.85rem;
+  margin-bottom: 0.95rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.sentence-ipa-box.blanks-sentence-ipa {
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
+.sentence-ipa-block.blanks-ipa-block {
+  margin-top: 0.6rem;
+  margin-bottom: 0.6rem;
 }
 
 .sentence-ipa-tag {
@@ -898,18 +941,25 @@ html, body {
   font-size: 0.65rem;
   font-weight: 700;
   letter-spacing: 0.05em;
-  color: #475569;
-  background: #e2e8f0;
-  padding: 0.1rem 0.35rem;
+  color: #0284c7;
+  background: #e0f2fe;
+  padding: 0.15rem 0.4rem;
   border-radius: 4px;
+  flex-shrink: 0;
+  margin-top: 0.2rem;
+  text-transform: uppercase;
 }
 
-.sentence-ipa-content {
-  font-family: var(--font-ipa);
-  font-size: 0.95rem;
+.sentence-ipa-text {
+  font-family: var(--font-ipa, 'Gentium Plus', serif);
+  font-size: 0.98rem;
+  line-height: 1.6;
   color: #334155;
-  font-weight: 500;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.02em;
+  margin: 0;
+  flex: 1;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .ipa-row {
@@ -5239,137 +5289,6 @@ html, body {
   color: #0b6e99;
   border-color: #2383e2;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-}
-
-/* --- Target Chunk Heading & IPA Enhancements --- */
-.chunk-heading-wrap {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.65rem;
-  margin-bottom: 0.35rem;
-}
-
-.chunk-text-heading {
-  font-size: 2.1rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  color: #1a1917;
-  margin: 0;
-  line-height: 1.25;
-}
-
-.chunk-title-speaker-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: #f7f6f3;
-  border: 1px solid rgba(55, 53, 47, 0.14);
-  color: #2383e2;
-  cursor: pointer;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-  transition: all 0.15s ease;
-  flex-shrink: 0;
-}
-
-.chunk-title-speaker-btn:hover {
-  background: #ebf5fb;
-  color: #0b6e99;
-  border-color: #2383e2;
-  transform: scale(1.06);
-}
-
-.chunk-ipa-badge {
-  display: inline-block;
-  font-family: var(--font-ipa);
-  font-size: 0.92rem;
-  font-weight: 500;
-  letter-spacing: 0.015em;
-  color: #0b6e99;
-  background: #f7f6f3;
-  padding: 0.2rem 0.65rem;
-  border-radius: 6px;
-  border: 1px solid rgba(55, 53, 47, 0.09);
-  margin-bottom: 0.65rem;
-}
-
-/* --- Target Chunk Heading & Speaker Button --- */
-.chunk-heading-wrap {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.65rem;
-  margin-bottom: 0.45rem;
-}
-
-.chunk-text-heading {
-  font-size: 2.15rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  color: #1a1917;
-  margin: 0;
-  line-height: 1.25;
-}
-
-.chunk-title-speaker-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: #f7f6f3;
-  border: 1px solid rgba(55, 53, 47, 0.14);
-  color: #2383e2;
-  cursor: pointer;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-  transition: all 0.15s ease;
-  flex-shrink: 0;
-}
-
-.chunk-title-speaker-btn:hover {
-  background: #ebf5fb;
-  color: #0b6e99;
-  border-color: #2383e2;
-  transform: scale(1.08);
-}
-
-/* --- Sentence IPA Box inside Example Sentence Box --- */
-.sentence-ipa-box {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  background: #fbfbfa;
-  padding: 0.42rem 0.85rem;
-  border-radius: 6px;
-  border: 1px solid rgba(55, 53, 47, 0.09);
-  margin-top: 0.65rem;
-  margin-bottom: 0.75rem;
-  font-family: var(--font-ipa);
-  font-size: 0.95rem;
-  line-height: 1.5;
-}
-
-.sentence-ipa-tag {
-  font-weight: 700;
-  color: #787774;
-  font-size: 0.68rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  background: rgba(55, 53, 47, 0.06);
-  padding: 0.12rem 0.4rem;
-  border-radius: 4px;
-  white-space: nowrap;
-}
-
-.sentence-ipa-content {
-  color: #0b6e99;
-  font-weight: 500;
-  letter-spacing: 0.015em;
-  word-break: break-word;
 }
 
 /* --- Mini Practice Button in Explorer Cards (Proper Auto-Width & Solid Background) --- */

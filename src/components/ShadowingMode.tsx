@@ -303,15 +303,17 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
             onClick={() => speechService.speak(chunk.chunk, 0.85)}
             title="Nghe phát âm riêng cụm từ này"
           >
-            <Volume2 size={22} />
+            <Volume2 size={20} />
           </button>
         </div>
+
+        {/* Chunk IPA on its own dedicated subline - never cramped with title */}
         {chunkIpa && (
-          <div className="chunk-ipa-badge" title="Phiên âm IPA chuẩn Anh - Mỹ của cụm từ">
-            <span className="chunk-ipa-tag">IPA CỤM TỪ</span>
+          <div className="chunk-ipa-row">
             <span className="chunk-ipa-text">{chunkIpa}</span>
           </div>
         )}
+
         <p className="core-meaning-text">➜ {chunk.detailMeaning || chunk.meaning}</p>
       </div>
 
@@ -348,11 +350,11 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
           &ldquo;{formatMarkdown(chunk.exampleSentence || chunk.cleanExample || chunk.chunk)}&rdquo;
         </p>
 
-        {/* Full Sentence IPA correctly positioned right under the example sentence */}
+        {/* Full Sentence IPA cleanly structured as a responsive phonetic block (handles long sentences smoothly) */}
         {sentenceIpa && (
-          <div className="sentence-ipa-box" title="Phiên âm IPA của cả câu ví dụ thực chiến">
-            <span className="sentence-ipa-tag">IPA CÂU</span>
-            <span className="sentence-ipa-content">{sentenceIpa}</span>
+          <div className="sentence-ipa-block" title="Phiên âm IPA của cả câu ví dụ thực chiến">
+            <span className="sentence-ipa-tag">IPA</span>
+            <p className="sentence-ipa-text">{sentenceIpa}</p>
           </div>
         )}
 

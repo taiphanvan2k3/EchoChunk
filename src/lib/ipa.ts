@@ -102,11 +102,65 @@ export function getPhraseIpa(phrase: string): string {
 
   const ipaParts = words.map((w) => {
     const rawIpa = getAmericanIpa(w);
-    return rawIpa ? rawIpa.replace(/^\/|\/$/g, '') : w.toLowerCase();
+    return rawIpa ? rawIpa.replace(/^\/|\/$/g, '').replace(/'/g, 'ˈ') : w.toLowerCase();
   });
 
   if (ipaParts.length === 0) return '';
   return `/${ipaParts.join(' ')}/`;
+}
+
+/**
+ * Extracts chunk IPA from full sentence IPA if the chunk is a substring of the example sentence.
+ */
+function extractChunkIpaFromSentenceIpa(
+  chunkText: string,
+  exampleText: string,
+  sentenceIpa: string
+): string {
+  if (!chunkText || !exampleText || !sentenceIpa) return '';
+
+  const cleanChunkWords = chunkText
+    .toLowerCase()
+    .replace(/[^a-z0-9\s'-]/g, ' ')
+    .split(/\s+/)
+    .filter(Boolean);
+
+  const cleanExampleWords = exampleText
+    .toLowerCase()
+    .replace(/[^a-z0-9\s'-]/g, ' ')
+    .split(/\s+/)
+    .filter(Boolean);
+
+  const cleanIpaStr = sentenceIpa.trim().replace(/^\/|\/$/g, '');
+  const ipaTokens = cleanIpaStr.split(/\s+/).filter(Boolean);
+
+  if (cleanChunkWords.length === 0 || cleanExampleWords.length === 0) return '';
+
+  let matchIndex = -1;
+  for (let i = 0; i <= cleanExampleWords.length - cleanChunkWords.length; i++) {
+    let match = true;
+    for (let j = 0; j < cleanChunkWords.length; j++) {
+      const exWord = cleanExampleWords[i + j].replace(/[^a-z0-9]/g, '');
+      const chWord = cleanChunkWords[j].replace(/[^a-z0-9]/g, '');
+      if (exWord !== chWord) {
+        match = false;
+        break;
+      }
+    }
+    if (match) {
+      matchIndex = i;
+      break;
+    }
+  }
+
+  if (matchIndex !== -1 && Math.abs(ipaTokens.length - cleanExampleWords.length) <= 2) {
+    const extracted = ipaTokens.slice(matchIndex, matchIndex + cleanChunkWords.length);
+    if (extracted.length === cleanChunkWords.length) {
+      return `/${extracted.join(' ').replace(/[,;.]/g, '')}/`;
+    }
+  }
+
+  return '';
 }
 
 /**
@@ -135,8 +189,17 @@ export function resolveChunkIpas(chunk: {
   if (!chunkIpa) {
     if (!isOldSentenceIpa && chunk.ipa) {
       chunkIpa = chunk.ipa.trim();
-    } else if (chunkText) {
-      chunkIpa = getPhraseIpa(chunkText);
+    } else {
+      // Try to extract from curated sentence IPA first
+      if (isOldSentenceIpa && chunk.ipa && exampleText) {
+        const extracted = extractChunkIpaFromSentenceIpa(chunkText, exampleText, chunk.ipa);
+        if (extracted) {
+          chunkIpa = extracted;
+        }
+      }
+      if (!chunkIpa && chunkText) {
+        chunkIpa = getPhraseIpa(chunkText);
+      }
     }
   }
 
