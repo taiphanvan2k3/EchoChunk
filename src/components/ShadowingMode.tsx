@@ -132,7 +132,7 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
     }
   }, [isRecording, spokenTranscript, evaluate]);
 
-  // Keyboard shortcut listener (1, 2, 3, 4, Space)
+  // Keyboard shortcut listener (1 = Chưa thuộc, 2/Enter/ArrowRight = Tiếp tục, Space = nghe mẫu)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
@@ -142,12 +142,8 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
         playAudio();
       } else if (e.key === '1') {
         onRate(1, evalResult?.accuracy || 0);
-      } else if (e.key === '2') {
-        onRate(2, evalResult?.accuracy || 0);
-      } else if (e.key === '3') {
+      } else if (e.key === '2' || e.key === 'Enter' || e.key === 'ArrowRight') {
         onRate(3, evalResult?.accuracy || 0);
-      } else if (e.key === '4') {
-        onRate(4, evalResult?.accuracy || 0);
       }
     };
 
@@ -631,32 +627,37 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
         )}
       </div>
 
-      {/* SRS Rating Bar */}
+      {/* Streamlined Binary SRS Rating Bar */}
       <div className="srs-rating-container">
-        <span className="srs-label">Đánh giá mức độ thuộc (SRS Feedback):</span>
-        <div className="srs-buttons-grid">
-          <button className="srs-btn srs-again" onClick={() => onRate(1, evalResult?.accuracy || 0)}>
-            <span className="srs-num">1</span>
-            <span className="srs-text">Chưa thuộc</span>
-            <span className="srs-sub">&lt; 1 ngày</span>
+        <div className="srs-header-row">
+          <span className="srs-label">Đánh giá mức độ thuộc (SRS):</span>
+          <span className="srs-hint-text">Bấm &ldquo;Tiếp tục&rdquo; để tự động dãn cách ngày ôn tập theo thuật toán</span>
+        </div>
+        <div className="srs-buttons-grid-binary">
+          <button
+            type="button"
+            className="srs-btn srs-btn-forget"
+            onClick={() => onRate(1, evalResult?.accuracy || 0)}
+            title="Đánh dấu cần ôn lại sớm (Phím tắt: 1)"
+          >
+            <div className="srs-btn-top">
+              <span className="srs-text">Chưa thuộc</span>
+              <span className="srs-shortcut-badge">Phím 1</span>
+            </div>
+            <span className="srs-sub">Ôn lại sớm (&lt; 1 ngày)</span>
           </button>
 
-          <button className="srs-btn srs-hard" onClick={() => onRate(2, evalResult?.accuracy || 0)}>
-            <span className="srs-num">2</span>
-            <span className="srs-text">Hơi khó</span>
-            <span className="srs-sub">2 ngày</span>
-          </button>
-
-          <button className="srs-btn srs-good" onClick={() => onRate(3, evalResult?.accuracy || 0)}>
-            <span className="srs-num">3</span>
-            <span className="srs-text">Nhớ tốt</span>
-            <span className="srs-sub">4 ngày</span>
-          </button>
-
-          <button className="srs-btn srs-easy" onClick={() => onRate(4, evalResult?.accuracy || 0)}>
-            <span className="srs-num">4</span>
-            <span className="srs-text">Rất dễ</span>
-            <span className="srs-sub">7+ ngày</span>
+          <button
+            type="button"
+            className="srs-btn srs-btn-next"
+            onClick={() => onRate(3, evalResult?.accuracy || 0)}
+            title="Đã thuộc câu này, chuyển tiếp tục (Phím tắt: Enter hoặc 2)"
+          >
+            <div className="srs-btn-top">
+              <span className="srs-text">Tiếp tục ➔</span>
+              <span className="srs-shortcut-badge srs-badge-primary">Enter ↵</span>
+            </div>
+            <span className="srs-sub">Đã nhớ tốt • Tự động tăng chu kỳ SRS</span>
           </button>
         </div>
       </div>

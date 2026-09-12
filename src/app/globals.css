@@ -1140,80 +1140,131 @@ html, body {
   gap: 0.65rem;
 }
 
-.srs-label {
-  font-size: 0.78rem;
-  color: var(--text-muted);
-  font-weight: 600;
-  font-size: 0.82rem;
-  color: #0b6e99;
+.srs-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
-.srs-buttons-grid {
+.srs-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #0b6e99;
+  letter-spacing: -0.01em;
+}
+
+.srs-hint-text {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.srs-buttons-grid-binary {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.65rem;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  align-items: stretch;
 }
 
 .srs-btn {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 0.75rem 0.5rem;
+  padding: 0.75rem 1.1rem;
   border-radius: 8px;
   border: 1px solid var(--border-medium);
   background: #ffffff;
   cursor: pointer;
-  transition: all 0.15s ease;
-  box-shadow: var(--shadow-subtle);
+  transition: all 0.16s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
-.srs-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-hover);
+.srs-btn-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 0.25rem;
 }
 
-.srs-num {
+.srs-shortcut-badge {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
-  opacity: 0.6;
-  margin-bottom: 0.2rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 0.12rem 0.4rem;
+  border-radius: 4px;
+  background: rgba(55, 53, 47, 0.08);
+  color: var(--text-secondary);
 }
 
-.srs-text {
-  font-size: 0.95rem;
-  font-weight: 700;
-  margin-bottom: 0.2rem;
+.srs-badge-primary {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Secondary Button: Chưa thuộc / Ôn lại (Notion Neutral Card with subtle red hover) */
+.srs-btn-forget {
+  background: #ffffff;
+  border: 1px solid rgba(55, 53, 47, 0.15);
   color: var(--text-primary);
 }
 
-.srs-sub {
-  font-size: 0.72rem;
-  color: var(--text-muted);
+.srs-btn-forget .srs-text {
+  color: #474542;
+  font-weight: 700;
+  font-size: 0.98rem;
+  transition: color 0.15s ease;
 }
 
-.srs-again:hover {
-  background: var(--notion-red-bg);
-  border-color: var(--notion-red-border);
-  color: var(--notion-red-text);
+.srs-btn-forget .srs-sub {
+  color: #8c8b88;
+  font-size: 0.74rem;
 }
 
-.srs-hard:hover {
-  background: var(--notion-yellow-bg);
-  border-color: var(--notion-yellow-border);
-  color: var(--notion-yellow-text);
+.srs-btn-forget:hover {
+  background: #fff8f8;
+  border-color: rgba(235, 87, 87, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(235, 87, 87, 0.1);
 }
 
-.srs-good:hover {
-  background: var(--notion-blue-bg);
-  border-color: var(--notion-blue-border);
-  color: var(--notion-blue-text);
+.srs-btn-forget:hover .srs-text {
+  color: #d43838;
 }
 
-.srs-easy:hover {
-  background: var(--notion-green-bg);
-  border-color: var(--notion-green-border);
-  color: var(--notion-green-text);
+/* Primary Button: Tiếp tục (Next) - Notion Brand Blue Hero */
+.srs-btn-next {
+  background: #2383e2;
+  border: 1px solid #2383e2;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(35, 131, 226, 0.22);
+}
+
+.srs-btn-next .srs-text {
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.srs-btn-next .srs-sub {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.74rem;
+}
+
+.srs-btn-next:hover {
+  background: #1b73c9;
+  border-color: #1b73c9;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(35, 131, 226, 0.35);
+}
+
+@media (max-width: 640px) {
+  .srs-buttons-grid-binary {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ==========================================================================
@@ -3211,6 +3262,81 @@ html, body {
 
 .notion-sub-input::placeholder {
   color: #b0afab;
+}
+
+/* Quick Add Mode & Collapsible Advanced Section */
+.notion-quick-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.65rem 0.85rem;
+  background: #f7f9fa;
+  border: 1px solid #e1e8ed;
+  border-left: 3px solid #2383e2;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: #37352f;
+  margin: 0.85rem 0 0.5rem 0;
+}
+
+.notion-quick-hint-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.notion-toggle-advanced-wrap {
+  margin: 0.75rem 0 0.5rem 0;
+  display: flex;
+  align-items: center;
+}
+
+.notion-toggle-advanced-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: transparent;
+  border: none;
+  padding: 0.4rem 0.6rem;
+  border-radius: 5px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #787774;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.notion-toggle-advanced-btn:hover {
+  background: rgba(55, 53, 47, 0.06);
+  color: #37352f;
+}
+
+.notion-toggle-chevron {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: rotate(-90deg);
+  flex-shrink: 0;
+}
+
+.notion-toggle-chevron.expanded {
+  transform: rotate(0deg);
+}
+
+.notion-advanced-section {
+  animation: notionFadeIn 0.2s ease-out;
+  padding-top: 0.5rem;
+}
+
+@keyframes notionFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Modal Footer */
