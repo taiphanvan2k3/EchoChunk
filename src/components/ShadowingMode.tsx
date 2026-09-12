@@ -352,8 +352,7 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
 
         {/* Full Sentence IPA cleanly structured as a responsive phonetic block (handles long sentences smoothly) */}
         {sentenceIpa && (
-          <div className="sentence-ipa-block" title="Phiên âm IPA của cả câu ví dụ thực chiến">
-            <span className="sentence-ipa-tag">IPA</span>
+          <div className="sentence-ipa-block" title="Phiên âm ngữ âm của câu ví dụ thực chiến">
             <p className="sentence-ipa-text">{sentenceIpa}</p>
           </div>
         )}

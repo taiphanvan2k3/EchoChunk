@@ -355,8 +355,7 @@ export const ChunkBlanksMode: React.FC<ChunkBlanksModeProps> = ({
 
           <p className="full-revealed-sentence">&ldquo;{formatMarkdown(chunk.exampleSentence || chunk.cleanExample)}&rdquo;</p>
           {sentenceIpa && (
-            <div className="sentence-ipa-block blanks-sentence-ipa" title="Phiên âm IPA cả câu ví dụ">
-              <span className="sentence-ipa-tag">IPA</span>
+            <div className="sentence-ipa-block blanks-sentence-ipa" title="Phiên âm ngữ âm cả câu ví dụ">
               <p className="sentence-ipa-text">{sentenceIpa}</p>
             </div>
           )}
