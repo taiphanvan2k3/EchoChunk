@@ -195,3 +195,22 @@
   - Thiết kế cấu trúc dữ liệu và API độc lập với ngôn ngữ (`language?: 'en' | 'ja' | 'ko'`).
   - Web Speech API trên trình duyệt đã hỗ trợ sẵn nhận diện và phát âm cho cả `ja-JP` và `ko-KR`.
   - Khi hoàn thiện phiên bản Tiếng Anh, hệ thống có thể mở rộng sang các ngôn ngữ này một cách dễ dàng mà không cần thay đổi kiến trúc gốc.
+
+---
+
+## ☁️ 12. Hạ Tầng Backend: Firebase Authentication & Firestore (Hybrid Architecture)
+
+> **Tài liệu đặc tả kỹ thuật chi tiết:** Xem tại [docs/specs/01-firebase-auth-firestore/spec.md](docs/specs/01-firebase-auth-firestore/spec.md).
+
+- **Nền tảng:** Google Firebase (Project ID: `echo-chunk`).
+- **Chiến lược kiến trúc (Hybrid Model):**
+  1. **Tầng Client (BaaS + Granular Security Rules):** 
+     - Dùng Firebase Modular Web SDK v11 trực tiếp trên trình duyệt.
+     - Đồng bộ Real-time (`onSnapshot`) và Offline-first (IndexedDB cache) cho tiến độ học tập SRS (`users/{userId}/progress`), thống kê streak (`users/{userId}/stats`), và từ vựng cá nhân (`users/{userId}/customChunks`).
+     - **Bảo mật tuyệt đối:** Áp dụng Security Rules phân lập theo `userId` (`allow read, write: if request.auth.uid == userId;`), loại bỏ hoàn toàn nguy cơ rò rỉ dữ liệu chéo giữa các tài khoản.
+  2. **Tầng Server (Next.js Server Actions / Route Handlers + Firebase Admin SDK):**
+     - Dành riêng cho các tác vụ AI phức tạp (sinh chunk tự động qua Gemini API, AI Speaking Coach) và các nghiệp vụ kiểm tra trùng lặp từ vựng khi import Deck cộng đồng.
+- **Xác thực (Authentication):**
+  - Đăng nhập 1-chạm bằng Google OAuth (`GoogleAuthProvider`) qua Popup.
+  - Tự động thực hiện cơ chế **Local-to-Cloud Merge** khi người dùng chuyển từ khách vãng lai sang tài khoản Google chính thức, đảm bảo không mất mát dữ liệu đã học.
+
