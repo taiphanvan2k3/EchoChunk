@@ -846,6 +846,72 @@ html, body {
   margin-bottom: 0.5rem;
 }
 
+.chunk-ipa-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(11, 110, 153, 0.08);
+  border: 1px solid rgba(11, 110, 153, 0.2);
+  padding: 0.22rem 0.65rem;
+  border-radius: 6px;
+  margin-bottom: 0.55rem;
+}
+
+.chunk-ipa-tag {
+  font-family: var(--font-sans);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #0b6e99;
+  background: rgba(11, 110, 153, 0.12);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+}
+
+.chunk-ipa-text {
+  font-family: var(--font-ipa);
+  font-size: 1.05rem;
+  color: #0b6e99;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.sentence-ipa-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  padding: 0.3rem 0.75rem;
+  border-radius: 6px;
+  margin-bottom: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.sentence-ipa-box.blanks-sentence-ipa {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.sentence-ipa-tag {
+  font-family: var(--font-sans);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #475569;
+  background: #e2e8f0;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+}
+
+.sentence-ipa-content {
+  font-family: var(--font-ipa);
+  font-size: 0.95rem;
+  color: #334155;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
 .ipa-row {
   display: inline-flex;
   align-items: center;
@@ -3320,6 +3386,45 @@ html, body {
 
 .notion-callout-textarea::placeholder {
   color: #b0afab;
+}
+
+/* Sentence IPA Editor row inside Callout Box */
+.callout-sentence-ipa-row {
+  margin-top: 0.65rem;
+  padding-top: 0.65rem;
+  border-top: 1px dashed rgba(55, 53, 47, 0.14);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.callout-sentence-ipa-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: #0b6e99;
+  font-weight: 600;
+}
+
+.callout-sentence-ipa-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.callout-sentence-ipa-input {
+  background: #ffffff !important;
+  border: 1px solid rgba(55, 53, 47, 0.16) !important;
+  padding: 0.35rem 0.6rem !important;
+  border-radius: 5px !important;
+  font-family: var(--font-ipa) !important;
+  font-size: 0.92rem !important;
+}
+
+.callout-sentence-ipa-input:focus {
+  border-color: #2383e2 !important;
+  box-shadow: 0 0 0 2px rgba(35, 131, 226, 0.15) !important;
 }
 
 /* Sub Fields Grid */

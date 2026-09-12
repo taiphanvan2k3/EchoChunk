@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { SpeakingChunk, TopicMeta } from '@/types';
 import { speechService } from '@/lib/speech';
 import { soundManager } from '@/lib/sound';
-import { getAmericanIpa } from '@/lib/ipa';
+import { getAmericanIpa, getPhraseIpa, resolveChunkIpas } from '@/lib/ipa';
 import {
   X,
   Volume2,
@@ -39,7 +39,8 @@ export const ChunkModal: React.FC<ChunkModalProps> = ({
 
   const [chunkText, setChunkText] = useState('');
   const [meaning, setMeaning] = useState('');
-  const [ipa, setIpa] = useState('');
+  const [chunkIpa, setChunkIpa] = useState('');
+  const [sentenceIpa, setSentenceIpa] = useState('');
   const [level, setLevel] = useState('B1');
   const [topicId, setTopicId] = useState(existingTopics[0]?.topicId || 'CUSTOM');
   const [customTopicName, setCustomTopicName] = useState('');
@@ -61,9 +62,11 @@ export const ChunkModal: React.FC<ChunkModalProps> = ({
   if (prevSyncKey.id !== chunkToEdit?.id || prevSyncKey.isOpen !== isOpen) {
     setPrevSyncKey({ id: chunkToEdit?.id, isOpen });
     if (chunkToEdit) {
+      const resolved = resolveChunkIpas(chunkToEdit);
       setChunkText(chunkToEdit.chunk || '');
       setMeaning(chunkToEdit.meaning || '');
-      setIpa(chunkToEdit.ipa || '');
+      setChunkIpa(resolved.chunkIpa);
+      setSentenceIpa(resolved.sentenceIpa);
       setLevel(chunkToEdit.level || 'B1');
       setTopicId(chunkToEdit.topicId || 'CUSTOM');
       setCustomTopicName(chunkToEdit.topicName || '');
@@ -76,7 +79,8 @@ export const ChunkModal: React.FC<ChunkModalProps> = ({
     } else {
       setChunkText('');
       setMeaning('');
-      setIpa('');
+      setChunkIpa('');
+      setSentenceIpa('');
       setLevel('B1');
       setTopicId(existingTopics[0]?.topicId || 'CUSTOM');
       setCustomTopicName('Từ vựng của tôi');
@@ -117,17 +121,19 @@ export const ChunkModal: React.FC<ChunkModalProps> = ({
   };
 
   // Helper: Auto generate American IPA for chunk text
-  const handleAutoGenerateIpa = () => {
-    const words = chunkText.trim().split(/\s+/);
-    if (!words.length || !words[0]) return;
+  const handleAutoGenerateChunkIpa = () => {
+    const trimmed = chunkText.trim();
+    if (!trimmed) return;
+    const generated = getPhraseIpa(trimmed);
+    if (generated) setChunkIpa(generated);
+  };
 
-    const ipaParts = words.map((w) => {
-      const phonetic = getAmericanIpa(w);
-      return phonetic ? phonetic.replace(/^\/|\/$/g, '') : w.toLowerCase();
-    });
-
-    const generated = `/${ipaParts.join(' ')}/`;
-    setIpa(generated);
+  // Helper: Auto generate American IPA for example sentence
+  const handleAutoGenerateSentenceIpa = () => {
+    const trimmed = exampleSentence.trim();
+    if (!trimmed) return;
+    const generated = getPhraseIpa(trimmed);
+    if (generated) setSentenceIpa(generated);
   };
 
   // Check if example sentence contains the chunk keywords
@@ -178,19 +184,16 @@ export const ChunkModal: React.FC<ChunkModalProps> = ({
       .map((t) => t.trim().toLowerCase())
       .filter((t) => t.length > 0);
 
-    // Auto-resolve IPA if user left it blank
-    let finalIpa = ipa.trim();
-    if (!finalIpa) {
-      const words = trimmedChunk.split(/\s+/);
-      const parts = words
-        .map((w) => {
-          const found = getAmericanIpa(w);
-          return found ? found.replace(/^\/|\/$/g, '') : '';
-        })
-        .filter(Boolean);
-      if (parts.length > 0) {
-        finalIpa = `/${parts.join(' ')}/`;
-      }
+    // Auto-resolve Chunk IPA if user left it blank
+    let finalChunkIpa = chunkIpa.trim();
+    if (!finalChunkIpa && trimmedChunk) {
+      finalChunkIpa = getPhraseIpa(trimmedChunk);
+    }
+
+    // Auto-resolve Sentence IPA if user left it blank and example exists
+    let finalSentenceIpa = sentenceIpa.trim();
+    if (!finalSentenceIpa && trimmedExample) {
+      finalSentenceIpa = getPhraseIpa(trimmedExample);
     }
 
     const resolvedCleanExample = trimmedExample ? trimmedExample.replace(/[*_`]/g, '') : '';
@@ -208,7 +211,9 @@ export const ChunkModal: React.FC<ChunkModalProps> = ({
       detailMeaning: detailMeaning.trim() || trimmedMeaning,
       exampleSentence: trimmedExample,
       cleanExample: resolvedCleanExample,
-      ipa: finalIpa,
+      ipa: finalChunkIpa,
+      chunkIpa: finalChunkIpa,
+      sentenceIpa: finalSentenceIpa,
       translation: trimmedTranslation,
       context: context.trim(),
       tags: parsedTags.length > 0 ? parsedTags : ['custom', 'speaking'],
@@ -441,29 +446,29 @@ export const ChunkModal: React.FC<ChunkModalProps> = ({
                   </div>
                 </div>
 
-                {/* Property: Phiên âm IPA */}
+                {/* Property: Phiên âm IPA Cụm từ */}
                 <div className="notion-property-row">
                   <div className="notion-prop-label">
                     <span>🔤</span>
-                    <span>Phiên âm IPA Mỹ</span>
+                    <span>IPA Cụm từ</span>
                   </div>
                   <div className="notion-prop-value flex items-center gap-2">
                     <input
                       type="text"
                       className="notion-inline-input flex-1"
                       placeholder="Ví dụ: /tʌtʃ beɪs wɪð/ (tự động sinh nếu để trống)"
-                      value={ipa}
-                      onChange={(e) => setIpa(e.target.value)}
+                      value={chunkIpa}
+                      onChange={(e) => setChunkIpa(e.target.value)}
                     />
                     {chunkText.trim() && (
                       <button
                         type="button"
-                        onClick={handleAutoGenerateIpa}
+                        onClick={handleAutoGenerateChunkIpa}
                         className="notion-btn-inline-action"
-                        title="Tự động sinh phiên âm Anh - Mỹ từ từ điển offline"
+                        title="Tự động sinh phiên âm Anh - Mỹ cho riêng cụm từ này"
                       >
                         <Wand2 size={13} />
-                        <span>Sinh IPA</span>
+                        <span>Sinh IPA Cụm</span>
                       </button>
                     )}
                   </div>
@@ -498,6 +503,34 @@ export const ChunkModal: React.FC<ChunkModalProps> = ({
                   value={exampleSentence}
                   onChange={(e) => setExampleSentence(e.target.value)}
                 />
+
+                {/* Sentence IPA Editor inside Callout Box */}
+                <div className="callout-sentence-ipa-row">
+                  <div className="callout-sentence-ipa-label">
+                    <span>🔤</span>
+                    <span>Phiên âm IPA cả câu ví dụ:</span>
+                  </div>
+                  <div className="callout-sentence-ipa-input-wrap">
+                    <input
+                      type="text"
+                      className="notion-inline-input callout-sentence-ipa-input flex-1"
+                      placeholder="Ví dụ: /lets tʌtʃ beɪs nekst ˈmʌndeɪ.../ (tự động sinh nếu để trống)"
+                      value={sentenceIpa}
+                      onChange={(e) => setSentenceIpa(e.target.value)}
+                    />
+                    {exampleSentence.trim() && (
+                      <button
+                        type="button"
+                        onClick={handleAutoGenerateSentenceIpa}
+                        className="notion-btn-inline-action"
+                        title="Tự động sinh phiên âm IPA cho toàn bộ câu ví dụ"
+                      >
+                        <Wand2 size={13} />
+                        <span>Sinh IPA Câu</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
 
                 {showContextWarning && (
                   <div className="chunk-context-hint">

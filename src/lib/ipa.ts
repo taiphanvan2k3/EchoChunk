@@ -88,12 +88,13 @@ export async function fetchMissingAmericanIpa(rawWord: string): Promise<string> 
 }
 
 /**
- * Returns American English (General American) IPA for a full phrase/chunk,
+ * Returns American English (General American) IPA for a full phrase/chunk or sentence,
  * e.g. "Hands-on experience with" -> "/ˈhændz ˈɑn ɪkspˈɪriəns ˈwɪð/"
  */
 export function getPhraseIpa(phrase: string): string {
   if (!phrase) return '';
-  const words = phrase
+  const clean = phrase.replace(/[*_`#~]/g, '');
+  const words = clean
     .replace(/[–—]/g, ' ')
     .replace(/[^a-zA-Z0-9\s'-]/g, ' ')
     .split(/\s+/)
@@ -106,4 +107,47 @@ export function getPhraseIpa(phrase: string): string {
 
   if (ipaParts.length === 0) return '';
   return `/${ipaParts.join(' ')}/`;
+}
+
+/**
+ * Cleanly resolves both Chunk IPA and Sentence IPA for any chunk,
+ * ensuring backwards compatibility with datasets where chunk.ipa stored either.
+ */
+export function resolveChunkIpas(chunk: {
+  chunk?: string;
+  ipa?: string;
+  chunkIpa?: string;
+  sentenceIpa?: string;
+  cleanExample?: string;
+  exampleSentence?: string;
+} | null | undefined): { chunkIpa: string; sentenceIpa: string } {
+  if (!chunk) return { chunkIpa: '', sentenceIpa: '' };
+
+  const chunkText = (chunk.chunk || '').trim();
+  const exampleText = (chunk.cleanExample || chunk.exampleSentence || '').replace(/[*_`#~]/g, '').trim();
+
+  const chunkWordCount = chunkText.split(/\s+/).filter(Boolean).length;
+  const ipaWordCount = (chunk.ipa || '').trim().split(/\s+/).filter(Boolean).length;
+  // If stored ipa is noticeably longer than chunk word count, it was an old sentence-level IPA
+  const isOldSentenceIpa = !chunk.sentenceIpa && ipaWordCount > chunkWordCount + 1;
+
+  let chunkIpa = chunk.chunkIpa?.trim() || '';
+  if (!chunkIpa) {
+    if (!isOldSentenceIpa && chunk.ipa) {
+      chunkIpa = chunk.ipa.trim();
+    } else if (chunkText) {
+      chunkIpa = getPhraseIpa(chunkText);
+    }
+  }
+
+  let sentenceIpa = chunk.sentenceIpa?.trim() || '';
+  if (!sentenceIpa) {
+    if (isOldSentenceIpa && chunk.ipa) {
+      sentenceIpa = chunk.ipa.trim();
+    } else if (exampleText) {
+      sentenceIpa = getPhraseIpa(exampleText);
+    }
+  }
+
+  return { chunkIpa, sentenceIpa };
 }

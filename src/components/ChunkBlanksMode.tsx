@@ -4,6 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { SpeakingChunk, SRSRating } from '@/types';
 import { soundManager } from '@/lib/sound';
 import { speechService } from '@/lib/speech';
+import { resolveChunkIpas } from '@/lib/ipa';
 import { Volume2, CheckCircle2, HelpCircle, Edit2, Lightbulb, ArrowRight, Shuffle } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { formatMarkdown } from '@/lib/formatMarkdown';
@@ -45,6 +46,9 @@ export const ChunkBlanksMode: React.FC<ChunkBlanksModeProps> = ({
     setIsCorrect(null);
     setShowLettersHint(false);
   }
+
+  // Cleanly resolve both Chunk IPA and Sentence IPA with backwards compatibility
+  const { chunkIpa, sentenceIpa } = useMemo(() => resolveChunkIpas(chunk), [chunk]);
 
   // Extract masked parts cleanly from exampleSentence
   const maskedParts = useMemo<MaskedParts>(() => {
@@ -346,10 +350,16 @@ export const ChunkBlanksMode: React.FC<ChunkBlanksModeProps> = ({
 
           <div className="revealed-chunk-display">
             <span className="revealed-chunk-name">{chunk.chunk}</span>
-            {chunk.ipa && <span className="revealed-chunk-ipa">{chunk.ipa}</span>}
+            {chunkIpa && <span className="revealed-chunk-ipa" title="Phiên âm IPA cụm từ">{chunkIpa}</span>}
           </div>
 
           <p className="full-revealed-sentence">&ldquo;{formatMarkdown(chunk.exampleSentence || chunk.cleanExample)}&rdquo;</p>
+          {sentenceIpa && (
+            <div className="sentence-ipa-box blanks-sentence-ipa" title="Phiên âm IPA cả câu ví dụ">
+              <span className="sentence-ipa-tag">IPA CÂU</span>
+              <span className="sentence-ipa-content">{sentenceIpa}</span>
+            </div>
+          )}
           {chunk.translation && (
             <p className="revealed-sentence-translation">➜ {chunk.translation}</p>
           )}

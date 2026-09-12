@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo, useCallback, useRef } from "react"
 import { ChunkProgress, SpeakingChunk, SpeechEvalResult, SRSRating } from "@/types";
 import { speechService } from "@/lib/speech";
 import { soundManager } from "@/lib/sound";
-import { getAmericanIpa } from "@/lib/ipa";
+import { getAmericanIpa, resolveChunkIpas } from "@/lib/ipa";
 import { Volume2, Mic, MicOff, CheckCircle2, Eye, EyeOff, Edit2, RotateCcw, Shuffle } from "lucide-react";
 import confetti from "canvas-confetti";
 import { formatMarkdown } from "@/lib/formatMarkdown";
@@ -60,6 +60,9 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
     setActiveWordPlaying(null);
     setPlayingAudioType(null);
   }
+
+  // Cleanly resolve both Chunk IPA and Sentence IPA with backwards compatibility
+  const { chunkIpa, sentenceIpa } = useMemo(() => resolveChunkIpas(chunk), [chunk]);
 
   const playAudio = useCallback(
     (speed: number = 1.0) => {
@@ -303,6 +306,12 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
             <Volume2 size={22} />
           </button>
         </div>
+        {chunkIpa && (
+          <div className="chunk-ipa-badge" title="Phiên âm IPA chuẩn Anh - Mỹ của cụm từ">
+            <span className="chunk-ipa-tag">IPA CỤM TỪ</span>
+            <span className="chunk-ipa-text">{chunkIpa}</span>
+          </div>
+        )}
         <p className="core-meaning-text">➜ {chunk.detailMeaning || chunk.meaning}</p>
       </div>
 
@@ -340,10 +349,10 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
         </p>
 
         {/* Full Sentence IPA correctly positioned right under the example sentence */}
-        {chunk.ipa && (
-          <div className="sentence-ipa-box" title="Phiên âm IPA của câu ví dụ thực chiến">
-            <span className="sentence-ipa-tag">IPA</span>
-            <span className="sentence-ipa-content">{chunk.ipa}</span>
+        {sentenceIpa && (
+          <div className="sentence-ipa-box" title="Phiên âm IPA của cả câu ví dụ thực chiến">
+            <span className="sentence-ipa-tag">IPA CÂU</span>
+            <span className="sentence-ipa-content">{sentenceIpa}</span>
           </div>
         )}
 
