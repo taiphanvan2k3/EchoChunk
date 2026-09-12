@@ -193,13 +193,7 @@ export const ChunkModal: React.FC<ChunkModalProps> = ({
       }
     }
 
-    // Auto-generate example sentence & translation if left blank
-    const resolvedExample =
-      trimmedExample || `I usually **${trimmedChunk}** when communicating in English.`;
-    const resolvedCleanExample = resolvedExample.replace(/[*_`]/g, '');
-    const resolvedTranslation =
-      trimmedTranslation ||
-      `Tôi thường ${trimmedMeaning.toLowerCase()} khi giao tiếp bằng tiếng Anh.`;
+    const resolvedCleanExample = trimmedExample ? trimmedExample.replace(/[*_`]/g, '') : '';
 
     const updatedChunk: SpeakingChunk = {
       id: chunkToEdit?.id || `custom_chunk_${Date.now()}`,
@@ -212,10 +206,10 @@ export const ChunkModal: React.FC<ChunkModalProps> = ({
       meaning: trimmedMeaning,
       level: level,
       detailMeaning: detailMeaning.trim() || trimmedMeaning,
-      exampleSentence: resolvedExample,
+      exampleSentence: trimmedExample,
       cleanExample: resolvedCleanExample,
       ipa: finalIpa,
-      translation: resolvedTranslation,
+      translation: trimmedTranslation,
       context: context.trim(),
       tags: parsedTags.length > 0 ? parsedTags : ['custom', 'speaking'],
       isCustom: true,
@@ -313,7 +307,7 @@ export const ChunkModal: React.FC<ChunkModalProps> = ({
             <div className="notion-quick-hint">
               <span className="notion-quick-hint-icon">⚡</span>
               <span>
-                <strong>Thêm nhanh:</strong> Chỉ cần nhập 2 ô trên và nhấn <em>Lưu</em> (hoặc <em>Enter</em>). Ví dụ câu, bản dịch, IPA và CEFR sẽ được tự động hoàn thiện thông minh!
+                <strong>Thêm nhanh:</strong> Chỉ cần nhập 2 ô trên và nhấn <em>Lưu</em> (hoặc <em>Enter</em>). Bạn có thể mở rộng tùy chỉnh bên dưới để thêm câu ví dụ hoặc ngữ cảnh bất kỳ lúc nào.
               </span>
             </div>
           )}
@@ -500,7 +494,7 @@ export const ChunkModal: React.FC<ChunkModalProps> = ({
                 <textarea
                   className="notion-callout-textarea"
                   rows={3}
-                  placeholder="Ví dụ: Let's touch base next Monday after the team meeting to align on deliverables. (để trống sẽ tự sinh câu mẫu)"
+                  placeholder="Ví dụ: Let's touch base next Monday after the team meeting to align on deliverables."
                   value={exampleSentence}
                   onChange={(e) => setExampleSentence(e.target.value)}
                 />
@@ -524,7 +518,7 @@ export const ChunkModal: React.FC<ChunkModalProps> = ({
                   <input
                     type="text"
                     className="notion-sub-input"
-                    placeholder="Ví dụ: Hãy trao đổi nhanh vào thứ Hai tới sau buổi họp nhóm... (tự động dịch nếu để trống)"
+                    placeholder="Ví dụ: Hãy trao đổi nhanh vào thứ Hai tới sau buổi họp nhóm để thống nhất kết quả..."
                     value={translation}
                     onChange={(e) => setTranslation(e.target.value)}
                   />
