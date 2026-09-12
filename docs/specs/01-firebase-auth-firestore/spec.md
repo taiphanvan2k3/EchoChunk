@@ -119,7 +119,15 @@ export interface AuthContextType {
 export function useAuth(): AuthContextType;
 ```
 
-### 5.3. Firestore Sync Contract (`src/lib/firebase/firestore.ts`)
+### 5.3. Firestore Modular Contract (`src/lib/firebase/firestore/`)
+
+Mô-đun được tách thành các tệp chuyên biệt theo Single Responsibility Principle:
+- `progress.ts`: Đồng bộ và truy vấn tiến độ SRS (`syncChunkProgress`, `fetchUserProgressMap`).
+- `stats.ts`: Quản lý chuỗi ngày học và mục tiêu (`syncUserStats`, `fetchUserStats`).
+- `customChunks.ts`: Thao tác CRUD từ vựng cá nhân (`syncCustomChunk`, `deleteCustomChunk`, `fetchCustomChunks`).
+- `merge.ts`: Thuật toán hợp nhất Local-to-Cloud (`batchMergeLocalToCloud`).
+- `index.ts`: Barrel export toàn bộ API ra ngoài.
+
 
 ```typescript
 // 1. Đồng bộ tiến độ 1 câu học SRS

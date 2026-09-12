@@ -10,10 +10,47 @@ export function getTodayDateStr(): string {
   return new Date().toISOString().split('T')[0];
 }
 
-export function loadProgressMap(): Record<string, ChunkProgress> {
+function getStorageKey(baseKey: string, uid?: string | null): string {
+  if (!uid || uid === 'guest') {
+    return `${baseKey}_guest`;
+  }
+  return `${baseKey}_${uid}`;
+}
+
+function getItemWithFallback(baseKey: string, uid?: string | null): string | null {
+  if (typeof window === 'undefined') return null;
+  const key = getStorageKey(baseKey, uid);
+  const val = localStorage.getItem(key);
+  if (val !== null) return val;
+
+  // Fallback / legacy migration for guest
+  if (!uid || uid === 'guest') {
+    const legacy = localStorage.getItem(baseKey);
+    if (legacy !== null) {
+      localStorage.setItem(key, legacy);
+      localStorage.removeItem(baseKey);
+      return legacy;
+    }
+  }
+  return null;
+}
+
+export function clearGuestStorage(): void {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem(`${PROGRESS_KEY}_guest`);
+  localStorage.removeItem(`${STATS_KEY}_guest`);
+  localStorage.removeItem(`${CUSTOM_CHUNKS_KEY}_guest`);
+  localStorage.removeItem(`${DELETED_CHUNK_IDS_KEY}_guest`);
+  localStorage.removeItem(PROGRESS_KEY);
+  localStorage.removeItem(STATS_KEY);
+  localStorage.removeItem(CUSTOM_CHUNKS_KEY);
+  localStorage.removeItem(DELETED_CHUNK_IDS_KEY);
+}
+
+export function loadProgressMap(uid?: string | null): Record<string, ChunkProgress> {
   if (typeof window === 'undefined') return {};
   try {
-    const raw = localStorage.getItem(PROGRESS_KEY);
+    const raw = getItemWithFallback(PROGRESS_KEY, uid);
     return raw ? JSON.parse(raw) : {};
   } catch (e) {
     console.error('Failed to load progress', e);
@@ -21,16 +58,17 @@ export function loadProgressMap(): Record<string, ChunkProgress> {
   }
 }
 
-export function saveProgressMap(map: Record<string, ChunkProgress>) {
+export function saveProgressMap(map: Record<string, ChunkProgress>, uid?: string | null) {
   if (typeof window === 'undefined') return;
   try {
-    localStorage.setItem(PROGRESS_KEY, JSON.stringify(map));
+    const key = getStorageKey(PROGRESS_KEY, uid);
+    localStorage.setItem(key, JSON.stringify(map));
   } catch (e) {
     console.error('Failed to save progress', e);
   }
 }
 
-export function loadUserStats(): UserStats {
+export function loadUserStats(uid?: string | null): UserStats {
   const defaultStats: UserStats = {
     streakDays: 1,
     lastActiveDate: getTodayDateStr(),
@@ -42,7 +80,7 @@ export function loadUserStats(): UserStats {
   if (typeof window === 'undefined') return defaultStats;
 
   try {
-    const raw = localStorage.getItem(STATS_KEY);
+    const raw = getItemWithFallback(STATS_KEY, uid);
     if (!raw) return defaultStats;
 
     const stats: UserStats = JSON.parse(raw);
@@ -63,25 +101,26 @@ export function loadUserStats(): UserStats {
     }
 
     return stats;
-  } catch (e) {
+  } catch {
     return defaultStats;
   }
 }
 
-export function saveUserStats(stats: UserStats) {
+export function saveUserStats(stats: UserStats, uid?: string | null) {
   if (typeof window === 'undefined') return;
   try {
-    localStorage.setItem(STATS_KEY, JSON.stringify(stats));
+    const key = getStorageKey(STATS_KEY, uid);
+    localStorage.setItem(key, JSON.stringify(stats));
   } catch (e) {
     console.error('Failed to save stats', e);
   }
 }
 
-export function recordChunkReviewed(chunkId: string, accuracy: number) {
-  const stats = loadUserStats();
+export function recordChunkReviewed(chunkId: string, accuracy: number, uid?: string | null) {
+  const stats = loadUserStats(uid);
   stats.todayReviewedCount += 1;
   stats.totalPracticedCount += 1;
-  saveUserStats(stats);
+  saveUserStats(stats, uid);
   return stats;
 }
 
@@ -89,10 +128,10 @@ export function recordChunkReviewed(chunkId: string, accuracy: number) {
 // CRUD Operations for Custom & Edited Chunks
 // --------------------------------------------------------------------------
 
-export function loadCustomChunks(): SpeakingChunk[] {
+export function loadCustomChunks(uid?: string | null): SpeakingChunk[] {
   if (typeof window === 'undefined') return [];
   try {
-    const raw = localStorage.getItem(CUSTOM_CHUNKS_KEY);
+    const raw = getItemWithFallback(CUSTOM_CHUNKS_KEY, uid);
     return raw ? JSON.parse(raw) : [];
   } catch (e) {
     console.error('Failed to load custom chunks', e);
@@ -100,19 +139,20 @@ export function loadCustomChunks(): SpeakingChunk[] {
   }
 }
 
-export function saveCustomChunks(chunks: SpeakingChunk[]) {
+export function saveCustomChunks(chunks: SpeakingChunk[], uid?: string | null) {
   if (typeof window === 'undefined') return;
   try {
-    localStorage.setItem(CUSTOM_CHUNKS_KEY, JSON.stringify(chunks));
+    const key = getStorageKey(CUSTOM_CHUNKS_KEY, uid);
+    localStorage.setItem(key, JSON.stringify(chunks));
   } catch (e) {
     console.error('Failed to save custom chunks', e);
   }
 }
 
-export function loadDeletedChunkIds(): string[] {
+export function loadDeletedChunkIds(uid?: string | null): string[] {
   if (typeof window === 'undefined') return [];
   try {
-    const raw = localStorage.getItem(DELETED_CHUNK_IDS_KEY);
+    const raw = getItemWithFallback(DELETED_CHUNK_IDS_KEY, uid);
     return raw ? JSON.parse(raw) : [];
   } catch (e) {
     console.error('Failed to load deleted chunk ids', e);
@@ -120,21 +160,26 @@ export function loadDeletedChunkIds(): string[] {
   }
 }
 
-export function saveDeletedChunkIds(ids: string[]) {
+export function saveDeletedChunkIds(ids: string[], uid?: string | null) {
   if (typeof window === 'undefined') return;
   try {
-    localStorage.setItem(DELETED_CHUNK_IDS_KEY, JSON.stringify(ids));
+    const key = getStorageKey(DELETED_CHUNK_IDS_KEY, uid);
+    localStorage.setItem(key, JSON.stringify(ids));
   } catch (e) {
     console.error('Failed to save deleted chunk ids', e);
   }
 }
 
-export function getMergedChunks(baseChunks: SpeakingChunk[]): SpeakingChunk[] {
-  const customChunks = loadCustomChunks();
-  const deletedIds = new Set(loadDeletedChunkIds());
+export function getMergedChunks(baseChunks: SpeakingChunk[], uid?: string | null): SpeakingChunk[] {
+  const customChunks = loadCustomChunks(uid);
+  const deletedIds = new Set(loadDeletedChunkIds(uid));
 
   const customMap = new Map<string, SpeakingChunk>();
   for (const c of customChunks) {
+    // Filter out chunks that belong to a different user
+    if (uid && c.userId && c.userId !== uid && c.userId !== 'guest') {
+      continue;
+    }
     customMap.set(c.id, c);
   }
 
@@ -158,33 +203,38 @@ export function getMergedChunks(baseChunks: SpeakingChunk[]): SpeakingChunk[] {
   return result;
 }
 
-export function saveChunk(chunk: SpeakingChunk): SpeakingChunk[] {
-  const customChunks = loadCustomChunks();
+export function saveChunk(chunk: SpeakingChunk, uid?: string | null): SpeakingChunk[] {
+  const customChunks = loadCustomChunks(uid);
   const index = customChunks.findIndex((c) => c.id === chunk.id);
-  if (index >= 0) {
-    customChunks[index] = chunk;
-  } else {
-    customChunks.unshift(chunk);
-  }
-  saveCustomChunks(customChunks);
+  const chunkToSave: SpeakingChunk = {
+    ...chunk,
+    userId: uid || 'guest',
+  };
 
-  const deletedIds = loadDeletedChunkIds();
+  if (index >= 0) {
+    customChunks[index] = chunkToSave;
+  } else {
+    customChunks.unshift(chunkToSave);
+  }
+  saveCustomChunks(customChunks, uid);
+
+  const deletedIds = loadDeletedChunkIds(uid);
   if (deletedIds.includes(chunk.id)) {
-    saveDeletedChunkIds(deletedIds.filter((id) => id !== chunk.id));
+    saveDeletedChunkIds(deletedIds.filter((id) => id !== chunk.id), uid);
   }
 
   return customChunks;
 }
 
-export function removeChunk(chunkId: string): void {
-  const customChunks = loadCustomChunks();
+export function removeChunk(chunkId: string, uid?: string | null): void {
+  const customChunks = loadCustomChunks(uid);
   const filtered = customChunks.filter((c) => c.id !== chunkId);
-  saveCustomChunks(filtered);
+  saveCustomChunks(filtered, uid);
 
-  const deletedIds = loadDeletedChunkIds();
+  const deletedIds = loadDeletedChunkIds(uid);
   if (!deletedIds.includes(chunkId)) {
     deletedIds.push(chunkId);
-    saveDeletedChunkIds(deletedIds);
+    saveDeletedChunkIds(deletedIds, uid);
   }
 }
 

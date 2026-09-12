@@ -18,6 +18,7 @@ export interface SpeakingChunk {
   context: string;
   tags: string[];
   isCustom?: boolean;
+  userId?: string;
 }
 
 export interface TopicMeta {
