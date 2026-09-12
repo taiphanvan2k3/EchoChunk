@@ -956,39 +956,45 @@ html, body {
   background: #196ec2;
 }
 
-/* 2. Loa hình con rùa (Turtle Slow Speed Button - Nằm sau loa bình thường) */
+/* 2. Loa hình con rùa (Turtle Slow Speed Button - Tone-matched Notion Blue) */
 .duo-turtle-btn {
-  background: #ffffff;
-  border: 1.5px solid #d0d7de;
-  color: #37352f;
-  box-shadow: 0 3px 0 #cfd7de, 0 2px 5px rgba(0, 0, 0, 0.05);
+  background: #f0f7ff;
+  border: 1.5px solid #2383e2;
+  color: #2383e2;
+  box-shadow: 0 3px 0 #bcd9f8, 0 2px 6px rgba(35, 131, 226, 0.12);
 }
 
 .duo-turtle-btn:hover {
-  background: #f8fafc;
+  background: #2383e2;
   border-color: #2383e2;
+  color: #ffffff;
   transform: translateY(-1px);
-  box-shadow: 0 4px 0 #cfd7de, 0 4px 10px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 0 #1a6ab8, 0 4px 10px rgba(35, 131, 226, 0.28);
 }
 
 .duo-turtle-btn:active {
   transform: translateY(2px);
-  box-shadow: 0 1px 0 #cfd7de, 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 0 #1a6ab8, 0 1px 3px rgba(35, 131, 226, 0.15);
+  background: #1a6ab8;
+  color: #ffffff;
 }
 
 .duo-turtle-btn.is-playing {
   animation: turtleWiggle 1s infinite ease-in-out;
+  background: #2383e2;
+  color: #ffffff;
   border-color: #2383e2;
-  background: #f0f7ff;
+  box-shadow: 0 3px 0 #1a6ab8;
 }
 
-.duo-turtle-emoji {
-  font-size: 1.25rem;
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transform: translateY(-0.5px);
+.duo-turtle-icon {
+  display: inline-block;
+  background-color: currentColor;
+  -webkit-mask: url('/icons/turtle.png') no-repeat center / contain;
+  mask: url('/icons/turtle.png') no-repeat center / contain;
+  vertical-align: middle;
+  flex-shrink: 0;
+  transition: transform 0.15s ease, background-color 0.15s ease;
 }
 
 @keyframes duoPulse {

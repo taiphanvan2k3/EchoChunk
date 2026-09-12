@@ -9,6 +9,25 @@ import { Volume2, Mic, MicOff, CheckCircle2, Eye, EyeOff, Edit2, RotateCcw, Shuf
 import confetti from 'canvas-confetti';
 import { formatMarkdown } from '@/lib/formatMarkdown';
 
+// Turtle icon matching the user's uploaded outline graphic with currentColor mask
+const TurtleIcon: React.FC<{ size?: number; className?: string }> = ({
+  size = 23,
+  className = '',
+}) => {
+  const height = Math.round(size * 0.6); // 200:120 aspect ratio is 1.67:1
+  return (
+    <span
+      className={`duo-turtle-icon ${className}`}
+      style={{
+        width: size,
+        height,
+      }}
+      role="img"
+      aria-label="Con rùa"
+    />
+  );
+};
+
 interface ShadowingModeProps {
   chunk: SpeakingChunk;
   progress?: ChunkProgress;
@@ -326,7 +345,7 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
               title="Phát âm chậm rãi từng từ (Tốc độ con rùa 0.75x)"
               aria-label="Phát âm chậm tốc độ con rùa"
             >
-              <span className="duo-turtle-emoji" role="img" aria-label="Con rùa">🐢</span>
+              <TurtleIcon size={22} />
             </button>
           </div>
         </div>
