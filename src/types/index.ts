@@ -14,6 +14,8 @@ export interface SpeakingChunk {
   exampleSentence: string;
   cleanExample: string;
   ipa: string;
+  chunkIpa?: string;
+  sentenceIpa?: string;
   translation: string;
   context: string;
   tags: string[];

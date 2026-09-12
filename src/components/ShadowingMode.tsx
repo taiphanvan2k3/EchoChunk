@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo, useCallback, useRef } from "react"
 import { ChunkProgress, SpeakingChunk, SpeechEvalResult, SRSRating } from "@/types";
 import { speechService } from "@/lib/speech";
 import { soundManager } from "@/lib/sound";
-import { getAmericanIpa } from "@/lib/ipa";
+import { getAmericanIpa, resolveChunkIpas } from "@/lib/ipa";
 import { Volume2, Mic, MicOff, CheckCircle2, Eye, EyeOff, Edit2, RotateCcw, Shuffle } from "lucide-react";
 import confetti from "canvas-confetti";
 import { formatMarkdown } from "@/lib/formatMarkdown";
@@ -60,6 +60,9 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
     setActiveWordPlaying(null);
     setPlayingAudioType(null);
   }
+
+  // Cleanly resolve both Chunk IPA and Sentence IPA with backwards compatibility
+  const { chunkIpa, sentenceIpa } = useMemo(() => resolveChunkIpas(chunk), [chunk]);
 
   const playAudio = useCallback(
     (speed: number = 1.0) => {
@@ -300,9 +303,17 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
             onClick={() => speechService.speak(chunk.chunk, 0.85)}
             title="Nghe phát âm riêng cụm từ này"
           >
-            <Volume2 size={22} />
+            <Volume2 size={20} />
           </button>
         </div>
+
+        {/* Chunk IPA on its own dedicated subline - never cramped with title */}
+        {chunkIpa && (
+          <div className="chunk-ipa-row">
+            <span className="chunk-ipa-text">{chunkIpa}</span>
+          </div>
+        )}
+
         <p className="core-meaning-text">➜ {chunk.detailMeaning || chunk.meaning}</p>
       </div>
 
@@ -339,11 +350,10 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
           &ldquo;{formatMarkdown(chunk.exampleSentence || chunk.cleanExample || chunk.chunk)}&rdquo;
         </p>
 
-        {/* Full Sentence IPA correctly positioned right under the example sentence */}
-        {chunk.ipa && (
-          <div className="sentence-ipa-box" title="Phiên âm IPA của câu ví dụ thực chiến">
-            <span className="sentence-ipa-tag">IPA</span>
-            <span className="sentence-ipa-content">{chunk.ipa}</span>
+        {/* Full Sentence IPA cleanly structured as a responsive phonetic block (handles long sentences smoothly) */}
+        {sentenceIpa && (
+          <div className="sentence-ipa-block" title="Phiên âm ngữ âm của câu ví dụ thực chiến">
+            <p className="sentence-ipa-text">{sentenceIpa}</p>
           </div>
         )}
 
