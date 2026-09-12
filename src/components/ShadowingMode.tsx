@@ -28,8 +28,7 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
   totalInQueue,
   onEditChunk,
 }) => {
-  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
-  const [playbackSpeed, setPlaybackSpeed] = useState<number>(1.0);
+  const [playingAudioType, setPlayingAudioType] = useState<'normal' | 'slow' | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [spokenTranscript, setSpokenTranscript] = useState('');
   const latestSpokenTranscriptRef = useRef('');
@@ -52,7 +51,7 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
     setPrevChunkId(chunk.id);
     speechService.stopListening();
     setIsRecording(false);
-        setSpokenTranscript('');
+    setSpokenTranscript('');
     setEvalResult(null);
     setInspectedWord(null);
     setShowDetails(false);
@@ -60,15 +59,17 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
     setDrillingWord(null);
     setDrilledSuccessWords(new Set());
     setActiveWordPlaying(null);
+    setPlayingAudioType(null);
   }
 
-  const playAudio = useCallback(() => {
-    setIsPlayingAudio(true);
+  const playAudio = useCallback((speed: number = 1.0) => {
+    const isSlow = speed < 1.0;
+    setPlayingAudioType(isSlow ? 'slow' : 'normal');
     soundManager.playClick();
-    speechService.speak(chunk.cleanExample || chunk.chunk, playbackSpeed, () => {
-      setIsPlayingAudio(false);
+    speechService.speak(chunk.cleanExample || chunk.chunk, speed, () => {
+      setPlayingAudioType(null);
     });
-  }, [chunk.cleanExample, chunk.chunk, playbackSpeed]);
+  }, [chunk.cleanExample, chunk.chunk]);
 
   const evaluate = useCallback((transcript: string) => {
     const target = chunk.cleanExample || chunk.chunk;
@@ -305,24 +306,27 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
       <div className="example-sentence-box">
         <div className="example-label">
           <span>Câu ví dụ thực chiến (Shadowing Target):</span>
-          <div className="audio-controls-row">
+          <div className="duo-audio-controls-row">
+            {/* 1. Loa phát âm tốc độ bình thường (Normal speed speaker) */}
             <button
-              className={`speed-pill ${playbackSpeed === 0.75 ? 'active' : ''}`}
-              onClick={() => setPlaybackSpeed(0.75)}
-              title="Tốc độ chậm để luyện phát âm"
+              type="button"
+              className={`duo-audio-btn duo-normal-btn ${playingAudioType === 'normal' ? 'is-playing' : ''}`}
+              onClick={() => playAudio(1.0)}
+              title="Phát âm tốc độ bình thường (Phím tắt: Space)"
+              aria-label="Phát âm tốc độ bình thường (Space)"
             >
-              0.75x
+              <Volume2 size={20} strokeWidth={2.4} />
             </button>
+
+            {/* 2. Loa hình con rùa (Turtle slow speed button - nằm sau loa bình thường) */}
             <button
-              className={`speed-pill ${playbackSpeed === 1.0 ? 'active' : ''}`}
-              onClick={() => setPlaybackSpeed(1.0)}
-              title="Tốc độ nói tự nhiên của người bản xứ"
+              type="button"
+              className={`duo-audio-btn duo-turtle-btn ${playingAudioType === 'slow' ? 'is-playing' : ''}`}
+              onClick={() => playAudio(0.72)}
+              title="Phát âm chậm rãi từng từ (Tốc độ con rùa 0.75x)"
+              aria-label="Phát âm chậm tốc độ con rùa"
             >
-              1x
-            </button>
-            <button className="play-audio-btn" onClick={playAudio} title="Phím tắt: Space">
-              <Volume2 size={16} />
-              <span>{isPlayingAudio ? 'Đang đọc...' : 'Nghe mẫu (Space)'}</span>
+              <span className="duo-turtle-emoji" role="img" aria-label="Con rùa">🐢</span>
             </button>
           </div>
         </div>

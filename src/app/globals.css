@@ -908,6 +908,110 @@ html, body {
   gap: 0.45rem;
 }
 
+/* ==========================================================================
+   DUOLINGO-STYLE AUDIO CONTROLS (Normal Speaker + Turtle Slow Audio)
+   ========================================================================== */
+
+.duo-audio-controls-row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.duo-audio-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  user-select: none;
+  border: none;
+}
+
+/* 1. Loa phát âm tốc độ bình thường (Duolingo Blue Hero Speaker) */
+.duo-normal-btn {
+  background: #2383e2;
+  color: #ffffff;
+  box-shadow: 0 3px 0 #1a6ab8, 0 3px 8px rgba(35, 131, 226, 0.25);
+}
+
+.duo-normal-btn:hover {
+  background: #1b73c9;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 #1a6ab8, 0 5px 12px rgba(35, 131, 226, 0.35);
+}
+
+.duo-normal-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #1a6ab8, 0 2px 4px rgba(35, 131, 226, 0.2);
+}
+
+.duo-normal-btn.is-playing {
+  animation: duoPulse 1s infinite alternate;
+  background: #196ec2;
+}
+
+/* 2. Loa hình con rùa (Turtle Slow Speed Button - Nằm sau loa bình thường) */
+.duo-turtle-btn {
+  background: #ffffff;
+  border: 1.5px solid #d0d7de;
+  color: #37352f;
+  box-shadow: 0 3px 0 #cfd7de, 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.duo-turtle-btn:hover {
+  background: #f8fafc;
+  border-color: #2383e2;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 #cfd7de, 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.duo-turtle-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #cfd7de, 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.duo-turtle-btn.is-playing {
+  animation: turtleWiggle 1s infinite ease-in-out;
+  border-color: #2383e2;
+  background: #f0f7ff;
+}
+
+.duo-turtle-emoji {
+  font-size: 1.25rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateY(-0.5px);
+}
+
+@keyframes duoPulse {
+  0% {
+    box-shadow: 0 3px 0 #1a6ab8, 0 0 0 0 rgba(35, 131, 226, 0.5);
+  }
+  100% {
+    box-shadow: 0 3px 0 #1a6ab8, 0 0 0 7px rgba(35, 131, 226, 0);
+  }
+}
+
+@keyframes turtleWiggle {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-6deg) scale(1.05);
+  }
+  75% {
+    transform: rotate(6deg) scale(1.05);
+  }
+}
+
 .speed-pill {
   background: #ffffff;
   border: 1px solid var(--border-subtle);
