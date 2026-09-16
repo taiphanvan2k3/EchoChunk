@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { SpeakingChunk, TopicMeta } from '@/types';
 import { speechService } from '@/lib/speech';
 import { soundManager } from '@/lib/sound';
-import { getAmericanIpa, getPhraseIpa, resolveChunkIpas } from '@/lib/ipa';
+import { getPhraseIpa, resolveChunkIpas } from '@/lib/ipa';
 import {
   X,
   Volume2,

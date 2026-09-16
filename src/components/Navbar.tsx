@@ -18,6 +18,7 @@ import {
   Cloud,
   LogOut,
   Loader2,
+  Video,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { usePractice } from '@/context/PracticeContext';
@@ -76,6 +77,10 @@ export const Navbar: React.FC<NavbarProps> = (props) => {
     pathname === '/explorer' ||
     pathname === '/browse' ||
     props.currentMode === 'browse';
+
+  const isYouTubeActive =
+    pathname === '/youtube' ||
+    pathname === '/hoc-qua-youtube';
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -159,6 +164,15 @@ export const Navbar: React.FC<NavbarProps> = (props) => {
           >
             <BookOpen size={15} className="tab-icon" />
             <span className="tab-label">Kho từ vựng</span>
+          </Link>
+
+          <Link
+            href="/youtube"
+            className={`nav-tab-btn ${isYouTubeActive ? 'active' : ''}`}
+            title="Luyện nói qua video YouTube tương tác"
+          >
+            <Video size={15} className="tab-icon text-red-500" />
+            <span className="tab-label">YouTube</span>
           </Link>
         </nav>
 

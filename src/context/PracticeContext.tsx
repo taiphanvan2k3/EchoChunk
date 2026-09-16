@@ -7,9 +7,9 @@ import React, {
   useMemo,
   useCallback,
   useEffect,
-  useSyncExternalStore,
 } from 'react';
 import { useRouter } from 'next/navigation';
+import { useIsClient } from '@/hooks/useIsClient';
 import dataset from '@/data/speaking-chunks.json';
 import {
   ChunksDataset,
@@ -48,7 +48,6 @@ import { soundManager } from '@/lib/sound';
 import confetti from 'canvas-confetti';
 
 const data = dataset as unknown as ChunksDataset;
-const emptySubscribe = () => () => {};
 
 interface PracticeContextType {
   isClient: boolean;
@@ -101,12 +100,7 @@ const PracticeContext = createContext<PracticeContextType | undefined>(undefined
 export const PracticeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const router = useRouter();
   const { user } = useAuth();
-
-  const isClient = useSyncExternalStore(
-    emptySubscribe,
-    () => true,
-    () => false
-  );
+  const isClient = useIsClient();
 
   const [selectedTopicId, setSelectedTopicId] = useState<string>('ALL');
   const [selectedLevel, setSelectedLevel] = useState<string>('ALL');
