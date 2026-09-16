@@ -3,6 +3,36 @@
    Minimalist, Crisp & Focus-Driven Workspace Aesthetic
    ========================================================================== */
 
+/* ==========================================================================
+   GLOBAL ANIMATION KEYFRAMES & UTILITIES
+   (Dùng vanilla CSS — không dùng Tailwind)
+   ========================================================================== */
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Utility class tương đương Tailwind animate-spin */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Utility class tương đương Tailwind animate-pulse */
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
 :root {
   --font-sans: var(--font-jakarta), 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: var(--font-jetbrains), 'JetBrains Mono', Consolas, Menlo, monospace;
@@ -94,6 +124,14 @@ html, body {
   max-width: 920px;
   margin: 0 auto;
   padding: 1.5rem 1.25rem 3.5rem 1.25rem;
+}
+
+/* Mở rộng chiều ngang cho YouTube Study Room theo chuẩn Shadowing English */
+.main-content:has(.yt-study-room-container),
+.main-content:has(.yt-page-wrapper) {
+  max-width: 1440px !important;
+  padding: 1.25rem 2rem 4rem 2rem;
+  width: 100%;
 }
 
 /* ==========================================================================
@@ -5331,3 +5369,1083 @@ html, body {
   white-space: nowrap !important;
   flex-shrink: 0 !important;
 }
+
+/* ==========================================================================
+   🎬 YOUTUBE STUDY SUITE (Shadowing English Aesthetic, Full-Width & Responsive)
+   ========================================================================== */
+
+.yt-study-room-container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0.5rem 0 3.5rem 0;
+}
+
+/* Breadcrumbs */
+.yt-breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.84rem;
+  color: #6b7280;
+  margin-bottom: 0.6rem;
+}
+
+.yt-breadcrumb-link {
+  color: #6b7280;
+  text-decoration: none;
+  transition: color 0.15s ease;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: inherit;
+  display: inline-flex;
+  align-items: center;
+}
+
+.yt-breadcrumb-link:hover {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.yt-breadcrumb-sep {
+  opacity: 0.45;
+  color: #9ca3af;
+}
+
+.yt-breadcrumb-current {
+  color: #111827;
+  font-weight: 500;
+  max-width: 540px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Lesson Header */
+.yt-lesson-header {
+  margin-bottom: 1.25rem;
+}
+
+.yt-lesson-title {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #111827;
+  line-height: 1.35;
+  letter-spacing: -0.015em;
+  margin: 0;
+}
+
+/* Input Bar */
+.yt-input-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
+.yt-empty-container .yt-input-bar-wrap {
+  max-width: 840px;
+  margin: 0 auto 1.75rem auto;
+}
+
+.yt-input-capsule {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0.65rem 1rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.yt-input-capsule:focus-within {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.yt-input-icon {
+  flex-shrink: 0;
+}
+
+.yt-url-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.92rem;
+  color: #111827;
+  font-family: inherit;
+}
+
+.yt-url-input::placeholder {
+  color: #9ca3af;
+}
+
+.yt-clear-input-btn {
+  border: none;
+  background: transparent;
+  color: #9ca3af;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px;
+  border-radius: 50%;
+  transition: all 0.15s;
+}
+
+.yt-clear-input-btn:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.yt-load-video-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.65rem 1.35rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.25);
+  white-space: nowrap;
+}
+
+.yt-load-video-btn:hover:not(:disabled) {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(37, 99, 235, 0.35);
+}
+
+.yt-load-video-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Error Banner */
+.yt-error-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  padding: 0.75rem 1.15rem;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  margin-bottom: 1.5rem;
+}
+
+.yt-error-banner .error-icon {
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   🕒 RECENT VIDEOS HISTORY (Video đã học gần đây)
+   ========================================================================== */
+
+.yt-recent-section {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 12px -2px rgba(0, 0, 0, 0.04);
+}
+
+.yt-recent-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.15rem;
+}
+
+.yt-recent-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.yt-recent-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.yt-recent-count-badge {
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 0.15rem 0.55rem;
+  border-radius: 9999px;
+}
+
+.yt-recent-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.15rem;
+}
+
+@media (max-width: 900px) {
+  .yt-recent-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 580px) {
+  .yt-recent-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.yt-recent-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.yt-recent-card:hover {
+  border-color: #93c5fd;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px -2px rgba(37, 99, 235, 0.12);
+}
+
+.yt-recent-card.is-disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Thumbnail */
+.yt-recent-thumb-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #111827;
+  overflow: hidden;
+}
+
+.yt-recent-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.25s ease;
+}
+
+.yt-recent-card:hover .yt-recent-thumb-img {
+  transform: scale(1.04);
+}
+
+.yt-recent-thumb-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.yt-recent-card:hover .yt-recent-thumb-overlay {
+  opacity: 1;
+}
+
+.yt-recent-play-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transform: scale(0.9);
+  transition: transform 0.2s ease;
+}
+
+.yt-recent-card:hover .yt-recent-play-circle {
+  transform: scale(1);
+}
+
+.yt-recent-sentence-badge {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  background: rgba(0, 0, 0, 0.75);
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  backdrop-filter: blur(4px);
+}
+
+.yt-recent-delete-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.65);
+  color: #ffffff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.15s ease;
+  backdrop-filter: blur(4px);
+}
+
+.yt-recent-card:hover .yt-recent-delete-btn {
+  opacity: 1;
+}
+
+.yt-recent-delete-btn:hover {
+  background: #ef4444;
+  color: #ffffff;
+  transform: scale(1.08);
+}
+
+/* Body */
+.yt-recent-body {
+  padding: 0.95rem 1rem 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 0.65rem;
+}
+
+.yt-recent-item-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.4;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.5em;
+}
+
+/* Progress bar */
+.yt-recent-progress-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.yt-recent-progress-bar {
+  width: 100%;
+  height: 5px;
+  background: #f3f4f6;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.yt-recent-progress-fill {
+  height: 100%;
+  background: #2563eb;
+  border-radius: 9999px;
+  transition: width 0.3s ease;
+}
+
+.yt-recent-progress-fill.is-done {
+  background: #10b981;
+}
+
+.yt-recent-progress-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.74rem;
+  color: #6b7280;
+}
+
+.yt-recent-percent-text {
+  font-weight: 600;
+  color: #374151;
+}
+
+/* Footer */
+.yt-recent-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 0.5rem;
+  border-top: 1px solid #f3f4f6;
+}
+
+.yt-recent-time-text {
+  font-size: 0.74rem;
+  color: #9ca3af;
+}
+
+.yt-recent-action-btn {
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #dbeafe;
+  border-radius: 6px;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.yt-recent-action-btn:hover {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+}
+
+/* Empty State Modern Container */
+.yt-empty-container {
+  max-width: 900px;
+  margin: 1rem auto 3rem auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.yt-empty-state-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 3.5rem 2rem;
+  text-align: center;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+}
+
+.yt-empty-icon-wrap {
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  background: #eff6ff;
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.25rem auto;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
+}
+
+.yt-empty-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 0.55rem 0;
+}
+
+.yt-empty-desc {
+  font-size: 0.94rem;
+  color: #6b7280;
+  line-height: 1.6;
+  max-width: 520px;
+  margin: 0 auto 1.75rem auto;
+}
+
+.yt-suggestions-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px dashed #e5e7eb;
+}
+
+.suggestions-label {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.suggestions-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+}
+
+.suggestion-chip {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  color: #374151;
+  border-radius: 9999px;
+  padding: 0.45rem 1rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.suggestion-chip:hover {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  color: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+/* 3 Thẻ Features ở Empty State */
+.yt-empty-features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .yt-empty-features-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.yt-feature-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.yt-feature-icon-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.25rem;
+}
+
+.yt-feature-icon-badge.blue {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.yt-feature-icon-badge.green {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.yt-feature-icon-badge.purple {
+  background: #faf5ff;
+  color: #9333ea;
+}
+
+.yt-feature-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.yt-feature-desc {
+  font-size: 0.8rem;
+  color: #6b7280;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Workspace Grid Layout (2 Columns - Bố cục chuẩn Shadowing English) */
+.yt-study-workspace-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.28fr) minmax(0, 1fr);
+  gap: 1.75rem;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .yt-study-workspace-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Cột Trái: Player & Practice Modes & Reviews */
+.yt-workspace-left-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.yt-video-wrapper {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #000000;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.12);
+}
+
+.yt-iframe-element {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* Choose a practice mode Section */
+.yt-practice-modes-section {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.yt-practice-modes-header {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.yt-practice-modes-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 0.25rem 0;
+}
+
+.yt-practice-modes-subtitle {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.yt-practice-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+}
+
+@media (max-width: 640px) {
+  .yt-practice-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.yt-mode-card {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 0.85rem 0.6rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  border: 1.5px solid transparent;
+}
+
+/* 1. Shadowing Card */
+.yt-mode-card.card-shadowing {
+  border-color: #38bdf8;
+}
+.yt-mode-card.card-shadowing:hover {
+  background: #f0f9ff;
+  box-shadow: 0 4px 12px rgba(56, 189, 248, 0.2);
+  transform: translateY(-2px);
+}
+.yt-mode-card.card-shadowing .yt-mode-icon {
+  color: #0284c7;
+}
+
+/* 2. Dictation Card */
+.yt-mode-card.card-dictation {
+  border-color: #fbbf24;
+}
+.yt-mode-card.card-dictation:hover {
+  background: #fffbeb;
+  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.2);
+  transform: translateY(-2px);
+}
+.yt-mode-card.card-dictation .yt-mode-icon {
+  color: #d97706;
+}
+
+/* 3. AI Talk Card */
+.yt-mode-card.card-aitalk {
+  border-color: #34d399;
+}
+.yt-mode-card.card-aitalk:hover {
+  background: #ecfdf5;
+  box-shadow: 0 4px 12px rgba(52, 211, 153, 0.2);
+  transform: translateY(-2px);
+}
+.yt-mode-card.card-aitalk .yt-mode-icon {
+  color: #059669;
+}
+
+/* 4. Vocabulary Card */
+.yt-mode-card.card-vocab {
+  border-color: #c084fc;
+}
+.yt-mode-card.card-vocab:hover {
+  background: #faf5ff;
+  box-shadow: 0 4px 12px rgba(192, 132, 252, 0.2);
+  transform: translateY(-2px);
+}
+.yt-mode-card.card-vocab .yt-mode-icon {
+  color: #9333ea;
+}
+
+.yt-mode-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.yt-mode-desc {
+  font-size: 0.72rem;
+  color: #6b7280;
+  line-height: 1.35;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.yt-mode-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  margin-top: 0.25rem;
+}
+
+.yt-mode-badge.badge-shadowing {
+  background: #e0f2fe;
+  color: #0284c7;
+}
+
+.yt-mode-badge.badge-dictation {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.yt-mode-badge.badge-aitalk {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.yt-mode-badge.badge-vocab {
+  background: #faf5ff;
+  color: #9333ea;
+}
+
+/* Reviews Section (Chuẩn Shadowing English) */
+.yt-reviews-section {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.yt-reviews-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.yt-reviews-title {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.yt-write-review-btn {
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.yt-write-review-btn:hover {
+  background: #1d4ed8;
+}
+
+.yt-reviews-card-body {
+  background: #f9fafb;
+  border: 1px solid #f3f4f6;
+  border-radius: 8px;
+  padding: 1.25rem 1rem;
+  text-align: center;
+}
+
+.yt-reviews-prompt-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #374151;
+  margin-bottom: 0.25rem;
+}
+
+.yt-reviews-prompt-desc {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+/* Practice for tags */
+.yt-practice-for-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.82rem;
+  color: #6b7280;
+  padding: 0.25rem 0.5rem;
+}
+
+.yt-practice-for-label {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.yt-practice-for-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.yt-tag-pill {
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  color: #374151;
+  border-radius: 9999px;
+  padding: 0.2rem 0.7rem;
+  font-size: 0.76rem;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.yt-tag-pill:hover {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+/* Cột Phải: Sentence List Card */
+.yt-sentence-list-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  height: 720px;
+  max-height: calc(100vh - 160px);
+  min-height: 600px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+}
+
+.yt-sentence-list-header {
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+}
+
+.yt-sentence-count-badge {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+
+.yt-sentence-count-badge .count-number {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.yt-sentence-count-badge .count-label {
+  font-size: 0.82rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.yt-edit-sentences-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  color: #4b5563;
+  border-radius: 6px;
+  padding: 0.3rem 0.65rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.yt-edit-sentences-btn:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+  color: #111827;
+}
+
+.yt-sentence-tip-banner {
+  background: #eff6ff;
+  color: #1d4ed8;
+  padding: 0.55rem 1.25rem;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-bottom: 1px solid #dbeafe;
+  font-weight: 500;
+}
+
+.yt-sentence-tip-banner .tip-icon {
+  flex-shrink: 0;
+  color: #2563eb;
+}
+
+/* Scroll Area */
+.yt-sentences-scroll-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.25rem 0;
+}
+
+.yt-sentences-scroll-area::-webkit-scrollbar {
+  width: 6px;
+}
+.yt-sentences-scroll-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+.yt-sentences-scroll-area::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+}
+.yt-sentences-scroll-area::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+/* Sentence Row */
+.yt-sentence-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid #f3f4f6;
+  cursor: pointer;
+  transition: background 0.12s ease;
+  border-left: 3px solid transparent;
+}
+
+.yt-sentence-row:hover {
+  background: #f9fafb;
+}
+
+.yt-sentence-row.is-active {
+  background: #f0f7ff;
+  border-left-color: #2563eb;
+}
+
+.yt-sentence-row.is-completed {
+  opacity: 0.9;
+}
+
+/* Index Badge & Checkmark (Hình vuông bo góc chuẩn Shadowing English) */
+.yt-sentence-index-badge {
+  min-width: 24px;
+  height: 24px;
+  padding: 0 4px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #6b7280;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  flex-shrink: 0;
+  margin-top: 2px;
+  transition: all 0.15s ease;
+}
+
+.yt-sentence-index-badge.active {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+}
+
+.yt-sentence-index-badge.completed {
+  background: #10b981;
+  color: #ffffff;
+  border-color: #10b981;
+}
+
+.yt-sentence-content {
+  flex: 1;
+  font-size: 0.94rem;
+  line-height: 1.58;
+  color: #374151;
+}
+
+.yt-sentence-row.is-active .yt-sentence-content {
+  color: #111827;
+}
+
+/* Karaoke Word Tokens */
+.yt-words-wrap {
+  display: inline;
+}
+
+.yt-word-token {
+  display: inline;
+  padding: 0.08rem 0.22rem;
+  border-radius: 4px;
+  /* Transition màu mượt, không đổi kích cỡ chữ để tránh giật layout */
+  transition: background 0.05s ease, color 0.05s ease;
+}
+
+.yt-word-token.is-singing {
+  background: #fef08a !important;
+  color: #854d0e !important;
+  box-shadow: 0 1px 2px rgba(234, 179, 8, 0.25);
+}
+
+.yt-plain-text {
+  display: inline;
+}
+

@@ -156,7 +156,8 @@
 
 ## 🚀 9. Danh Sách Tính Năng Dự Định Triển Khai (Planned Features Backlog)
 
-> **Giai đoạn hiện tại:** Đang tổng hợp ý tưởng, thiết kế kiến trúc và luồng người dùng (Brainstorming & Architecture Phase). Chưa tiến hành code.
+> **Quản lý tác vụ trực tiếp:** Xem chi tiết bảng ma trận ưu tiên và checklist thực thi tại [TODO.md](./TODO.md).
+> **Giai đoạn hiện tại:** Đang tổng hợp ý tưởng, thiết kế kiến trúc và luồng người dùng (Brainstorming & Architecture Phase). Sẵn sàng bước vào triển khai Giai đoạn 1.
 
 1. **🌟 Phân Tầng Thư Viện Album (Library Categorization):**
    - **Tầng 1 (My Personal Hub):** Đặt trên cùng gồm `My 24 Hours`, `YouTube Decks`, `Từ vựng của tôi` và `Sổ tay SRS`.

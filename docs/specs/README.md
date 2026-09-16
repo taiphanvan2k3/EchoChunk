@@ -37,4 +37,4 @@ docs/specs/<feature-folder>/
 | **SPEC-01** | **Firebase Backend (Auth & Firestore Sync)** | 🟢 In-Progress | [01-firebase-auth-firestore/spec.md](01-firebase-auth-firestore/spec.md) |
 | **SPEC-02** | **My 24 Hours Ecosystem (Quick Capture & Branching)** | 🟡 Backlog | *Đang soạn thảo* |
 | **SPEC-03** | **Dictation Lab (Nghe chép chính tả đục lỗ)** | 🟡 Backlog | *Đang soạn thảo* |
-| **SPEC-04** | **YouTube Study Suite (Lộ trình 6 bước)** | 🟡 Backlog | [docs/FEATURE_YOUTUBE_STUDY_SUITE.md](../FEATURE_YOUTUBE_STUDY_SUITE.md) |
+| **SPEC-04** | **YouTube Study Suite (Interactive Player & Practice Hub)** | 🟢 Approved / In-Progress | [04-youtube-study-suite/spec.md](04-youtube-study-suite/spec.md) |
