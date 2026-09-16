@@ -61,30 +61,58 @@ interface RawCaptionTrack {
  * Gọi YouTube InnerTube API để lấy thông tin video và danh sách captionTracks
  */
 async function fetchPlayerResponse(videoId: string) {
-  try {
-    const res = await fetch(INNERTUBE_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': INNERTUBE_USER_AGENT,
-      },
-      body: JSON.stringify({
-        context: {
-          client: {
-            clientName: 'ANDROID',
-            clientVersion: INNERTUBE_CLIENT_VERSION,
-          },
-        },
-        videoId,
-      }),
-    });
+  // Thử lần lượt các client context — TVHTML5 hoạt động tốt hơn từ datacenter IP (Vercel)
+  const clients = [
+    {
+      clientName: 'TVHTML5',
+      clientVersion: '7.20250101.00.00',
+      userAgent: 'Mozilla/5.0 (SMART-TV; Linux; Tizen 6.0) AppleWebKit/538.1 (KHTML, like Gecko) Version/6.0 TV Safari/538.1',
+    },
+    {
+      clientName: 'ANDROID',
+      clientVersion: INNERTUBE_CLIENT_VERSION,
+      userAgent: INNERTUBE_USER_AGENT,
+    },
+  ];
 
-    if (!res.ok) return null;
-    return await res.json();
-  } catch (err) {
-    console.error('[YouTubeService] InnerTube fetch error:', err);
-    return null;
+  for (const client of clients) {
+    try {
+      const res = await fetch(INNERTUBE_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': client.userAgent,
+          'Accept-Language': 'en-US,en;q=0.9',
+          'Origin': 'https://www.youtube.com',
+          'Referer': `https://www.youtube.com/watch?v=${videoId}`,
+        },
+        body: JSON.stringify({
+          context: {
+            client: {
+              clientName: client.clientName,
+              clientVersion: client.clientVersion,
+              hl: 'en',
+              gl: 'US',
+            },
+          },
+          videoId,
+        }),
+        cache: 'no-store',
+      });
+
+      if (!res.ok) continue;
+      const data = await res.json();
+      const tracks = data?.captions?.playerCaptionsTracklistRenderer?.captionTracks;
+      // Chỉ return nếu response thực sự có captionTracks
+      if (tracks && Array.isArray(tracks) && tracks.length > 0) {
+        return data;
+      }
+    } catch (err) {
+      console.error(`[YouTubeService] InnerTube fetch error (${client.clientName}):`, err);
+    }
   }
+
+  return null;
 }
 
 const BROWSER_USER_AGENT =
@@ -359,7 +387,9 @@ export async function getYouTubeTranscript(urlOrId: string): Promise<YouTubeLess
     throw new Error('Không thể tải dữ liệu phụ đề từ YouTube.');
   }
 
-  const xmlContent = await xmlRes.text();
+  const xmlBuffer = await xmlRes.arrayBuffer();
+  const xmlContent = new TextDecoder('utf-8').decode(xmlBuffer);
+
   const { sentences } = parseTranscriptXml(xmlContent);
 
   if (sentences.length === 0) {
