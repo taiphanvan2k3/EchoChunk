@@ -316,26 +316,33 @@ function parseTranscriptXml(xml: string): { sentences: YouTubeSentence[] } {
 export async function getYouTubeTranscript(urlOrId: string): Promise<YouTubeLessonData> {
   const videoId = extractVideoId(urlOrId);
   if (!videoId) {
+    console.error('[YouTubeService] Invalid YouTube URL or ID:', urlOrId);
     throw new Error('Đường dẫn YouTube không hợp lệ. Vui lòng kiểm tra lại link video.');
   }
 
-  // 1. Thử lấy dữ liệu qua InnerTube Android Client
+  // 1. Thử lấy dữ liệu qua InnerTube (TVHTML5 → ANDROID)
   let playerResponse = await fetchPlayerResponse(videoId);
   let captionTracks: RawCaptionTrack[] | undefined =
     playerResponse?.captions?.playerCaptionsTracklistRenderer?.captionTracks;
 
+  console.log(`[YT:${videoId}] InnerTube captionTracks:`, captionTracks?.length ?? 'null');
+
   // 2. Nếu InnerTube không có captionTracks, fallback sang cào HTML Web Page
   if (!captionTracks || !Array.isArray(captionTracks) || captionTracks.length === 0) {
+    console.log(`[YT:${videoId}] Trying HTML fallback...`);
     const fallbackResponse = await fetchPlayerResponseFallback(videoId);
     if (fallbackResponse) {
       playerResponse = { ...playerResponse, ...fallbackResponse };
       captionTracks = fallbackResponse.captions?.playerCaptionsTracklistRenderer?.captionTracks;
     }
+    console.log(`[YT:${videoId}] Fallback captionTracks:`, captionTracks?.length ?? 'null');
+    console.log(`[YT:${videoId}] playabilityStatus:`, fallbackResponse?.playabilityStatus?.status ?? playerResponse?.playabilityStatus?.status);
   }
 
   // 3. Nếu vẫn không tìm thấy captionTracks nào
   if (!captionTracks || !Array.isArray(captionTracks) || captionTracks.length === 0) {
     const playabilityStatus = playerResponse?.playabilityStatus?.status;
+    console.error(`[YT:${videoId}] FAILED — playabilityStatus: ${playabilityStatus}`);
     if (playabilityStatus === 'UNPLAYABLE') {
       throw new Error('Video này không khả dụng hoặc đã bị gỡ khỏi YouTube.');
     }
