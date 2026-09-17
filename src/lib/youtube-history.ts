@@ -1,5 +1,10 @@
-// LocalStorage Manager for YouTube Study History (Partitioned by User UID)
+// Local-First & Cloud Firestore Manager for YouTube Study History
 import { YouTubeHistoryItem } from '@/types/youtube';
+import {
+  syncYouTubeHistoryToCloud,
+  removeYouTubeHistoryFromCloud,
+  mergeYouTubeHistoryLocalAndCloud,
+} from './firebase/firestore/youtubeHistory';
 
 const BASE_HISTORY_KEY = 'echo_yt_history_v1';
 const MAX_HISTORY_ITEMS = 20;
@@ -12,9 +17,9 @@ function getStorageKey(uid?: string | null): string {
 }
 
 /**
- * Lấy danh sách lịch sử video đã học của người dùng, sắp xếp theo thời gian gần nhất
+ * Lấy danh sách lịch sử video đã học của người dùng từ LocalStorage (bộ nhớ cục bộ trình duyệt)
  */
-export function getYouTubeHistory(uid?: string | null): YouTubeHistoryItem[] {
+export function getLocalYouTubeHistory(uid?: string | null): YouTubeHistoryItem[] {
   if (typeof window === 'undefined') return [];
 
   try {
@@ -36,13 +41,36 @@ export function getYouTubeHistory(uid?: string | null): YouTubeHistoryItem[] {
 
     return parsed.sort((a, b) => (b.lastStudiedAt || 0) - (a.lastStudiedAt || 0));
   } catch (err) {
-    console.error('[YouTubeHistory] Lỗi khi đọc lịch sử video:', err);
+    console.error('[YouTubeHistory] Lỗi khi đọc lịch sử video từ LocalStorage:', err);
     return [];
   }
 }
 
 /**
- * Lưu hoặc cập nhật một video vào đầu danh sách lịch sử
+ * Đồng bộ lịch sử video giữa LocalStorage và Cloud Firestore.
+ * Giúp người dùng chuyển đổi trình duyệt / thiết bị vẫn giữ nguyên toàn bộ video đã học.
+ */
+export async function fetchAndSyncYouTubeHistory(
+  uid?: string | null
+): Promise<YouTubeHistoryItem[]> {
+  const localList = getLocalYouTubeHistory(uid);
+  if (!uid || uid === 'guest') {
+    return localList;
+  }
+
+  try {
+    const mergedList = await mergeYouTubeHistoryLocalAndCloud(uid, localList);
+    const key = getStorageKey(uid);
+    localStorage.setItem(key, JSON.stringify(mergedList));
+    return mergedList;
+  } catch (err) {
+    console.error('[YouTubeHistory] Lỗi khi đồng bộ lịch sử video với Cloud:', err);
+    return localList;
+  }
+}
+
+/**
+ * Lưu hoặc cập nhật một video vào đầu danh sách lịch sử (lưu LocalStorage + sync Cloud Firestore)
  */
 export function saveYouTubeHistoryItem(
   item: Omit<YouTubeHistoryItem, 'lastStudiedAt'> & { lastStudiedAt?: number },
@@ -51,7 +79,7 @@ export function saveYouTubeHistoryItem(
   if (typeof window === 'undefined') return;
 
   try {
-    const currentList = getYouTubeHistory(uid);
+    const currentList = getLocalYouTubeHistory(uid);
     const existingIndex = currentList.findIndex((i) => i.videoId === item.videoId);
 
     const updatedItem: YouTubeHistoryItem = {
@@ -83,6 +111,13 @@ export function saveYouTubeHistoryItem(
 
     const key = getStorageKey(uid);
     localStorage.setItem(key, JSON.stringify(newList));
+
+    // Đồng bộ lên Cloud Firestore nếu người dùng đã đăng nhập
+    if (uid && uid !== 'guest') {
+      syncYouTubeHistoryToCloud(uid, updatedItem).catch((err) => {
+        console.warn('[YouTubeHistory] Lỗi sync video lên Cloud:', err);
+      });
+    }
   } catch (err) {
     console.error('[YouTubeHistory] Lỗi khi lưu video vào lịch sử:', err);
   }
@@ -99,7 +134,7 @@ export function updateYouTubeHistoryProgress(
   if (typeof window === 'undefined') return;
 
   try {
-    const currentList = getYouTubeHistory(uid);
+    const currentList = getLocalYouTubeHistory(uid);
     const target = currentList.find((i) => i.videoId === videoId);
     if (!target) return;
 
@@ -108,22 +143,36 @@ export function updateYouTubeHistoryProgress(
 
     const key = getStorageKey(uid);
     localStorage.setItem(key, JSON.stringify(currentList));
+
+    // Đồng bộ tiến độ lên Cloud Firestore nếu người dùng đã đăng nhập
+    if (uid && uid !== 'guest') {
+      syncYouTubeHistoryToCloud(uid, target).catch((err) => {
+        console.warn('[YouTubeHistory] Lỗi sync tiến độ video lên Cloud:', err);
+      });
+    }
   } catch (err) {
     console.error('[YouTubeHistory] Lỗi khi cập nhật tiến độ video:', err);
   }
 }
 
 /**
- * Xóa một video khỏi lịch sử học
+ * Xóa một video khỏi lịch sử học (xóa LocalStorage + xóa Cloud Firestore)
  */
 export function removeYouTubeHistoryItem(videoId: string, uid?: string | null): void {
   if (typeof window === 'undefined') return;
 
   try {
-    const currentList = getYouTubeHistory(uid);
+    const currentList = getLocalYouTubeHistory(uid);
     const filtered = currentList.filter((i) => i.videoId !== videoId);
     const key = getStorageKey(uid);
     localStorage.setItem(key, JSON.stringify(filtered));
+
+    // Xóa khỏi Cloud Firestore nếu người dùng đã đăng nhập
+    if (uid && uid !== 'guest') {
+      removeYouTubeHistoryFromCloud(uid, videoId).catch((err) => {
+        console.warn('[YouTubeHistory] Lỗi xóa video trên Cloud:', err);
+      });
+    }
   } catch (err) {
     console.error('[YouTubeHistory] Lỗi khi xóa video khỏi lịch sử:', err);
   }

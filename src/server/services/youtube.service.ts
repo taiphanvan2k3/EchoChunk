@@ -12,6 +12,7 @@
  */
 
 import { YouTubeLessonData, YouTubeSentence, YouTubeWord } from '@/types/youtube';
+import { getCachedTranscript, saveCachedTranscript } from '@/lib/firebase/firestore/youtubeTranscript';
 
 const INNERTUBE_API_URL = 'https://www.youtube.com/youtubei/v1/player?prettyPrint=false';
 const INNERTUBE_CLIENT_VERSION = '20.10.38';
@@ -19,6 +20,9 @@ const INNERTUBE_USER_AGENT = `com.google.android.youtube/${INNERTUBE_CLIENT_VERS
 
 const RE_YOUTUBE = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
 const RE_RAW_ID = /^[a-zA-Z0-9_-]{11}$/;
+
+const YTRANSCRIPT_API_URL = 'https://ytranscript.com/api/v1/transcript';
+const YTRANSCRIPT_API_KEY = process.env.YTRANSCRIPT_API_KEY;
 
 /**
  * Trích xuất video ID từ URL YouTube hoặc chuỗi ID trực tiếp
@@ -61,12 +65,34 @@ interface RawCaptionTrack {
  * Gọi YouTube InnerTube API để lấy thông tin video và danh sách captionTracks
  */
 async function fetchPlayerResponse(videoId: string) {
-  // Thử lần lượt các client context — TVHTML5 hoạt động tốt hơn từ datacenter IP (Vercel)
-  const clients = [
+  // Thử lần lượt các client context:
+  // 1. WEB_EMBEDDED — giả lập embedded player (iframe), YouTube cho phép từ datacenter IP
+  // 2. TVHTML5_SIMPLY_EMBEDDED_PLAYER — embedded TV client, thường bypass LOGIN_REQUIRED
+  // 3. WEB — browser thường, với embedUrl để signal embedded context
+  // 4. ANDROID — mobile client, fallback cuối cùng
+  const clients: {
+    clientName: string;
+    clientVersion: string;
+    userAgent: string;
+    embedUrl?: string;
+  }[] = [
     {
-      clientName: 'TVHTML5',
-      clientVersion: '7.20250101.00.00',
+      clientName: 'WEB_EMBEDDED_PLAYER',
+      clientVersion: '1.20250915.01.00',
+      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
+      embedUrl: `https://www.youtube.com/embed/${videoId}`,
+    },
+    {
+      clientName: 'TVHTML5_SIMPLY_EMBEDDED_PLAYER',
+      clientVersion: '2.0',
       userAgent: 'Mozilla/5.0 (SMART-TV; Linux; Tizen 6.0) AppleWebKit/538.1 (KHTML, like Gecko) Version/6.0 TV Safari/538.1',
+      embedUrl: `https://www.youtube.com/embed/${videoId}`,
+    },
+    {
+      clientName: 'WEB',
+      clientVersion: '2.20250915.01.00',
+      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
+      embedUrl: `https://www.youtube.com/embed/${videoId}`,
     },
     {
       clientName: 'ANDROID',
@@ -77,6 +103,27 @@ async function fetchPlayerResponse(videoId: string) {
 
   for (const client of clients) {
     try {
+      // Xây dựng request body — nếu có embedUrl thì thêm thirdParty context
+      // để YouTube biết đây là embedded player (hợp lệ từ datacenter IP)
+      const requestBody: Record<string, unknown> = {
+        context: {
+          client: {
+            clientName: client.clientName,
+            clientVersion: client.clientVersion,
+            hl: 'en',
+            gl: 'US',
+          },
+          ...(client.embedUrl
+            ? {
+                thirdParty: {
+                  embedUrl: client.embedUrl,
+                },
+              }
+            : {}),
+        },
+        videoId,
+      };
+
       const res = await fetch(INNERTUBE_API_URL, {
         method: 'POST',
         headers: {
@@ -84,25 +131,22 @@ async function fetchPlayerResponse(videoId: string) {
           'User-Agent': client.userAgent,
           'Accept-Language': 'en-US,en;q=0.9',
           'Origin': 'https://www.youtube.com',
-          'Referer': `https://www.youtube.com/watch?v=${videoId}`,
+          'Referer': client.embedUrl || `https://www.youtube.com/watch?v=${videoId}`,
         },
-        body: JSON.stringify({
-          context: {
-            client: {
-              clientName: client.clientName,
-              clientVersion: client.clientVersion,
-              hl: 'en',
-              gl: 'US',
-            },
-          },
-          videoId,
-        }),
+        body: JSON.stringify(requestBody),
         cache: 'no-store',
       });
 
-      if (!res.ok) continue;
+      if (!res.ok) {
+        console.log(`[YT:${videoId}] ${client.clientName}: HTTP ${res.status}`);
+        continue;
+      }
       const data = await res.json();
+      const status = data?.playabilityStatus?.status;
       const tracks = data?.captions?.playerCaptionsTracklistRenderer?.captionTracks;
+
+      console.log(`[YT:${videoId}] ${client.clientName}: status=${status}, tracks=${tracks?.length ?? 0}`);
+
       // Chỉ return nếu response thực sự có captionTracks
       if (tracks && Array.isArray(tracks) && tracks.length > 0) {
         return data;
@@ -311,45 +355,183 @@ function parseTranscriptXml(xml: string): { sentences: YouTubeSentence[] } {
 }
 
 /**
- * Lấy danh sách câu và mốc thời gian từng từ của video YouTube
+ * Lấy tiêu đề video từ YouTube oEmbed (hoạt động ổn định trên cả Vercel / Datacenter IP)
  */
-export async function getYouTubeTranscript(urlOrId: string): Promise<YouTubeLessonData> {
-  const videoId = extractVideoId(urlOrId);
-  if (!videoId) {
-    console.error('[YouTubeService] Invalid YouTube URL or ID:', urlOrId);
-    throw new Error('Đường dẫn YouTube không hợp lệ. Vui lòng kiểm tra lại link video.');
+async function fetchVideoTitle(videoId: string): Promise<string> {
+  try {
+    const res = await fetch(
+      `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`,
+      { next: { revalidate: 86400 } }
+    );
+    if (!res.ok) return 'YouTube Speaking Practice';
+    const json = (await res.json()) as { title?: string };
+    return json.title || 'YouTube Speaking Practice';
+  } catch {
+    return 'YouTube Speaking Practice';
+  }
+}
+
+interface YTranscriptSegment {
+  text: string;
+  offset: number; // ms
+  duration: number; // ms
+}
+
+interface YTranscriptResponse {
+  video_id: string;
+  lang: string;
+  whisper?: boolean;
+  cached?: boolean;
+  units_charged?: number;
+  segments?: YTranscriptSegment[];
+  error?: {
+    code?: string;
+    message?: string;
+  } | string;
+  message?: string;
+}
+
+/**
+ * Cơ chế Fallback: Lấy phụ đề từ dịch vụ ytranscript.com khi YouTube chặn IP server
+ */
+async function fetchFromYTranscript(
+  videoId: string,
+  fallbackTitle?: string
+): Promise<YouTubeLessonData> {
+  console.log(`[YT:${videoId}] Initiating ytranscript.com fallback...`);
+
+  if (!YTRANSCRIPT_API_KEY) {
+    console.error(`[YT:${videoId}] YTRANSCRIPT_API_KEY chưa được cấu hình trong biến môi trường.`);
+    throw new Error('Chưa cấu hình YTRANSCRIPT_API_KEY trong biến môi trường.');
   }
 
-  // 1. Thử lấy dữ liệu qua InnerTube (TVHTML5 → ANDROID)
+  const [videoTitle, apiRes] = await Promise.all([
+    fallbackTitle && fallbackTitle !== 'YouTube Speaking Practice'
+      ? Promise.resolve(fallbackTitle)
+      : fetchVideoTitle(videoId),
+    fetch(`${YTRANSCRIPT_API_URL}?videoId=${videoId}`, {
+      headers: {
+        Authorization: `Bearer ${YTRANSCRIPT_API_KEY}`,
+      },
+      cache: 'no-store',
+    }),
+  ]);
+
+  if (!apiRes.ok) {
+    console.error(`[YT:${videoId}] ytranscript.com responded with HTTP ${apiRes.status}`);
+    throw new Error(`Dịch vụ phụ đề trả về lỗi (${apiRes.status}). Vui lòng thử lại sau.`);
+  }
+
+  const data = (await apiRes.json()) as YTranscriptResponse;
+
+  if (data.error) {
+    const errorMsg = typeof data.error === 'string' ? data.error : data.error.message;
+    console.error(`[YT:${videoId}] ytranscript.com API error:`, errorMsg);
+    throw new Error(errorMsg || 'Không tìm thấy phụ đề cho video này.');
+  }
+
+  const rawSegments = data.segments;
+  if (!rawSegments || !Array.isArray(rawSegments) || rawSegments.length === 0) {
+    throw new Error('Video này không có phụ đề tiếng Anh có sẵn.');
+  }
+
+  const sentences: YouTubeSentence[] = [];
+  let index = 1;
+
+  for (const seg of rawSegments) {
+    const rawText = decodeEntities(seg.text || '')
+      .replace(/^>>\s*/, '')
+      .replace(/\r?\n|\r/g, ' ')
+      .trim();
+
+    if (!rawText) continue;
+
+    const sentenceStartSec = Number((seg.offset / 1000).toFixed(3));
+    const sentenceDurSec = Number((seg.duration / 1000).toFixed(3));
+    const sentenceEndSec = Number((sentenceStartSec + sentenceDurSec).toFixed(3));
+
+    const splittedWords = rawText.split(/\s+/).filter(Boolean);
+    const totalChars = splittedWords.reduce((acc, w) => acc + w.length, 0);
+    let curWordStart = sentenceStartSec;
+
+    // Phân rã từ & tính mốc thời gian từng từ để phục vụ Karaoke Word Highlighting
+    const words: YouTubeWord[] = splittedWords.map((w, i) => {
+      const ratio = totalChars > 0 ? w.length / totalChars : 1 / splittedWords.length;
+      const wDur = Math.max(0.08, sentenceDurSec * ratio);
+      const wStart = curWordStart;
+      let wEnd =
+        i === splittedWords.length - 1
+          ? sentenceEndSec
+          : Number((wStart + wDur).toFixed(3));
+
+      if (wEnd <= wStart) {
+        wEnd = Number((wStart + 0.15).toFixed(3));
+      }
+      curWordStart = wEnd;
+
+      return {
+        word: w,
+        start: Number(wStart.toFixed(3)),
+        end: Number(wEnd.toFixed(3)),
+      };
+    });
+
+    sentences.push({
+      id: `sent-${index}`,
+      index,
+      text: rawText,
+      start: sentenceStartSec,
+      duration: sentenceDurSec,
+      words,
+      isCompleted: false,
+    });
+
+    index++;
+  }
+
+  if (sentences.length === 0) {
+    throw new Error('Phụ đề của video này trống hoặc không đọc được nội dung.');
+  }
+
+  return {
+    videoId,
+    videoTitle,
+    sentences,
+    totalSentences: sentences.length,
+    completedCount: 0,
+  };
+}
+
+/**
+ * Thử lấy phụ đề trực tiếp từ YouTube (InnerTube API / Web Scrape srv3)
+ */
+async function tryFetchNativeYouTube(videoId: string): Promise<YouTubeLessonData | null> {
+  // 1. Thử qua InnerTube
   let playerResponse = await fetchPlayerResponse(videoId);
   let captionTracks: RawCaptionTrack[] | undefined =
     playerResponse?.captions?.playerCaptionsTracklistRenderer?.captionTracks;
 
-  console.log(`[YT:${videoId}] InnerTube captionTracks:`, captionTracks?.length ?? 'null');
+  console.log(`[YT:${videoId}] Native InnerTube captionTracks:`, captionTracks?.length ?? 'null');
 
-  // 2. Nếu InnerTube không có captionTracks, fallback sang cào HTML Web Page
+  // 2. Nếu InnerTube không có captionTracks, fallback sang cào HTML
   if (!captionTracks || !Array.isArray(captionTracks) || captionTracks.length === 0) {
-    console.log(`[YT:${videoId}] Trying HTML fallback...`);
+    console.log(`[YT:${videoId}] Trying native HTML scrape fallback...`);
     const fallbackResponse = await fetchPlayerResponseFallback(videoId);
     if (fallbackResponse) {
       playerResponse = { ...playerResponse, ...fallbackResponse };
       captionTracks = fallbackResponse.captions?.playerCaptionsTracklistRenderer?.captionTracks;
     }
-    console.log(`[YT:${videoId}] Fallback captionTracks:`, captionTracks?.length ?? 'null');
-    console.log(`[YT:${videoId}] playabilityStatus:`, fallbackResponse?.playabilityStatus?.status ?? playerResponse?.playabilityStatus?.status);
+    console.log(`[YT:${videoId}] Native HTML scrape captionTracks:`, captionTracks?.length ?? 'null');
   }
 
-  // 3. Nếu vẫn không tìm thấy captionTracks nào
+  // 3. Nếu vẫn không tìm thấy captionTracks
   if (!captionTracks || !Array.isArray(captionTracks) || captionTracks.length === 0) {
-    const playabilityStatus = playerResponse?.playabilityStatus?.status;
-    console.error(`[YT:${videoId}] FAILED — playabilityStatus: ${playabilityStatus}`);
-    if (playabilityStatus === 'UNPLAYABLE') {
-      throw new Error('Video này không khả dụng hoặc đã bị gỡ khỏi YouTube.');
-    }
-    throw new Error('Video này không có phụ đề tiếng Anh có sẵn trên YouTube.');
+    const status = playerResponse?.playabilityStatus?.status;
+    console.warn(`[YT:${videoId}] Native YouTube no tracks found. Status: ${status}`);
+    return null;
   }
 
-  // Ưu tiên phụ đề tiếng Anh: en, en-US, en-GB, hoặc bất kỳ phụ đề tiếng Anh nào
+  // Ưu tiên phụ đề tiếng Anh
   let track = captionTracks.find(
     (t) =>
       t.languageCode === 'en' ||
@@ -358,16 +540,15 @@ export async function getYouTubeTranscript(urlOrId: string): Promise<YouTubeLess
       t.languageCode?.startsWith('en')
   );
 
-  // Nếu không có tiếng Anh, chọn track đầu tiên có sẵn
   if (!track) {
     track = captionTracks[0];
   }
 
   if (!track || !track.baseUrl) {
-    throw new Error('Không tìm thấy đường dẫn phụ đề của video.');
+    return null;
   }
 
-  // 4. Tải XML phụ đề (yêu cầu srv3 để bóc tách word-level timings)
+  // 4. Tải XML phụ đề (ưu tiên srv3 để có mốc từng từ)
   let xmlUrl = track.baseUrl;
   if (!xmlUrl.includes('fmt=')) {
     xmlUrl += '&fmt=srv3';
@@ -380,7 +561,6 @@ export async function getYouTubeTranscript(urlOrId: string): Promise<YouTubeLess
     },
   });
 
-  // Nếu fetch srv3 không thành công, thử lại bằng link gốc (classic format)
   if (!xmlRes.ok && xmlUrl !== track.baseUrl) {
     xmlRes = await fetch(track.baseUrl, {
       headers: {
@@ -391,7 +571,8 @@ export async function getYouTubeTranscript(urlOrId: string): Promise<YouTubeLess
   }
 
   if (!xmlRes.ok) {
-    throw new Error('Không thể tải dữ liệu phụ đề từ YouTube.');
+    console.warn(`[YT:${videoId}] Failed to download native caption XML (${xmlRes.status})`);
+    return null;
   }
 
   const xmlBuffer = await xmlRes.arrayBuffer();
@@ -400,7 +581,7 @@ export async function getYouTubeTranscript(urlOrId: string): Promise<YouTubeLess
   const { sentences } = parseTranscriptXml(xmlContent);
 
   if (sentences.length === 0) {
-    throw new Error('Phụ đề của video này trống hoặc không đọc được nội dung.');
+    return null;
   }
 
   const videoTitle = playerResponse?.videoDetails?.title || 'YouTube Speaking Practice';
@@ -413,3 +594,58 @@ export async function getYouTubeTranscript(urlOrId: string): Promise<YouTubeLess
     completedCount: 0,
   };
 }
+
+/**
+ * Lấy danh sách câu và mốc thời gian từng từ của video YouTube.
+ * Tự động thử native YouTube trước, nếu lỗi hoặc bị chặn IP thì chuyển sang ytranscript.com.
+ */
+export async function getYouTubeTranscript(urlOrId: string): Promise<YouTubeLessonData> {
+  const videoId = extractVideoId(urlOrId);
+  if (!videoId) {
+    console.error('[YouTubeService] Invalid YouTube URL or ID:', urlOrId);
+    throw new Error('Đường dẫn YouTube không hợp lệ. Vui lòng kiểm tra lại link video.');
+  }
+
+  // Bước 0: Kiểm tra Cache Firestore (tránh gọi API lặp lại, tiết kiệm chi phí & tải tức thì)
+  try {
+    const cached = await getCachedTranscript(videoId);
+    if (cached && cached.sentences.length > 0) {
+      console.log(`[YT:${videoId}] Cache HIT in Firestore (${cached.sentences.length} câu)`);
+      return cached;
+    }
+  } catch (cacheErr) {
+    console.warn(`[YT:${videoId}] Lỗi khi kiểm tra cache Firestore:`, cacheErr);
+  }
+
+  // Bước 1: Thử lấy trực tiếp từ YouTube (srv3 XML gốc)
+  let result: YouTubeLessonData | null = null;
+  let source: 'native' | 'ytranscript' = 'native';
+
+  try {
+    const nativeResult = await tryFetchNativeYouTube(videoId);
+    if (nativeResult && nativeResult.sentences.length > 0) {
+      console.log(`[YT:${videoId}] Lấy thành công từ native YouTube (${nativeResult.sentences.length} câu)`);
+      result = nativeResult;
+      source = 'native';
+    }
+  } catch (nativeErr) {
+    console.warn(`[YT:${videoId}] Native YouTube fetch error:`, (nativeErr as Error).message);
+  }
+
+  // Bước 2: Fallback sang provider ytranscript.com khi YouTube chặn hoặc không có phụ đề trực tiếp
+  if (!result) {
+    console.log(`[YT:${videoId}] Native YouTube không khả dụng, đang chuyển sang Fallback (ytranscript.com)...`);
+    result = await fetchFromYTranscript(videoId);
+    source = 'ytranscript';
+  }
+
+  // Bước 3: Tự động lưu kết quả vào Firestore Cache (bất đồng bộ để không chặn kết quả trả về)
+  if (result && result.sentences.length > 0) {
+    saveCachedTranscript(result, source).catch((saveErr) => {
+      console.warn(`[YT:${videoId}] Không thể lưu cache Firestore:`, saveErr);
+    });
+  }
+
+  return result;
+}
+
