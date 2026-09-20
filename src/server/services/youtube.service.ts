@@ -23,7 +23,24 @@ const RE_YOUTUBE = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts)\/|.
 const RE_RAW_ID = /^[a-zA-Z0-9_-]{11}$/;
 
 const YTRANSCRIPT_API_URL = 'https://ytranscript.com/api/v1/transcript';
-const YTRANSCRIPT_API_KEY = process.env.YTRANSCRIPT_API_KEY;
+
+/**
+ * Pool các API key xoay vòng.
+ * Thêm key mới vào Vercel env dưới dạng danh sách phân cách dấu phẩy:
+ *   YTRANSCRIPT_API_KEYS=key1,key2,key3
+ * Hoặc dùng YTRANSCRIPT_API_KEY (đơn) — backward compatible.
+ */
+function buildKeyPool(): string[] {
+  const multi = process.env.YTRANSCRIPT_API_KEYS;
+  if (multi) {
+    const pool = multi.split(',').map((k) => k.trim()).filter(Boolean);
+    if (pool.length > 0) return pool;
+  }
+  const single = process.env.YTRANSCRIPT_API_KEY;
+  return single ? [single] : [];
+}
+
+const YTRANSCRIPT_KEY_POOL = buildKeyPool();
 
 /**
  * Cấu hình Proxy (Webshare hoặc HTTP/HTTPS Proxy bất kỳ).
@@ -53,9 +70,9 @@ function getMaskedProxyInfo(): string {
 async function fetchWithProxy(url: string | URL, init: RequestInit = {}): Promise<Response> {
   if (proxyDispatcher) {
     return (await undiciFetch(url.toString(), {
-      ...init,
+      ...(init as unknown as Parameters<typeof undiciFetch>[1]),
       dispatcher: proxyDispatcher,
-    } as any)) as unknown as Response;
+    })) as unknown as Response;
   }
   return fetch(url, init);
 }
@@ -442,26 +459,52 @@ async function fetchFromYTranscript(
 ): Promise<YouTubeLessonData> {
   console.log(`[YT:${videoId}] Initiating ytranscript.com fallback...`);
 
-  if (!YTRANSCRIPT_API_KEY) {
-    console.error(`[YT:${videoId}] YTRANSCRIPT_API_KEY chưa được cấu hình trong biến môi trường.`);
-    throw new Error('Chưa cấu hình YTRANSCRIPT_API_KEY trong biến môi trường.');
+  if (YTRANSCRIPT_KEY_POOL.length === 0) {
+    console.error(`[YT:${videoId}] Chưa cấu hình YTRANSCRIPT_API_KEY(S) trong biến môi trường.`);
+    throw new Error('Chưa cấu hình YTRANSCRIPT_API_KEY(S) trong biến môi trường.');
   }
 
-  const [videoTitle, apiRes] = await Promise.all([
+  const videoTitle = await (
     fallbackTitle && fallbackTitle !== 'YouTube Speaking Practice'
       ? Promise.resolve(fallbackTitle)
-      : fetchVideoTitle(videoId),
-    fetch(`${YTRANSCRIPT_API_URL}?videoId=${videoId}`, {
-      headers: {
-        Authorization: `Bearer ${YTRANSCRIPT_API_KEY}`,
-      },
-      cache: 'no-store',
-    }),
-  ]);
+      : fetchVideoTitle(videoId)
+  );
 
-  if (!apiRes.ok) {
-    console.error(`[YT:${videoId}] ytranscript.com responded with HTTP ${apiRes.status}`);
-    throw new Error(`Dịch vụ phụ đề trả về lỗi (${apiRes.status}). Vui lòng thử lại sau.`);
+  // Xoay vòng key: thử từng key, bỏ qua khi bị 429 (quota hết), throw khi hết key
+  let lastError: string = 'Tất cả API key đã hết quota. Vui lòng thử lại vào tháng sau.';
+  let apiRes: Response | null = null;
+
+  for (let i = 0; i < YTRANSCRIPT_KEY_POOL.length; i++) {
+    const key = YTRANSCRIPT_KEY_POOL[i];
+    const maskedKey = key.slice(0, 8) + '...';
+
+    const res = await fetch(`${YTRANSCRIPT_API_URL}?videoId=${videoId}`, {
+      headers: { Authorization: `Bearer ${key}` },
+      cache: 'no-store',
+    });
+
+    const quotaUsed = res.headers.get('X-Quota-Used');
+    const quotaLimit = res.headers.get('X-Quota-Limit');
+    console.log(`[YT:${videoId}] Key[${i + 1}/${YTRANSCRIPT_KEY_POOL.length}] ${maskedKey} → HTTP ${res.status} | Quota: ${quotaUsed}/${quotaLimit}`);
+
+    if (res.status === 429) {
+      lastError = `Key [${i + 1}] hết quota (${quotaUsed}/${quotaLimit}), thử key tiếp theo...`;
+      console.warn(`[YT:${videoId}] ${lastError}`);
+      continue; // thử key kế tiếp
+    }
+
+    if (!res.ok) {
+      lastError = `Dịch vụ phụ đề trả về lỗi (HTTP ${res.status}). Vui lòng thử lại sau.`;
+      console.error(`[YT:${videoId}] ytranscript.com responded with HTTP ${res.status}`);
+      throw new Error(lastError);
+    }
+
+    apiRes = res;
+    break; // key này dùng được
+  }
+
+  if (!apiRes) {
+    throw new Error(lastError);
   }
 
   const data = (await apiRes.json()) as YTranscriptResponse;
@@ -490,41 +533,15 @@ async function fetchFromYTranscript(
 
     const sentenceStartSec = Number((seg.offset / 1000).toFixed(3));
     const sentenceDurSec = Number((seg.duration / 1000).toFixed(3));
-    const sentenceEndSec = Number((sentenceStartSec + sentenceDurSec).toFixed(3));
 
-    const splittedWords = rawText.split(/\s+/).filter(Boolean);
-    const totalChars = splittedWords.reduce((acc, w) => acc + w.length, 0);
-    let curWordStart = sentenceStartSec;
-
-    // Phân rã từ & tính mốc thời gian từng từ để phục vụ Karaoke Word Highlighting
-    const words: YouTubeWord[] = splittedWords.map((w, i) => {
-      const ratio = totalChars > 0 ? w.length / totalChars : 1 / splittedWords.length;
-      const wDur = Math.max(0.08, sentenceDurSec * ratio);
-      const wStart = curWordStart;
-      let wEnd =
-        i === splittedWords.length - 1
-          ? sentenceEndSec
-          : Number((wStart + wDur).toFixed(3));
-
-      if (wEnd <= wStart) {
-        wEnd = Number((wStart + 0.15).toFixed(3));
-      }
-      curWordStart = wEnd;
-
-      return {
-        word: w,
-        start: Number(wStart.toFixed(3)),
-        end: Number(wEnd.toFixed(3)),
-      };
-    });
-
+    // YTranscript chỉ cung cấp mốc thời gian cấp câu (offset & duration),
+    // không hỗ trợ mốc thời gian từng từ. Không sinh mốc từ giả lập để tránh nhảy chữ sai.
     sentences.push({
       id: `sent-${index}`,
       index,
       text: rawText,
       start: sentenceStartSec,
       duration: sentenceDurSec,
-      words,
     });
 
     index++;
@@ -540,6 +557,7 @@ async function fetchFromYTranscript(
     sentences,
     totalSentences: sentences.length,
     completedCount: 0,
+    source: 'ytranscript',
   };
 }
 
@@ -650,6 +668,7 @@ async function tryFetchNativeYouTube(videoId: string): Promise<YouTubeLessonData
     sentences,
     totalSentences: sentences.length,
     completedCount: 0,
+    source: 'native',
   };
 }
 
@@ -699,9 +718,14 @@ export async function getYouTubeTranscript(urlOrId: string): Promise<YouTubeLess
 
   // Bước 3: Tự động lưu kết quả vào Firestore Cache (bất đồng bộ để không chặn kết quả trả về)
   if (result && result.sentences.length > 0) {
+    result.source = source;
     saveCachedTranscript(result, source).catch((saveErr) => {
       console.warn(`[YT:${videoId}] Không thể lưu cache Firestore:`, saveErr);
     });
+  }
+
+  if (result) {
+    result.source = source;
   }
 
   return result;

@@ -1,8 +1,17 @@
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../config';
-import { YouTubeLessonData, YouTubeSentence } from '@/types/youtube';
+import { doc, getDoc, setDoc, serverTimestamp, collection, query, orderBy, limit, getDocs } from "firebase/firestore";
+import { db } from "../config";
+import { YouTubeLessonData, YouTubeSentence } from "@/types/youtube";
 
-const COLLECTION_NAME = 'youtube_transcripts';
+const COLLECTION_NAME = "youtube_transcripts";
+
+export interface TranscribedVideoSummary {
+  videoId: string;
+  videoTitle: string;
+  totalSentences: number;
+  thumbnailUrl: string;
+  source: "native" | "ytranscript";
+  updatedAt?: number;
+}
 
 /**
  * Lấy dữ liệu phụ đề đã được cache trong Cloud Firestore.
@@ -26,10 +35,11 @@ export async function getCachedTranscript(videoId: string): Promise<YouTubeLesso
 
     return {
       videoId: data.videoId || videoId,
-      videoTitle: data.videoTitle || 'YouTube Speaking Practice',
+      videoTitle: data.videoTitle || "YouTube Speaking Practice",
       sentences,
       totalSentences: data.totalSentences || sentences.length,
       completedCount: 0,
+      source: (data.source as "native" | "ytranscript") || "native"
     };
   } catch (error) {
     console.warn(`[FirestoreCache] Lỗi khi đọc cache cho video ${videoId}:`, error);
@@ -43,7 +53,7 @@ export async function getCachedTranscript(videoId: string): Promise<YouTubeLesso
  */
 export async function saveCachedTranscript(
   data: YouTubeLessonData,
-  source: 'native' | 'ytranscript' = 'native'
+  source: "native" | "ytranscript" = "native"
 ): Promise<void> {
   try {
     if (!data.videoId || !data.sentences || data.sentences.length === 0) {
@@ -60,8 +70,8 @@ export async function saveCachedTranscript(
       words: (s.words || []).map((w) => ({
         word: w.word,
         start: w.start,
-        end: w.end,
-      })),
+        end: w.end
+      }))
     }));
 
     // Kiểm tra giới hạn kích thước document Firestore (1MB limit)
@@ -79,12 +89,12 @@ export async function saveCachedTranscript(
       docRef,
       {
         videoId: data.videoId,
-        videoTitle: data.videoTitle || 'YouTube Speaking Practice',
+        videoTitle: data.videoTitle || "YouTube Speaking Practice",
         totalSentences: data.totalSentences || cleanSentences.length,
         sentences: cleanSentences,
         source,
         updatedAt: serverTimestamp(),
-        createdAt: serverTimestamp(),
+        createdAt: serverTimestamp()
       },
       { merge: true }
     );
@@ -94,5 +104,49 @@ export async function saveCachedTranscript(
     );
   } catch (error) {
     console.warn(`[FirestoreCache] Không thể lưu cache cho video ${data.videoId}:`, error);
+  }
+}
+
+/**
+ * Lấy danh sách tóm tắt các video đã từng được phân tích phụ đề từ Firestore.
+ * Trả về danh sách đã sắp xếp theo thời gian cập nhật gần nhất, kết hợp danh sách mẫu.
+ */
+export async function getTranscribedVideosList(limitCount: number = 24): Promise<TranscribedVideoSummary[]> {
+  try {
+    const colRef = collection(db, COLLECTION_NAME);
+    let snap;
+    try {
+      const q = query(colRef, orderBy("updatedAt", "desc"), limit(limitCount));
+      snap = await getDocs(q);
+    } catch {
+      // Fallback nếu index chưa sẵn sàng
+      const q = query(colRef, limit(limitCount));
+      snap = await getDocs(q);
+    }
+
+    const firestoreList: TranscribedVideoSummary[] = [];
+    const seenIds = new Set<string>();
+
+    snap.forEach((docSnap) => {
+      const data = docSnap.data();
+      const videoId = data.videoId || docSnap.id;
+      if (!videoId || seenIds.has(videoId)) return;
+      seenIds.add(videoId);
+
+      const title = data.videoTitle || "YouTube Speaking Practice";
+      firestoreList.push({
+        videoId,
+        videoTitle: title,
+        totalSentences: data.totalSentences || (Array.isArray(data.sentences) ? data.sentences.length : 0),
+        thumbnailUrl: `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`,
+        source: (data.source as "native" | "ytranscript") || "native",
+        updatedAt: data.updatedAt?.toMillis?.() || Date.now()
+      });
+    });
+
+    return firestoreList;
+  } catch (error) {
+    console.warn("[FirestoreCache] Lỗi khi lấy danh sách video explore:", error);
+    return [];
   }
 }
