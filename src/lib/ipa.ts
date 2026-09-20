@@ -1,3 +1,11 @@
+/**
+ * General American IPA Transcription Engine
+ *
+ * Core offline dictionary source:
+ * - Dataset: The CMU Pronouncing Dictionary converted to IPA (124,000+ words)
+ * - Source: https://github.com/menelik3/cmudict-ipa (menelik3/cmudict-ipa)
+ * - File: src/data/american-ipa.json
+ */
 import ipaData from "@/data/american-ipa.json";
 import { getEnrichedIpaSync, prefetchEnrichedIpa } from "@/lib/firebase/firestore/ipaEnriched";
 
@@ -7,12 +15,6 @@ const ipaDict: Record<string, string> = ipaData as Record<string, string>;
 if (typeof window !== 'undefined') {
   prefetchEnrichedIpa();
 }
-
-/** Words currently being fetched — prevents duplicate concurrent requests */
-const inFlightWords = new Set<string>();
-
-/** Sentinel stored in localStorage to permanently skip words not found in the API */
-const IPA_FAILED_SENTINEL = "__NOTFOUND__";
 
 const CONTRACTIONS_DICT: Record<string, string> = {
   "let's": "lɛts",
@@ -249,110 +251,15 @@ export function getAmericanIpa(rawWord: string): string {
     }
   }
 
-  // 9. Asynchronously trigger background enrichment for unknown words
-  // Guard: skip if already in-flight, already failed, or server-side
-  if (typeof window !== "undefined" && alpha.length >= 3 && !inFlightWords.has(alpha)) {
-    try {
-      const failed = localStorage.getItem(`echo_ipa_${alpha}`);
-      if (failed !== IPA_FAILED_SENTINEL) {
-        void fetchMissingAmericanIpa(alpha);
-      }
-    } catch {
-      void fetchMissingAmericanIpa(alpha);
-    }
-  }
-
   return "";
 }
 
 /**
- * Asynchronously fetch American IPA from Free Dictionary API if a newly-added word is missing.
+ * Resolves American IPA for a word offline.
+ * Note: External dictionary API has been removed in favor of the complete 124,000+ CMUdict offline dataset.
  */
 export async function fetchMissingAmericanIpa(rawWord: string): Promise<string> {
-  const clean = rawWord
-    .toLowerCase()
-    .replace(/^[+*`]/, "")
-    .replace(/[^a-z0-9]/g, "")
-    .trim();
-
-  if (!clean) return "";
-
-  // If already in the static dict, no need to fetch
-  if (ipaDict[clean]) return `/${ipaDict[clean]}/`;
-
-  // Check localStorage cache (including failure sentinel)
-  if (typeof window !== "undefined") {
-    try {
-      const cached = localStorage.getItem(`echo_ipa_${clean}`);
-      if (cached && cached !== IPA_FAILED_SENTINEL) return cached;
-      if (cached === IPA_FAILED_SENTINEL) return ""; // permanently skipped
-    } catch {
-      /* ignore */
-    }
-  }
-
-  // Guard: skip if already being fetched
-  if (inFlightWords.has(clean)) return "";
-  inFlightWords.add(clean);
-
-  try {
-    const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${clean}`);
-    if (!res.ok) {
-      // Cache failure permanently so we never retry
-      if (typeof window !== "undefined") {
-        try {
-          localStorage.setItem(`echo_ipa_${clean}`, IPA_FAILED_SENTINEL);
-        } catch {
-          /* ignore */
-        }
-      }
-      return "";
-    }
-    const data = await res.json();
-    if (Array.isArray(data) && data.length > 0) {
-      interface PhoneticItem {
-        audio?: string;
-        text?: string;
-      }
-      const phonetics: PhoneticItem[] = data[0].phonetics || [];
-      // Prioritize US phonetic or first available transcription
-      const usPhonetic =
-        phonetics.find((p) => (p.audio?.includes("-us") || p.audio?.includes("/us/")) && p.text) ||
-        phonetics.find((p) => p.text) ||
-        (data[0].phonetic ? { text: data[0].phonetic } : null);
-
-      if (usPhonetic && usPhonetic.text) {
-        let text = usPhonetic.text.trim();
-        if (!text.startsWith("/")) text = `/${text}`;
-        if (!text.endsWith("/")) text = `${text}/`;
-
-        if (typeof window !== 'undefined') {
-          try { localStorage.setItem(`echo_ipa_${clean}`, text); } catch { /* ignore */ }
-        }
-        // Fire-and-forget: persist new entry back into the source dictionary
-        void fetch('/api/enrich-ipa', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ word: clean, ipa: text }),
-        }).catch(() => { /* ignore — production read-only FS is expected */ });
-        return text;
-      }
-    }
-    // Data found but no phonetic — still cache as failed
-    if (typeof window !== "undefined") {
-      try {
-        localStorage.setItem(`echo_ipa_${clean}`, IPA_FAILED_SENTINEL);
-      } catch {
-        /* ignore */
-      }
-    }
-  } catch {
-    // Network error — do NOT cache, allow retry next session
-  } finally {
-    inFlightWords.delete(clean);
-  }
-
-  return "";
+  return getAmericanIpa(rawWord);
 }
 
 /**

@@ -44,7 +44,7 @@ Hầu hết người học tiếng Anh đều gặp trở ngại khi chuyển t�
 ---
 
 ### 2. 🎙️ Shadowing & Pronunciation Lab
-* **Phát âm chuẩn người bản xứ**: Sử dụng Web Speech Synthesis với tùy chọn tốc độ (`1.0x` / `0.75x`).
+* **Phát âm chuẩn người bản xứ (Neural TTS)**: Sử dụng Microsoft Edge Neural TTS (`en-US-JennyNeural`, MP3 24kHz) kèm tùy chọn tốc độ (`1.0x` / `0.75x`), tự động cache và fallback về Web Speech Synthesis khi mất mạng.
 * **Nhận diện giọng nói trực tiếp**: Nhấn giữ phím Micro để nhại lại câu.
 * **So khớp phát âm theo thời gian thực (Color-coded Diff)**:
   * 🟢 **Xanh lá**: Phát âm chuẩn xác.
@@ -88,7 +88,10 @@ Hầu hết người học tiếng Anh đều gặp trở ngại khi chuyển t�
 * **Thư viện UI**: [React 19.2.8](https://react.dev/), [Lucide React](https://lucide.dev/), [Canvas Confetti](https://www.npmjs.com/package/canvas-confetti)
 * **Styling**: [Tailwind CSS 3.4](https://tailwindcss.com/)
 * **Backend & Database**: [Firebase v12](https://firebase.google.com/) (Auth, Cloud Firestore)
-* **Speech Engine**: Web Speech API (`SpeechRecognition` & `SpeechSynthesis`)
+* **Speech & Audio Engine**:
+  * **Neural TTS**: [msedge-tts](https://www.npmjs.com/package/msedge-tts) (Microsoft Edge Neural Voice `en-US-JennyNeural`, streaming MP3 24kHz Mono, LRU In-memory Cache & Vercel Edge CDN Caching).
+  * **Speech Recognition**: Web Speech API (`webkitSpeechRecognition` & `SpeechRecognition`).
+* **Phonetics & IPA Engine**: Hệ thống phiên âm General American offline **124,895 từ vựng** dựa trên [menelik3/cmudict-ipa](https://github.com/menelik3/cmudict-ipa) (CMUdict v0.7b), tra cứu tức thì $O(1)$ với 0ms độ trễ.
 * **YouTube Service**: Tự chủ giải thuật trích xuất phụ đề `srv3` / `classic` XML + Fallback Provider REST API.
 
 ---

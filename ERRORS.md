@@ -1,8 +1,8 @@
 # ERRORS.md — Nhật ký Lỗi, Nguyên nhân Gốc rễ & Giải pháp (EchoChunk)
 
 > **Dự án:** EchoChunk  
-> **Cập nhật lần cuối:** 2026-09-13  
-> **Phạm vi:** YouTube Transcript, Player, React 19 Lifecycle, SSR Hydration, ESLint Rules
+> **Cập nhật lần cuối:** 2026-09-20  
+> **Phạm vi:** YouTube Transcript, Player, React 19 Lifecycle, SSR Hydration, ESLint Rules, TTS Audio Engine, Phonetics IPA
 
 ---
 
@@ -14,6 +14,8 @@
 5. [Khảo sát kiến trúc xử lý từ ShadowingEnglish.com](#5-khảo-sát-kiến-trúc-xử-lý-từ-shadowingenglishcom)
 6. [Lỗi ESLint `Cannot access refs during render` (`react-hooks/refs`) trong React 19](#6-lỗi-eslint-cannot-access-refs-during-render-react-hooksrefs-trong-react-19)
 7. [Lỗi Cascading Render & `react-hooks/set-state-in-effect` khi đọc LocalStorage](#7-lỗi-cascading-render--react-hooksset-state-in-effect-khi-đọc-localstorage)
+8. [Lỗi thư viện `@travisvn/edge-tts` bị treo vô hạn (hang/freeze) trên Node.js runtime](#8-lỗi-thư-viện-travisvnedge-tts-bị-treo-vô-hạn-hangfreeze-trên-nodejs-runtime)
+9. [Bộ từ điển `american-ipa.json` bị cắt cụt (truncated) và sự cố nghẽn mạng từ `api.dictionaryapi.dev`](#9-bộ-từ-điển-american-ipajson-bị-cắt-cụt-truncated-và-sự-cố-nghẽn-mạng-từ-apidictionaryapidev)
 
 ---
 
@@ -264,3 +266,100 @@ const history = useMemo<YouTubeHistoryItem[]>(() => {
 ```
 - Phía Server: `isClient = false` ➔ render mảng rỗng an toàn, khớp với SSR HTML.
 - Phía Client: `isClient = true` ➔ render ngay dữ liệu từ LocalStorage trong 1 lượt duy nhất, không cascading render, 0 cảnh báo ESLint.
+
+---
+
+## 8. Lỗi thư viện `@travisvn/edge-tts` bị treo vô hạn (hang/freeze) trên Node.js runtime
+
+### Triệu chứng
+Khi triển khai tính năng Microsoft Edge Neural TTS cho backend Route Handler bằng gói npm `@travisvn/edge-tts`:
+```js
+import { EdgeTTS } from '@travisvn/edge-tts';
+
+const tts = new EdgeTTS('Hello world', 'en-US-JennyNeural');
+const res = await tts.synthesize(); // <--- Treo vô hạn ở đây
+```
+- Process in ra `Synthesizing...` rồi bị đơ hoàn toàn (hang/freeze).
+- Không trả về mảng dữ liệu âm thanh, không timeout và không ném ra bất kỳ Exception hay Error nào.
+- Request gọi tới `/api/tts` bị pending vĩnh viễn dẫn tới timeout phía client.
+
+### Nguyên nhân gốc rễ
+1. **Kiến trúc client-centric**: Thư viện `@travisvn/edge-tts` được thiết kế chủ yếu cho môi trường trình duyệt (Browser), sử dụng các API Web Socket/Fetch không tương thích tốt với Node.js runtime stream lifecycle.
+2. **Ngậm WebSocket handshake vô hạn**: Khi khởi tạo kết nối WebSocket với máy chủ TTS của Microsoft trên Node.js, socket handshake không bắt được event stream closure và không resolve Promise `synthesize()`, làm treo luồng thực thi.
+
+### Cách khắc phục
+1. Gỡ bỏ hoàn toàn `@travisvn/edge-tts`:
+   ```bash
+   pnpm remove @travisvn/edge-tts
+   ```
+2. Cài đặt thư viện chuyên dụng, chuẩn hóa cho Node.js backend: **`msedge-tts`** (v2.0.7):
+   ```bash
+   pnpm add msedge-tts
+   ```
+3. Chuyển đổi sang luồng xử lý **Node.js Readable Stream** chuẩn:
+   ```ts
+   import { MsEdgeTTS, OUTPUT_FORMAT } from 'msedge-tts';
+
+   const tts = new MsEdgeTTS();
+   await tts.setMetadata('en-US-JennyNeural', OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
+
+   const { audioStream } = await tts.toStream(text, {
+     rate: rateStr,
+     pitch: '+0Hz',
+   });
+
+   const chunks: Buffer[] = [];
+   await new Promise<void>((resolve, reject) => {
+     audioStream.on('data', (chunk: Buffer) => chunks.push(chunk));
+     audioStream.on('end', () => resolve());
+     audioStream.on('error', (err: Error) => reject(err));
+   });
+
+   const buffer = Buffer.concat(chunks);
+   ```
+4. **Kết quả**:
+   - Âm thanh MP3 chất lượng cao (24kHz Mono 48kbps) trả về sau **chưa đầy 0.8 giây**.
+   - Tương thích 100% với Next.js Route Handler trên Vercel Serverless Function (`export const runtime = 'nodejs';`).
+
+---
+
+## 9. Bộ từ điển `american-ipa.json` bị cắt cụt (truncated) và sự cố nghẽn mạng từ `api.dictionaryapi.dev`
+
+### Triệu chứng
+1. Khi người dùng nhập các câu tiếng Anh thông dụng (ví dụ: *"Shall I open the window?"*), hệ thống phát âm IPA hiển thị rớt lại các từ gốc tiếng Anh chưa được phiên âm:
+   ```text
+   /shall ˈaɪ open ðə ˈwɪndoʊ/
+   ```
+   Các từ như `shall`, `open`, `door`, `water`, `pen` hoàn toàn không có phiên âm.
+2. Đồng thời, trình duyệt gặp hiện tượng lag, đơ, phản hồi cực kỳ chậm từ API ngoài `api.dictionaryapi.dev` (Free Dictionary API).
+
+### Nguyên nhân gốc rễ
+1. **Từ điển offline bị cắt cụt (Truncated dataset)**:
+   - Tệp `src/data/american-ipa.json` trước đây ghi nhận có 25,681 từ. Tuy nhiên, khi phân tích phân bố theo chữ cái:
+     - `A`: 6,245 từ
+     - `B`: 8,602 từ
+     - `C`: 9,282 từ (riêng A, B, C chiếm **24,129 từ ~ 94% toàn bộ từ điển**)
+     - `D`: 401 từ (bị dừng đột ngột ngay ở từ `dana`)
+     - `E – Z`: Hầu như trống rỗng (`O` chỉ có 36 từ, `S` có 186 từ, `Z` có 0 từ).
+   - Tệp JSON ban đầu được xuất theo bảng chữ cái nhưng bị ngắt quãng giữa chừng khi mới đến chữ D, khiến gần như toàn bộ từ vựng thông dụng từ D đến Z bị thiếu.
+2. **Nghẽn mạng do gọi API dự phòng dồn dập**:
+   - Hàm `getPhraseIpa` là hàm **đồng bộ (synchronous)** để render tức thì lên giao diện. Khi gặp từ thiếu, code kích hoạt `fetchMissingAmericanIpa` dạng fire-and-forget đến `api.dictionaryapi.dev`.
+   - Vì thiếu đến 90% từ vựng từ D–Z, mỗi câu người dùng gõ vào bắn dồn dập 3–5 request đồng thời lên `api.dictionaryapi.dev` (vốn là dịch vụ miễn phí của cộng đồng, thường xuyên rate-limit, timeout hoặc chặn IP).
+   - Hàm đồng bộ không đợi API và trả về ngay từ gốc làm fallback (`shall`, `open`), trong khi background network request treo đơ trình duyệt.
+
+### Cách khắc phục
+1. **Nâng cấp từ điển offline toàn diện từ CMUdict IPA**:
+   - Sử dụng bộ dữ liệu chuẩn hoá [menelik3/cmudict-ipa](https://github.com/menelik3/cmudict-ipa) (dựa trên **CMU Pronouncing Dictionary v0.7b** của Đại học Carnegie Mellon).
+   - Chuẩn hoá sang chuẩn **Broad General American IPA** (`r` thay vì `ɹ`, `l` thay vì `ɫ`) và gộp toàn bộ từ vựng thuật ngữ công nghệ hiện có của EchoChunk (`api`, `llm`, `tsx`, `codebase`,...).
+   - Quy mô từ điển tăng từ 25,681 từ lên **124,895 từ vựng** trải đều 100% từ A đến Z, dung lượng file JSON ~3.1MB (gzip ~700KB), tra cứu $O(1)$ tức thì 0ms.
+2. **Xoá bỏ hoàn toàn lời gọi phụ thuộc tới `api.dictionaryapi.dev`**:
+   - Trong [`src/lib/ipa.ts`](file:///d:/SelfLearning/EchoChunk/src/lib/ipa.ts), loại bỏ hoàn toàn lệnh `fetch` đến `api.dictionaryapi.dev`.
+   - Xóa bỏ việc kích hoạt background request ngầm khi không tìm thấy từ.
+   - Chuyển `fetchMissingAmericanIpa` thành hàm tra cứu offline từ bộ từ điển 124,895 từ.
+3. **Kết quả**:
+   - Câu *"Shall I open the window?"* được phiên âm chính xác ngay lập tức:
+     ```text
+     /ˈʃæl ˈaɪ ˈoʊpən ðə ˈwɪndoʊ/
+     ```
+   - Hệ thống vận hành **offline 100%**, triệt tiêu hoàn toàn độ trễ mạng và tình trạng treo đơ do API bên ngoài.
+

@@ -259,21 +259,58 @@ class SpeechService {
     }
   }
 
+  private currentAudio: HTMLAudioElement | null = null;
+  private currentRequestId = 0;
+  private audioUrlCache = new Map<string, string>();
+  private readonly MAX_CLIENT_CACHE = 200;
+
   isRecognitionSupported(): boolean {
     if (typeof window === 'undefined') return false;
     const win = window as CustomWindow;
     return !!(win.SpeechRecognition || win.webkitSpeechRecognition);
   }
 
-  speak(text: string, rate: number = 1.0, onEnd?: () => void) {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+  private playAudioUrl(url: string, requestId: number, onEnd?: () => void, onError?: () => void) {
+    if (requestId !== this.currentRequestId) return;
+
+    try {
+      const audio = new Audio(url);
+      this.currentAudio = audio;
+
+      audio.onended = () => {
+        if (this.currentAudio === audio) {
+          this.currentAudio = null;
+        }
+        onEnd?.();
+      };
+
+      audio.onerror = () => {
+        if (this.currentAudio === audio) {
+          this.currentAudio = null;
+        }
+        onError?.();
+      };
+
+      audio.play().catch(() => {
+        if (this.currentAudio === audio) {
+          this.currentAudio = null;
+        }
+        onError?.();
+      });
+    } catch {
+      onError?.();
+    }
+  }
+
+  private fallbackBrowserSpeak(text: string, rate: number = 1.0, onEnd?: () => void) {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+      onEnd?.();
+      return;
+    }
 
     window.speechSynthesis.cancel();
 
-    const cleanText = text.replace(/[*_`]/g, '').trim();
-    if (!cleanText) return;
-
-    const utterance = new SpeechSynthesisUtterance(cleanText);
+    const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = rate;
     utterance.lang = 'en-US';
 
@@ -299,10 +336,95 @@ class SpeechService {
     window.speechSynthesis.speak(utterance);
   }
 
-  stopSpeaking() {
+  /**
+   * Speak English text using Microsoft Edge Neural TTS (en-US-JennyNeural)
+   * with ultra-fast in-memory caching and automatic fallback to browser Web Speech API.
+   */
+  speak(text: string, rate: number = 1.0, onEnd?: () => void) {
+    if (typeof window === 'undefined') return;
+
+    // Increment request ID to cancel any in-flight previous audio/fetch
+    const requestId = ++this.currentRequestId;
+    this.stopSpeakingInternal();
+
+    const cleanText = text.replace(/[*_`]/g, '').trim();
+    if (!cleanText) {
+      onEnd?.();
+      return;
+    }
+
+    const cacheKey = `${cleanText}__${rate.toFixed(2)}`;
+
+    // 1. Check client memory cache for instant playback (0ms latency)
+    if (this.audioUrlCache.has(cacheKey)) {
+      const cachedUrl = this.audioUrlCache.get(cacheKey)!;
+      this.playAudioUrl(
+        cachedUrl,
+        requestId,
+        onEnd,
+        () => this.fallbackBrowserSpeak(cleanText, rate, onEnd)
+      );
+      return;
+    }
+
+    // 2. Fetch high-definition Neural TTS from /api/tts (Microsoft Edge Neural Voice)
+    // Using GET enables Vercel Edge CDN caching globally
+    const ttsUrl = `/api/tts?text=${encodeURIComponent(cleanText)}&rate=${rate.toFixed(2)}`;
+    fetch(ttsUrl)
+      .then(async (res) => {
+        if (!res.ok) {
+          throw new Error(`TTS server responded with ${res.status}`);
+        }
+        if (requestId !== this.currentRequestId) {
+          return;
+        }
+        const blob = await res.blob();
+        if (requestId !== this.currentRequestId) return;
+
+        const audioUrl = URL.createObjectURL(blob);
+
+        // Evict oldest if cache gets too large
+        if (this.audioUrlCache.size >= this.MAX_CLIENT_CACHE) {
+          const oldestKey = this.audioUrlCache.keys().next().value;
+          if (oldestKey) {
+            const oldUrl = this.audioUrlCache.get(oldestKey);
+            if (oldUrl) URL.revokeObjectURL(oldUrl);
+            this.audioUrlCache.delete(oldestKey);
+          }
+        }
+        this.audioUrlCache.set(cacheKey, audioUrl);
+
+        this.playAudioUrl(
+          audioUrl,
+          requestId,
+          onEnd,
+          () => this.fallbackBrowserSpeak(cleanText, rate, onEnd)
+        );
+      })
+      .catch((err) => {
+        console.warn('Edge TTS request failed, falling back to browser speechSynthesis:', err);
+        if (requestId === this.currentRequestId) {
+          this.fallbackBrowserSpeak(cleanText, rate, onEnd);
+        }
+      });
+  }
+
+  private stopSpeakingInternal() {
+    if (this.currentAudio) {
+      this.currentAudio.pause();
+      this.currentAudio.currentTime = 0;
+      this.currentAudio.onended = null;
+      this.currentAudio.onerror = null;
+      this.currentAudio = null;
+    }
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
     }
+  }
+
+  stopSpeaking() {
+    this.currentRequestId++;
+    this.stopSpeakingInternal();
   }
 
   /**
