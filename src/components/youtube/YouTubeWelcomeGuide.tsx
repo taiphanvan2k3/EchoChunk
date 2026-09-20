@@ -1,33 +1,18 @@
 'use client';
 
 import React from 'react';
-import { YouTubeHistoryItem } from '@/types/youtube';
-import { YouTubeRecentVideos } from './YouTubeRecentVideos';
 import { Sparkles, Mic, BookOpen } from 'lucide-react';
 
-interface YouTubeEmptyStateProps {
-  history: YouTubeHistoryItem[];
+interface YouTubeWelcomeGuideProps {
   onSelectVideo: (url: string) => void;
-  onRemoveHistory: (videoId: string) => void;
-  isLoading: boolean;
 }
 
-export const YouTubeEmptyState: React.FC<YouTubeEmptyStateProps> = ({
-  history,
+export const YouTubeWelcomeGuide: React.FC<YouTubeWelcomeGuideProps> = ({
   onSelectVideo,
-  onRemoveHistory,
-  isLoading,
 }) => {
   return (
-    <div className="yt-empty-container">
-      {/* Danh sách video đã học gần đây */}
-      <YouTubeRecentVideos
-        history={history}
-        onSelectVideo={onSelectVideo}
-        onRemoveVideo={onRemoveHistory}
-        isLoading={isLoading}
-      />
-
+    <div className="yt-welcome-guide">
+      {/* Thẻ giới thiệu & video mẫu */}
       <div className="yt-empty-state-card">
         <div className="yt-empty-icon-wrap">
           <Sparkles size={28} className="yt-empty-sparkle" />
@@ -67,7 +52,7 @@ export const YouTubeEmptyState: React.FC<YouTubeEmptyStateProps> = ({
         </div>
       </div>
 
-      {/* 3 Thẻ tính năng nổi bật phía dưới empty state */}
+      {/* 3 Thẻ tính năng nổi bật */}
       <div className="yt-empty-features-grid">
         <div className="yt-feature-card">
           <div className="yt-feature-icon-badge blue">

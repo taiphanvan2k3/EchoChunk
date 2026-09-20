@@ -1,63 +1,24 @@
 "use client";
 
-import React, { useState, useCallback, useMemo, useTransition, useEffect } from "react";
+import React, { useState, useCallback, useTransition } from "react";
 import { flushSync } from "react-dom";
 import Link from "next/link";
-import { YouTubeLessonData, YouTubeSentence, YouTubeHistoryItem } from "@/types/youtube";
+import { YouTubeLessonData, YouTubeSentence } from "@/types/youtube";
 import { getYoutubeTranscriptAction } from "@/server/actions/youtube.actions";
 import { useAuth } from "@/context/AuthContext";
-import { useIsClient } from "@/hooks/useIsClient";
-import {
-  getLocalYouTubeHistory,
-  fetchAndSyncYouTubeHistory,
-  saveYouTubeHistoryItem,
-  updateYouTubeHistoryProgress,
-  removeYouTubeHistoryItem
-} from "@/lib/youtube-history";
+import { youtubeHistoryStore } from "@/stores/youtubeHistoryStore";
 import { YouTubePlayer } from "./YouTubePlayer";
 import { SentenceList } from "./SentenceList";
 import { PracticeModeCards } from "./PracticeModeCards";
 import { YouTubeInputBar } from "./YouTubeInputBar";
-import { YouTubeEmptyState } from "./YouTubeEmptyState";
+import { YouTubeRecentVideos } from "./YouTubeRecentVideos";
+import { YouTubeWelcomeGuide } from "./YouTubeWelcomeGuide";
 import { YouTubeReviewsCard } from "./YouTubeReviewsCard";
 import { ChevronRight, AlertCircle } from "lucide-react";
 
 export const YouTubeStudyRoom: React.FC = () => {
   const { user } = useAuth();
-  const isClient = useIsClient();
   const [inputUrl, setInputUrl] = useState("");
-  const [storeVersion, setStoreVersion] = useState(0);
-
-  const [cloudHistory, setCloudHistory] = useState<YouTubeHistoryItem[] | null>(null);
-
-  // Đồng bộ 2 chiều với Cloud Firestore khi user đăng nhập hoặc storeVersion thay đổi
-  useEffect(() => {
-    if (!isClient || !user?.uid) return;
-
-    let isMounted = true;
-    fetchAndSyncYouTubeHistory(user.uid)
-      .then((merged) => {
-        if (isMounted && merged) {
-          setCloudHistory(merged);
-        }
-      })
-      .catch((err) => {
-        console.warn("[YouTubeStudyRoom] Cloud history sync error:", err);
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [isClient, user?.uid, storeVersion]);
-
-  // Lịch sử hiển thị: Ưu tiên Cloud Firestore đã sync, nếu không có thì sử dụng từ LocalStorage
-  const history = useMemo<YouTubeHistoryItem[]>(() => {
-    void storeVersion;
-    if (!isClient) return [];
-    if (cloudHistory && user?.uid) return cloudHistory;
-
-    return getLocalYouTubeHistory(user?.uid);
-  }, [isClient, storeVersion, user?.uid, cloudHistory]);
 
   // isFetching: đang chờ server trả lời
   // isPending:  React đang render hàng trăm câu — giữ spinner cho đến khi xong
@@ -91,7 +52,7 @@ export const YouTubeStudyRoom: React.FC = () => {
         const data = res.data;
 
         // Lưu vào lịch sử học LocalStorage & Firestore (nếu đã đăng nhập)
-        saveYouTubeHistoryItem(
+        youtubeHistoryStore.save(
           {
             videoId: data.videoId,
             videoUrl: url,
@@ -102,7 +63,6 @@ export const YouTubeStudyRoom: React.FC = () => {
           },
           user?.uid
         );
-        setStoreVersion((v) => v + 1);
 
         // startTransition: React render hàng nghìn câu không-blocking
         startTransition(() => {
@@ -121,15 +81,6 @@ export const YouTubeStudyRoom: React.FC = () => {
       setIsFetching(false);
     }
   };
-
-  // Xóa một video khỏi lịch sử học
-  const handleRemoveHistory = useCallback(
-    (videoId: string) => {
-      removeYouTubeHistoryItem(videoId, user?.uid);
-      setStoreVersion((v) => v + 1);
-    },
-    [user?.uid]
-  );
 
   // Bấm vào 1 câu trong danh sách để nhảy video
   const handleSelectSentence = useCallback((sentence: YouTubeSentence) => {
@@ -151,8 +102,7 @@ export const YouTubeStudyRoom: React.FC = () => {
         }
 
         if (currentVideoId) {
-          updateYouTubeHistoryProgress(currentVideoId, next.size, user?.uid);
-          setStoreVersion((v) => v + 1);
+          youtubeHistoryStore.updateProgress(currentVideoId, next.size, user?.uid);
         }
 
         return next;
@@ -219,17 +169,23 @@ export const YouTubeStudyRoom: React.FC = () => {
         </div>
       )}
 
-      {/* 4. Trạng thái khởi đầu (Chưa tải video) */}
+      {/* 4. Trạng thái khám phá & video đã học khi chưa tải bài học */}
       {!lessonData && !isLoading && (
-        <YouTubeEmptyState
-          history={history}
-          onSelectVideo={(url) => {
-            setInputUrl(url);
-            handleLoadVideo(url);
-          }}
-          onRemoveHistory={handleRemoveHistory}
-          isLoading={isLoading}
-        />
+        <div className="yt-empty-container">
+          <YouTubeRecentVideos
+            onSelectVideo={(url) => {
+              setInputUrl(url);
+              handleLoadVideo(url);
+            }}
+            isLoading={isLoading}
+          />
+          <YouTubeWelcomeGuide
+            onSelectVideo={(url) => {
+              setInputUrl(url);
+              handleLoadVideo(url);
+            }}
+          />
+        </div>
       )}
 
       {/* 5. Khối bài học 2 cột khi đã có dữ liệu */}

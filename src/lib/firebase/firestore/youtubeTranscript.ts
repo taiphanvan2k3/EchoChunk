@@ -62,7 +62,6 @@ export async function saveCachedTranscript(
         start: w.start,
         end: w.end,
       })),
-      isCompleted: false,
     }));
 
     // Kiểm tra giới hạn kích thước document Firestore (1MB limit)

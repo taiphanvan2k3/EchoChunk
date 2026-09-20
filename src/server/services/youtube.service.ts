@@ -302,7 +302,6 @@ function parseTranscriptXml(xml: string): { sentences: YouTubeSentence[] } {
         start: Number(sentenceStartSec.toFixed(3)),
         duration: Number(sentenceDurSec.toFixed(3)),
         words,
-        isCompleted: false,
       });
 
       index++;
@@ -344,7 +343,6 @@ function parseTranscriptXml(xml: string): { sentences: YouTubeSentence[] } {
         start: Number(startSec.toFixed(3)),
         duration: Number(durSec.toFixed(3)),
         words,
-        isCompleted: false,
       });
 
       cIndex++;
@@ -483,7 +481,6 @@ async function fetchFromYTranscript(
       start: sentenceStartSec,
       duration: sentenceDurSec,
       words,
-      isCompleted: false,
     });
 
     index++;
