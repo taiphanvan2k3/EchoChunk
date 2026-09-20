@@ -11,6 +11,7 @@
  *   4. Tự chủ 100% mã nguồn trong `src/server/services`, loại bỏ sự phụ thuộc vào package ngoài.
  */
 
+import { HttpsProxyAgent } from 'https-proxy-agent';
 import { YouTubeLessonData, YouTubeSentence, YouTubeWord } from '@/types/youtube';
 import { getCachedTranscript, saveCachedTranscript } from '@/lib/firebase/firestore/youtubeTranscript';
 
@@ -23,6 +24,13 @@ const RE_RAW_ID = /^[a-zA-Z0-9_-]{11}$/;
 
 const YTRANSCRIPT_API_URL = 'https://ytranscript.com/api/v1/transcript';
 const YTRANSCRIPT_API_KEY = process.env.YTRANSCRIPT_API_KEY;
+
+/**
+ * Proxy agent tùy chọn — inject vào tất cả fetch() calls để bypass YouTube IP block.
+ * Nếu WEBSHARE_PROXY_URL chưa được cấu hình, service vẫn hoạt động bình thường (không proxy).
+ */
+const PROXY_URL = process.env.WEBSHARE_PROXY_URL;
+const proxyAgent = PROXY_URL ? new HttpsProxyAgent(PROXY_URL) : undefined;
 
 /**
  * Trích xuất video ID từ URL YouTube hoặc chuỗi ID trực tiếp
@@ -76,6 +84,13 @@ async function fetchPlayerResponse(videoId: string) {
     userAgent: string;
     embedUrl?: string;
   }[] = [
+    // ANDROID đứng đầu: client duy nhất bypass được YouTube bot-detection
+    // trên datacenter IP và rotating proxy (test xác nhận 2026-09-20)
+    {
+      clientName: 'ANDROID',
+      clientVersion: INNERTUBE_CLIENT_VERSION,
+      userAgent: INNERTUBE_USER_AGENT,
+    },
     {
       clientName: 'WEB_EMBEDDED_PLAYER',
       clientVersion: '1.20250915.01.00',
@@ -93,11 +108,6 @@ async function fetchPlayerResponse(videoId: string) {
       clientVersion: '2.20250915.01.00',
       userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
       embedUrl: `https://www.youtube.com/embed/${videoId}`,
-    },
-    {
-      clientName: 'ANDROID',
-      clientVersion: INNERTUBE_CLIENT_VERSION,
-      userAgent: INNERTUBE_USER_AGENT,
     },
   ];
 
@@ -135,6 +145,7 @@ async function fetchPlayerResponse(videoId: string) {
         },
         body: JSON.stringify(requestBody),
         cache: 'no-store',
+        ...(proxyAgent ? { agent: proxyAgent } : {}),
       });
 
       if (!res.ok) {
@@ -213,6 +224,7 @@ async function fetchPlayerResponseFallback(videoId: string) {
         'User-Agent': BROWSER_USER_AGENT,
         'Accept-Language': 'en-US,en;q=0.9',
       },
+      ...(proxyAgent ? { agent: proxyAgent } : {}),
     });
     if (!res.ok) return null;
     const html = await res.text();
@@ -556,6 +568,7 @@ async function tryFetchNativeYouTube(videoId: string): Promise<YouTubeLessonData
       'User-Agent': BROWSER_USER_AGENT,
       'Accept-Language': 'en-US,en;q=0.9',
     },
+    ...(proxyAgent ? { agent: proxyAgent } : {}),
   });
 
   if (!xmlRes.ok && xmlUrl !== track.baseUrl) {
@@ -564,6 +577,7 @@ async function tryFetchNativeYouTube(videoId: string): Promise<YouTubeLessonData
         'User-Agent': BROWSER_USER_AGENT,
         'Accept-Language': 'en-US,en;q=0.9',
       },
+      ...(proxyAgent ? { agent: proxyAgent } : {}),
     });
   }
 
