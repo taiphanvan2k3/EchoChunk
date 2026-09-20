@@ -12,6 +12,7 @@
 - [x] Tích hợp trực tiếp **InnerTube Android Client API** (`POST /youtubei/v1/player`) lấy `captionTracks` tự chủ, không phụ thuộc package ngoài.
 - [x] Cơ chế **Fallback Web Scraping** an toàn bằng thuật toán đếm ngoặc (bracket counter) giải mã JSON `ytInitialPlayerResponse` khi API chặn.
 - [x] Hỗ trợ định dạng phụ đề `srv3` bóc tách **mốc thời gian từng từ đơn lẻ** (`<s>` tags) phục vụ hiệu ứng Karaoke.
+- [x] Tích hợp **Webshare Rotating Proxy** (`https-proxy-agent`) & ưu tiên client InnerTube `ANDROID` chống YouTube chặn IP datacenter/server.
 - [x] Server Action RPC [`getYoutubeTranscriptAction`](file:///d:/SelfLearning/EchoChunk/src/server/actions/youtube.actions.ts).
 
 ### 2. Giao diện Phòng Học YouTube (`/youtube`)
