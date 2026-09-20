@@ -13,6 +13,7 @@ import { PracticeModeCards } from "./PracticeModeCards";
 import { YouTubeInputBar } from "./YouTubeInputBar";
 import { YouTubeRecentVideos } from "./YouTubeRecentVideos";
 import { YouTubeReviewsCard } from "./YouTubeReviewsCard";
+import { YouTubeExploreLibrary } from "./YouTubeExploreLibrary";
 import { ChevronRight, AlertCircle } from "lucide-react";
 
 export const YouTubeStudyRoom: React.FC = () => {
@@ -178,6 +179,14 @@ export const YouTubeStudyRoom: React.FC = () => {
             }}
             isLoading={isLoading}
           />
+          <YouTubeExploreLibrary
+            onSelectVideo={(videoId) => {
+              const url = `https://www.youtube.com/watch?v=${videoId}`;
+              setInputUrl(url);
+              handleLoadVideo(url);
+            }}
+            isLoading={isLoading}
+          />
         </div>
       )}
 
@@ -210,6 +219,7 @@ export const YouTubeStudyRoom: React.FC = () => {
               sentences={augmentedSentences}
               currentTime={currentTime}
               activeSentenceId={activeSentenceId}
+              source={lessonData.source}
               onSelectSentence={handleSelectSentence}
               onToggleComplete={handleToggleComplete}
             />

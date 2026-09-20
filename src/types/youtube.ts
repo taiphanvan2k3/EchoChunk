@@ -20,6 +20,7 @@ export interface YouTubeLessonData {
   sentences: YouTubeSentence[];
   totalSentences: number;
   completedCount: number;
+  source?: 'native' | 'ytranscript';
 }
 
 export interface YouTubeHistoryItem {

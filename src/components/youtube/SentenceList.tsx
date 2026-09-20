@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import React, { useEffect, useRef, forwardRef } from 'react';
-import { YouTubeSentence, YouTubeWord } from '@/types/youtube';
-import { Check, Lightbulb, Edit2 } from 'lucide-react';
+import React, { useEffect, useRef, forwardRef } from "react";
+import { YouTubeSentence, YouTubeWord } from "@/types/youtube";
+import { Check, Lightbulb, Edit2 } from "lucide-react";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SentenceRow — memoized để tránh re-render không cần thiết.
@@ -15,45 +15,43 @@ interface SentenceRowProps {
   isActive: boolean;
   isCompleted: boolean;
   currentTime: number;
+  isKaraokeEnabled: boolean;
   onSelectSentence: (sentence: YouTubeSentence) => void;
   onToggleComplete?: (sentenceId: string) => void;
 }
 
 const SentenceRow = React.memo(
   forwardRef<HTMLDivElement, SentenceRowProps>(function SentenceRow(
-    { sentence, isActive, isCompleted, currentTime, onSelectSentence, onToggleComplete },
+    { sentence, isActive, isCompleted, currentTime, isKaraokeEnabled, onSelectSentence, onToggleComplete },
     ref
   ) {
     return (
       <div
         ref={ref}
-        className={`yt-sentence-row${isActive ? ' is-active' : ''}${isCompleted ? ' is-completed' : ''}`}
+        className={`yt-sentence-row${isActive ? " is-active" : ""}${isCompleted ? " is-completed" : ""}`}
         onClick={() => onSelectSentence(sentence)}
       >
         {/* Badge số thứ tự hoặc Tích xanh hoàn thành */}
         <div
-          className={`yt-sentence-index-badge${isCompleted ? ' completed' : isActive ? ' active' : ''}`}
+          className={`yt-sentence-index-badge${isCompleted ? " completed" : isActive ? " active" : ""}`}
           onClick={(e) => {
             e.stopPropagation();
             onToggleComplete?.(sentence.id);
           }}
-          title={isCompleted ? 'Đã hoàn thành' : 'Đánh dấu hoàn thành'}
+          title={isCompleted ? "Đã hoàn thành" : "Đánh dấu hoàn thành"}
         >
           {isCompleted ? <Check size={12} strokeWidth={3} /> : sentence.index}
         </div>
 
-        {/* Nội dung câu + Karaoke Word Highlighting */}
+        {/* Nội dung câu: Karaoke Word Highlighting (chỉ khi có word-timing chuẩn native) */}
         <div className="yt-sentence-content">
-          {sentence.words && sentence.words.length > 0 ? (
+          {isKaraokeEnabled && sentence.words && sentence.words.length > 0 ? (
             <div className="yt-words-wrap">
               {sentence.words.map((w: YouTubeWord, wIdx: number) => {
                 const isWordActive = isActive && currentTime >= w.start && currentTime < w.end;
                 return (
-                  <span
-                    key={wIdx}
-                    className={`yt-word-token${isWordActive ? ' is-singing' : ''}`}
-                  >
-                    {w.word}{' '}
+                  <span key={wIdx} className={`yt-word-token${isWordActive ? " is-singing" : ""}`}>
+                    {w.word}{" "}
                   </span>
                 );
               })}
@@ -74,6 +72,7 @@ interface SentenceListProps {
   sentences: YouTubeSentence[];
   currentTime: number;
   activeSentenceId: string | null;
+  source?: "native" | "ytranscript";
   onSelectSentence: (sentence: YouTubeSentence) => void;
   onToggleComplete?: (sentenceId: string) => void;
   onEditClick?: () => void;
@@ -83,12 +82,17 @@ export const SentenceList: React.FC<SentenceListProps> = ({
   sentences,
   currentTime,
   activeSentenceId,
+  source = "native",
   onSelectSentence,
   onToggleComplete,
-  onEditClick,
+  onEditClick
 }) => {
   const listContainerRef = useRef<HTMLDivElement>(null);
   const activeItemRef = useRef<HTMLDivElement>(null);
+
+  // Chỉ bật Karaoke tô màu từng từ khi nguồn phụ đề là native YouTube (có mốc từ chuẩn srv3).
+  // Nếu là ytranscript.com thì chỉ highlight cả dòng (line highlighting).
+  const isKaraokeEnabled = source !== "ytranscript";
 
   // Tìm câu đang phát từ CUỐI mảng → câu được bắt đầu gần nhất thắng
   // (YouTube srv3 sinh các đoạn chồng thời gian, tìm từ đầu trả về câu cũ)
@@ -113,8 +117,7 @@ export const SentenceList: React.FC<SentenceListProps> = ({
     return sentences[0];
   }, [sentences, currentTime]);
 
-  const effectiveActiveId =
-    currentPlayingSentence?.id || activeSentenceId || sentences[0]?.id || null;
+  const effectiveActiveId = currentPlayingSentence?.id || activeSentenceId || sentences[0]?.id || null;
 
   // Auto-scroll: chỉ cuộn trong khung scroll-area, không giật toàn trang
   useEffect(() => {
@@ -129,7 +132,7 @@ export const SentenceList: React.FC<SentenceListProps> = ({
       if (itemTop < scrollTop + 30 || itemBottom > scrollTop + viewH - 30) {
         container.scrollTo({
           top: Math.max(0, itemTop - viewH / 2 + item.clientHeight / 2),
-          behavior: 'smooth',
+          behavior: "smooth"
         });
       }
     }
@@ -142,14 +145,18 @@ export const SentenceList: React.FC<SentenceListProps> = ({
         <div className="yt-sentence-count-badge">
           <span className="count-number">{sentences.length}</span>
           <span className="count-label">sentences</span>
+          {source === "native" && (
+            <span
+              className="ml-2 inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full"
+              title="Phụ đề lấy trực tiếp từ YouTube (có mốc thời gian từng từ)"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              Phụ đề lấy trực tiếp từ YouTube
+            </span>
+          )}
         </div>
 
-        <button
-          type="button"
-          className="yt-edit-sentences-btn"
-          onClick={onEditClick}
-          title="Chỉnh sửa danh sách câu"
-        >
+        <button type="button" className="yt-edit-sentences-btn" onClick={onEditClick} title="Chỉnh sửa danh sách câu">
           <Edit2 size={13} />
           <span>Edit</span>
         </button>
@@ -175,6 +182,7 @@ export const SentenceList: React.FC<SentenceListProps> = ({
               isCompleted={!!sentence.isCompleted}
               // ← Key optimization: non-active rows luôn nhận 0, không bao giờ re-render vì time
               currentTime={isActive ? currentTime : 0}
+              isKaraokeEnabled={isKaraokeEnabled}
               onSelectSentence={onSelectSentence}
               onToggleComplete={onToggleComplete}
             />
