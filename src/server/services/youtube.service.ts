@@ -11,7 +11,7 @@
  *   4. Tự chủ 100% mã nguồn trong `src/server/services`, loại bỏ sự phụ thuộc vào package ngoài.
  */
 
-import { HttpsProxyAgent } from 'https-proxy-agent';
+import { fetch as undiciFetch, ProxyAgent } from 'undici';
 import { YouTubeLessonData, YouTubeSentence, YouTubeWord } from '@/types/youtube';
 import { getCachedTranscript, saveCachedTranscript } from '@/lib/firebase/firestore/youtubeTranscript';
 
@@ -26,11 +26,39 @@ const YTRANSCRIPT_API_URL = 'https://ytranscript.com/api/v1/transcript';
 const YTRANSCRIPT_API_KEY = process.env.YTRANSCRIPT_API_KEY;
 
 /**
- * Proxy agent tùy chọn — inject vào tất cả fetch() calls để bypass YouTube IP block.
- * Nếu WEBSHARE_PROXY_URL chưa được cấu hình, service vẫn hoạt động bình thường (không proxy).
+ * Cấu hình Proxy (Webshare hoặc HTTP/HTTPS Proxy bất kỳ).
+ * LƯU Ý KỸ THUẬT:
+ * Node.js / Next.js runtime (v18+) sử dụng WHATWG fetch chuẩn, KHÔNG hỗ trợ option `{ agent: ... }`.
+ * Để request thực sự đi qua Proxy, bắt buộc phải dùng `undici.fetch` kèm `{ dispatcher: new ProxyAgent(...) }`.
  */
 const PROXY_URL = process.env.WEBSHARE_PROXY_URL;
-const proxyAgent = PROXY_URL ? new HttpsProxyAgent(PROXY_URL) : undefined;
+const proxyDispatcher = PROXY_URL ? new ProxyAgent(PROXY_URL) : undefined;
+
+function getMaskedProxyInfo(): string {
+  if (!PROXY_URL) {
+    return '🔴 DISABLED (WEBSHARE_PROXY_URL is undefined - Direct Server IP)';
+  }
+  try {
+    const parsed = new URL(PROXY_URL);
+    const maskedUser = parsed.username ? `${parsed.username.slice(0, 4)}***` : 'user';
+    return `🟢 ENABLED (${parsed.protocol}//${maskedUser}:***@${parsed.host})`;
+  } catch {
+    return '🟡 CONFIGURED (Invalid URL format)';
+  }
+}
+
+/**
+ * Helper gọi fetch qua ProxyDispatcher (nếu có cấu hình) hoặc fetch chuẩn
+ */
+async function fetchWithProxy(url: string | URL, init: RequestInit = {}): Promise<Response> {
+  if (proxyDispatcher) {
+    return (await undiciFetch(url.toString(), {
+      ...init,
+      dispatcher: proxyDispatcher,
+    } as any)) as unknown as Response;
+  }
+  return fetch(url, init);
+}
 
 /**
  * Trích xuất video ID từ URL YouTube hoặc chuỗi ID trực tiếp
@@ -134,7 +162,7 @@ async function fetchPlayerResponse(videoId: string) {
         videoId,
       };
 
-      const res = await fetch(INNERTUBE_API_URL, {
+      const res = await fetchWithProxy(INNERTUBE_API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -145,18 +173,18 @@ async function fetchPlayerResponse(videoId: string) {
         },
         body: JSON.stringify(requestBody),
         cache: 'no-store',
-        ...(proxyAgent ? { agent: proxyAgent } : {}),
       });
 
       if (!res.ok) {
-        console.log(`[YT:${videoId}] ${client.clientName}: HTTP ${res.status}`);
+        console.log(`[YT:${videoId}] ❌ ${client.clientName}: HTTP ${res.status}`);
         continue;
       }
       const data = await res.json();
       const status = data?.playabilityStatus?.status;
+      const reason = data?.playabilityStatus?.reason;
       const tracks = data?.captions?.playerCaptionsTracklistRenderer?.captionTracks;
 
-      console.log(`[YT:${videoId}] ${client.clientName}: status=${status}, tracks=${tracks?.length ?? 0}`);
+      console.log(`[YT:${videoId}] [${client.clientName}] status=${status}, reason="${reason || 'OK'}", tracks=${tracks?.length ?? 0}`);
 
       // Chỉ return nếu response thực sự có captionTracks
       if (tracks && Array.isArray(tracks) && tracks.length > 0) {
@@ -167,6 +195,7 @@ async function fetchPlayerResponse(videoId: string) {
     }
   }
 
+  console.log(`[YT:${videoId}] ⚠️ All InnerTube clients returned 0 tracks.`);
   return null;
 }
 
@@ -219,14 +248,17 @@ function parseInlineJson(html: string, globalName: string): InnerTubePlayerRespo
  */
 async function fetchPlayerResponseFallback(videoId: string) {
   try {
-    const res = await fetch(`https://www.youtube.com/watch?v=${videoId}`, {
+    console.log(`[YT:${videoId}] 🌐 Fallback HTML scraping (Proxy: ${proxyDispatcher ? 'ACTIVE' : 'OFF'})...`);
+    const res = await fetchWithProxy(`https://www.youtube.com/watch?v=${videoId}`, {
       headers: {
         'User-Agent': BROWSER_USER_AGENT,
         'Accept-Language': 'en-US,en;q=0.9',
       },
-      ...(proxyAgent ? { agent: proxyAgent } : {}),
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      console.log(`[YT:${videoId}] Fallback HTML scrape HTTP ${res.status}`);
+      return null;
+    }
     const html = await res.text();
     return parseInlineJson(html, 'ytInitialPlayerResponse');
   } catch (err) {
@@ -515,6 +547,10 @@ async function fetchFromYTranscript(
  * Thử lấy phụ đề trực tiếp từ YouTube (InnerTube API / Web Scrape srv3)
  */
 async function tryFetchNativeYouTube(videoId: string): Promise<YouTubeLessonData | null> {
+  console.log(`[YT:${videoId}] ----------------------------------------------------`);
+  console.log(`[YT:${videoId}] 🔍 Starting native transcript fetch`);
+  console.log(`[YT:${videoId}] 🌐 Proxy Status: ${getMaskedProxyInfo()}`);
+
   // 1. Thử qua InnerTube
   let playerResponse = await fetchPlayerResponse(videoId);
   let captionTracks: RawCaptionTrack[] | undefined =
@@ -536,7 +572,8 @@ async function tryFetchNativeYouTube(videoId: string): Promise<YouTubeLessonData
   // 3. Nếu vẫn không tìm thấy captionTracks
   if (!captionTracks || !Array.isArray(captionTracks) || captionTracks.length === 0) {
     const status = playerResponse?.playabilityStatus?.status;
-    console.warn(`[YT:${videoId}] Native YouTube no tracks found. Status: ${status}`);
+    const reason = playerResponse?.playabilityStatus?.reason;
+    console.warn(`[YT:${videoId}] ⚠️ Native YouTube no tracks found. Status: ${status}, Reason: "${reason || 'N/A'}"`);
     return null;
   }
 
@@ -563,26 +600,36 @@ async function tryFetchNativeYouTube(videoId: string): Promise<YouTubeLessonData
     xmlUrl += '&fmt=srv3';
   }
 
-  let xmlRes = await fetch(xmlUrl, {
+  console.log(`[YT:${videoId}] 📥 Downloading caption XML (Proxy: ${proxyDispatcher ? 'ACTIVE' : 'OFF'})...`);
+  let xmlRes = await fetchWithProxy(xmlUrl, {
     headers: {
       'User-Agent': BROWSER_USER_AGENT,
       'Accept-Language': 'en-US,en;q=0.9',
     },
-    ...(proxyAgent ? { agent: proxyAgent } : {}),
   });
 
   if (!xmlRes.ok && xmlUrl !== track.baseUrl) {
-    xmlRes = await fetch(track.baseUrl, {
+    console.log(`[YT:${videoId}] ⚠️ srv3 download failed (${xmlRes.status}), retrying base XML...`);
+    xmlRes = await fetchWithProxy(track.baseUrl, {
       headers: {
         'User-Agent': BROWSER_USER_AGENT,
         'Accept-Language': 'en-US,en;q=0.9',
       },
-      ...(proxyAgent ? { agent: proxyAgent } : {}),
+    });
+  }
+
+  if (!xmlRes.ok && proxyDispatcher) {
+    console.log(`[YT:${videoId}] ⚠️ Proxy caption XML returned HTTP ${xmlRes.status}. Retrying direct download fallback...`);
+    xmlRes = await fetch(xmlUrl, {
+      headers: {
+        'User-Agent': BROWSER_USER_AGENT,
+        'Accept-Language': 'en-US,en;q=0.9',
+      },
     });
   }
 
   if (!xmlRes.ok) {
-    console.warn(`[YT:${videoId}] Failed to download native caption XML (${xmlRes.status})`);
+    console.warn(`[YT:${videoId}] ❌ Failed to download native caption XML (${xmlRes.status})`);
     return null;
   }
 
