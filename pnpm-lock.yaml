@@ -17,6 +17,9 @@ importers:
       firebase:
         specifier: ^12.19.0
         version: 12.19.0
+      https-proxy-agent:
+        specifier: ^9.1.0
+        version: 9.1.0
       lucide-react:
         specifier: ^1.41.0
         version: 1.41.0(react@19.2.8)
@@ -51,9 +54,6 @@ importers:
       eslint-config-next:
         specifier: 16.3.4
         version: 16.3.4(@typescript-eslint/parser@8.69.0(eslint@9.39.5(jiti@1.21.7))(typescript@5.9.3))(eslint@9.39.5(jiti@1.21.7))(typescript@5.9.3)
-      https-proxy-agent:
-        specifier: ^9.1.0
-        version: 9.1.0
       postcss:
         specifier: ^8.5.28
         version: 8.5.28
