@@ -392,46 +392,61 @@ const res = await tts.synthesize(); // <--- Treo vô hạn ở đây
      | **`ANDROID`** (`com.google.android.youtube/...`) | ✅ **`OK` (Trả về đủ `captionTracks`)** | ⚠️ `OK` (dễ bị rate-limit nếu IP bẩn) | **Client DUY NHẤT vượt qua bot-detection** |
 
    - YouTube cho phép ứng dụng Android YouTube hoạt động trong nhiều điều kiện mạng khác nhau (kể cả mạng di động CGNAT hoặc proxy) mà không yêu cầu cookie trình duyệt phức tạp.
-3. **Vấn đề IP tĩnh bị gắn cờ**:
-   - Nếu chỉ dùng một proxy cố định hoặc IP server đơn lẻ, sau một số lượng request nhất định, IP đó sẽ bị YouTube tạm khóa hoặc yêu cầu Captcha. Cần một giải pháp **Rotating Proxy** (xoay vòng địa chỉ IP sau mỗi request) để phân tán tải.
+3. **Lỗ hổng silently-ignored của native `fetch` trong Node.js / Next.js**:
+   - Node.js (v18+) và Next.js sử dụng chuẩn WHATWG `fetch`.
+   - Trong chuẩn WHATWG `fetch`, **hoàn toàn không có thuộc tính `agent`** trong `RequestInit` (chỉ có trong `http.request` hoặc thư viện cũ `node-fetch`).
+   - Do đó, khi truyền `{ agent: proxyAgent }` vào native `fetch`, Node.js **lặng lẽ bỏ qua (silently ignored)** và vẫn gọi HTTP trực tiếp bằng IP của máy / server!
+   - Kết quả: Khi chạy local máy cá nhân thì tưởng đã chạy qua proxy, nhưng thực chất vẫn dùng IP mạng nhà. Khi deploy lên Vercel, request đi thẳng bằng IP Datacenter của Vercel và bị YouTube chặn ngay lập tức (`LOGIN_REQUIRED`).
 
 ### Cách khắc phục
-1. **Tích hợp Rotating Proxy trên Node.js bằng `https-proxy-agent`**:
-   - Cài đặt thư viện chuẩn cho hệ sinh thái Node.js:
+1. **Sử dụng `undici.fetch` kết hợp `ProxyAgent`**:
+   - Thư viện HTTP chuẩn hiện đại của Node.js là `undici`. `undici` hỗ trợ cơ chế `dispatcher` để ép luồng mạng đi qua proxy:
      ```bash
-     pnpm add https-proxy-agent
+     pnpm add undici
      ```
-   - Trong [`src/server/services/youtube.service.ts`](file:///d:/SelfLearning/EchoChunk/src/server/services/youtube.service.ts), khởi tạo proxy agent từ biến môi trường `WEBSHARE_PROXY_URL`:
+   - Trong [`src/server/services/youtube.service.ts`](file:///d:/SelfLearning/EchoChunk/src/server/services/youtube.service.ts), khởi tạo `proxyDispatcher` và wrapper `fetchWithProxy`:
      ```ts
-     import { HttpsProxyAgent } from 'https-proxy-agent';
+     import { fetch as undiciFetch, ProxyAgent } from 'undici';
 
      const PROXY_URL = process.env.WEBSHARE_PROXY_URL;
-     const proxyAgent = PROXY_URL ? new HttpsProxyAgent(PROXY_URL) : undefined;
-     ```
-   - **Cơ chế Graceful Degradation (Tương thích ngược)**: Nếu `WEBSHARE_PROXY_URL` không được định nghĩa, `proxyAgent` sẽ là `undefined`. Lệnh `fetch` của Node.js sẽ chạy trực tiếp bình thường mà không gây lỗi hoặc bắt buộc cấu hình proxy.
+     const proxyDispatcher = PROXY_URL ? new ProxyAgent(PROXY_URL) : undefined;
 
-2. **Truyền `agent` vào tất cả các điểm gọi `fetch` của YouTube Service**:
-   - Tích hợp option `agent` vào cả 3 khâu tương tác mạng:
-     - **InnerTube Player API**: Lấy danh sách metadata & `captionTracks`.
-     - **Fallback HTML Scrape**: Cào trang `watch?v=...` dự phòng.
-     - **Tải XML Phụ đề**: Tải payload phụ đề `srv3` từ Signed URL (`track.baseUrl`).
+     async function fetchWithProxy(url: string | URL, init: RequestInit = {}): Promise<Response> {
+       if (proxyDispatcher) {
+         return (await undiciFetch(url.toString(), {
+           ...init,
+           dispatcher: proxyDispatcher,
+         } as any)) as unknown as Response;
+       }
+       return fetch(url, init);
+     }
+     ```
+   - **Cơ chế Graceful Degradation**: Nếu `WEBSHARE_PROXY_URL` không được cấu hình, service tự động dùng `fetch` thông thường mà không cần proxy.
+
+2. **Thêm hệ thống Console Logging trực quan**:
+   - Mỗi khi gọi lấy phụ đề, hệ thống in log rõ ràng để kiểm tra trên runtime (đặc biệt là Vercel):
+     ```text
+     [YT:videoId] ----------------------------------------------------
+     [YT:videoId] 🔍 Starting native transcript fetch
+     [YT:videoId] 🌐 Proxy Status: 🟢 ENABLED (http://quom***:***@p.webshare.io)
+     [YT:videoId] [ANDROID] status=OK, reason="OK", tracks=6
+     ```
+   - Nếu Vercel chưa được cấu hình biến môi trường, log sẽ cảnh báo ngay:
+     ```text
+     [YT:videoId] 🌐 Proxy Status: 🔴 DISABLED (WEBSHARE_PROXY_URL is undefined - Direct Server IP)
+     ```
+
+3. **Cơ chế tải XML phụ đề 2 lớp (Proxy + Direct Fallback)**:
+   - YouTube CDN đôi khi trả về HTTP `429 Too Many Requests` với IP proxy khi tải XML phụ đề.
+   - Code tự động fallback sang tải direct nếu proxy gặp 429:
      ```ts
-     const res = await fetch(INNERTUBE_API_URL, {
-       method: 'POST',
-       headers: {
-         'Content-Type': 'application/json',
-         'User-Agent': client.userAgent,
-         'Accept-Language': 'en-US,en;q=0.9',
-         'Origin': 'https://www.youtube.com',
-         'Referer': client.embedUrl || `https://www.youtube.com/watch?v=${videoId}`,
-       },
-       body: JSON.stringify(requestBody),
-       cache: 'no-store',
-       ...(proxyAgent ? { agent: proxyAgent } : {}),
-     });
+     if (!xmlRes.ok && proxyDispatcher) {
+       console.log(`[YT:${videoId}] ⚠️ Proxy caption XML returned HTTP ${xmlRes.status}. Retrying direct download fallback...`);
+       xmlRes = await fetch(xmlUrl, { headers: ... });
+     }
      ```
 
-3. **Ưu tiên Client `ANDROID` lên vị trí số 1**:
+4. **Ưu tiên Client `ANDROID` lên vị trí số 1**:
    - Đưa cấu hình `ANDROID` lên đầu mảng `clients` trong `fetchPlayerResponse()`:
      ```ts
      const clients = [
@@ -447,7 +462,7 @@ const res = await tts.synthesize(); // <--- Treo vô hạn ở đây
      ```
    - Nhờ đó, request thành công ngay ở lần thử đầu tiên (0 lần retry), tối ưu tốc độ phản hồi xuống mức thấp nhất (~1.2s - 1.5s).
 
-4. **Cấu hình môi trường (`.env.local`)**:
+5. **Cấu hình môi trường (`.env.local` và Vercel Project Settings)**:
    ```bash
    # Webshare Rotating Proxy (định dạng http://username-rotate:password@p.webshare.io:80)
    WEBSHARE_PROXY_URL=http://quomavrt-rotate:8x9pyh5q2q9v@p.webshare.io:80
