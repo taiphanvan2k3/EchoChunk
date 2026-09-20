@@ -72,10 +72,11 @@
 
 ## 🔤 4. Hệ Thống Phiên Âm IPA Mỹ (General American Engine)
 
-- **Cơ sở dữ liệu:** Tệp từ điển offline `src/data/american-ipa.json` chứa **25,681 từ vựng thông dụng** được chuẩn hóa theo ngữ âm General American (`en-US`).
+- **Cơ sở dữ liệu:** Tệp từ điển offline `src/data/american-ipa.json` chứa **124,895 từ vựng** được chuẩn hóa theo ngữ âm General American (`en-US`).
+  - **Nguồn dữ liệu:** Chuyển đổi từ [menelik3/cmudict-ipa: The CMU Pronouncing Dictionary converted to IPA](https://github.com/menelik3/cmudict-ipa) (CMUdict v0.7b) kết hợp cùng từ điển thuật ngữ công nghệ của EchoChunk.
 - **Thư viện tra cứu `src/lib/ipa.ts`:**
-  - `getAmericanIpa(word)`: Tra cứu tức thì $O(1)$ từ điển offline.
-  - `fetchMissingAmericanIpa(word)`: Tự động gọi API dự phòng khi gặp từ mới chưa có trong từ điển và cache vào `localStorage`.
+  - `getAmericanIpa(word)`: Tra cứu tức thì $O(1)$ từ điển offline (0ms latency, không phụ thuộc API bên ngoài).
+  - `getPhraseIpa(phrase)`: Tự động ghép nối và sinh phiên âm IPA chuẩn cho toàn bộ cụm từ/câu.
 - **Tự động sinh IPA:** Trong form thêm Chunk mới, người dùng có nút **"Sinh IPA"** để hệ thống tự ghép phiên âm Mỹ cho cả cụm từ mà không cần gõ thủ công.
 
 ---
