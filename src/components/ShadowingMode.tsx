@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo, useCallback, useRef } from "react"
 import { ChunkProgress, SpeakingChunk, SpeechEvalResult, SRSRating } from "@/types";
 import { speechService } from "@/lib/speech";
 import { soundManager } from "@/lib/sound";
-import { getAmericanIpa, resolveChunkIpas } from "@/lib/ipa";
+import { getAmericanIpa, getPhraseIpa, resolveChunkIpas } from "@/lib/ipa";
 import { Volume2, Mic, MicOff, CheckCircle2, Eye, EyeOff, Edit2, RotateCcw, Shuffle } from "lucide-react";
 import confetti from "canvas-confetti";
 import { formatMarkdown } from "@/lib/formatMarkdown";
@@ -43,11 +43,13 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
   const [drillingWord, setDrillingWord] = useState<string | null>(null);
   const [drilledSuccessWords, setDrilledSuccessWords] = useState<Set<string>>(new Set());
   const [activeWordPlaying, setActiveWordPlaying] = useState<string | null>(null);
+  const [activeExampleIndex, setActiveExampleIndex] = useState(0);
 
   // Synchronous state reset on chunk change (React recommended pattern)
   const [prevChunkId, setPrevChunkId] = useState(chunk.id);
   if (prevChunkId !== chunk.id) {
     setPrevChunkId(chunk.id);
+    setActiveExampleIndex(0);
     speechService.stopListening();
     setIsRecording(false);
     setSpokenTranscript("");
@@ -61,24 +63,60 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
     setPlayingAudioType(null);
   }
 
+  // Active example resolution
+  const activeExample = useMemo(() => {
+    if (chunk.examples && chunk.examples.length > 0) {
+      const idx = Math.min(activeExampleIndex, chunk.examples.length - 1);
+      return chunk.examples[idx] || chunk.examples[0];
+    }
+    return {
+      id: 'primary',
+      sentence: chunk.exampleSentence || chunk.cleanExample || '',
+      cleanSentence: chunk.cleanExample || chunk.exampleSentence || '',
+      sentenceIpa: chunk.sentenceIpa || '',
+      translation: chunk.translation || '',
+      context: chunk.context || '',
+    };
+  }, [chunk, activeExampleIndex]);
+
   // Cleanly resolve both Chunk IPA and Sentence IPA with backwards compatibility
-  const { chunkIpa, sentenceIpa } = useMemo(() => resolveChunkIpas(chunk), [chunk]);
+  const { chunkIpa, sentenceIpa: defaultSentenceIpa } = useMemo(() => resolveChunkIpas(chunk), [chunk]);
+
+  const currentSentenceIpa = useMemo(() => {
+    if (activeExample.sentenceIpa) return activeExample.sentenceIpa;
+    if (activeExample.cleanSentence || activeExample.sentence) {
+      return getPhraseIpa(activeExample.cleanSentence || activeExample.sentence);
+    }
+    return defaultSentenceIpa;
+  }, [activeExample, defaultSentenceIpa]);
+
+  const currentCleanSentence = useMemo(() => {
+    const s = activeExample.cleanSentence || activeExample.sentence || chunk.cleanExample || chunk.chunk;
+    return s.replace(/[*_`]/g, '');
+  }, [activeExample, chunk.cleanExample, chunk.chunk]);
+
+  const currentRawSentence = useMemo(() => {
+    return activeExample.sentence || activeExample.cleanSentence || chunk.exampleSentence || chunk.cleanExample || chunk.chunk;
+  }, [activeExample, chunk.exampleSentence, chunk.cleanExample, chunk.chunk]);
+
+  const currentTranslation = activeExample.translation || chunk.translation;
+  const currentContext = activeExample.context || chunk.context;
 
   const playAudio = useCallback(
     (speed: number = 1.0) => {
       const isSlow = speed < 1.0;
       setPlayingAudioType(isSlow ? "slow" : "normal");
       soundManager.playClick();
-      speechService.speak(chunk.cleanExample || chunk.chunk, speed, () => {
+      speechService.speak(currentCleanSentence || chunk.chunk, speed, () => {
         setPlayingAudioType(null);
       });
     },
-    [chunk.cleanExample, chunk.chunk]
+    [currentCleanSentence, chunk.chunk]
   );
 
   const evaluate = useCallback(
     (transcript: string) => {
-      const target = chunk.cleanExample || chunk.chunk;
+      const target = currentCleanSentence || chunk.chunk;
       const result = speechService.evaluatePronunciation(target, transcript);
       setEvalResult(result);
 
@@ -95,7 +133,7 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
         soundManager.playError();
       }
     },
-    [chunk.cleanExample, chunk.chunk]
+    [currentCleanSentence, chunk.chunk]
   );
 
   const toggleRecording = useCallback(() => {
@@ -319,6 +357,30 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
 
       {/* Example Sentence with highlighted chunk */}
       <div className="example-sentence-box">
+        {/* Multi-example switcher if chunk has multiple examples */}
+        {chunk.examples && chunk.examples.length > 1 && (
+          <div className="example-selector-bar">
+            <span className="example-selector-label">Ngữ cảnh ví dụ ({chunk.examples.length}):</span>
+            <div className="example-selector-pills">
+              {chunk.examples.map((ex, idx) => (
+                <button
+                  key={ex.id || idx}
+                  type="button"
+                  className={`example-selector-pill ${activeExampleIndex === idx ? 'active' : ''}`}
+                  onClick={() => {
+                    setActiveExampleIndex(idx);
+                    setEvalResult(null);
+                    setSpokenTranscript('');
+                    soundManager.playClick();
+                  }}
+                >
+                  Ví dụ #{idx + 1}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="example-label">
           <span>Câu ví dụ thực chiến (Shadowing Target):</span>
           <div className="duo-audio-controls-row">
@@ -347,13 +409,13 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
         </div>
 
         <p className="example-content">
-          &ldquo;{formatMarkdown(chunk.exampleSentence || chunk.cleanExample || chunk.chunk)}&rdquo;
+          &ldquo;{formatMarkdown(currentRawSentence)}&rdquo;
         </p>
 
         {/* Full Sentence IPA cleanly structured as a responsive phonetic block (handles long sentences smoothly) */}
-        {sentenceIpa && (
+        {currentSentenceIpa && (
           <div className="sentence-ipa-block" title="Phiên âm ngữ âm của câu ví dụ thực chiến">
-            <p className="sentence-ipa-text">{sentenceIpa}</p>
+            <p className="sentence-ipa-text">{currentSentenceIpa}</p>
           </div>
         )}
 
@@ -366,12 +428,14 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
 
           {showDetails && (
             <div className="revealed-details">
-              <p className="detail-translation">
-                ➜ <em>{chunk.translation}</em>
-              </p>
-              {chunk.context && (
+              {currentTranslation && (
+                <p className="detail-translation">
+                  ➜ <em>{currentTranslation}</em>
+                </p>
+              )}
+              {currentContext && (
                 <p className="detail-context">
-                  💡 <strong>Ngữ cảnh:</strong> {chunk.context}
+                  💡 <strong>Ngữ cảnh:</strong> {currentContext}
                 </p>
               )}
             </div>

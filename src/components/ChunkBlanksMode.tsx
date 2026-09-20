@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import React, { useState, useMemo } from 'react';
-import { SpeakingChunk, SRSRating } from '@/types';
-import { soundManager } from '@/lib/sound';
-import { speechService } from '@/lib/speech';
-import { resolveChunkIpas } from '@/lib/ipa';
-import { Volume2, CheckCircle2, HelpCircle, Edit2, Lightbulb, ArrowRight, Shuffle } from 'lucide-react';
-import confetti from 'canvas-confetti';
-import { formatMarkdown } from '@/lib/formatMarkdown';
+import React, { useState, useMemo, useEffect, useCallback } from "react";
+import { SpeakingChunk, SRSRating } from "@/types";
+import { soundManager } from "@/lib/sound";
+import { speechService } from "@/lib/speech";
+import { resolveChunkIpas } from "@/lib/ipa";
+import { CheckCircle2, HelpCircle, Edit2, Lightbulb, ChevronDown, ArrowRight, Shuffle } from "lucide-react";
+import confetti from "canvas-confetti";
+import { formatMarkdown } from "@/lib/formatMarkdown";
 
 interface ChunkBlanksModeProps {
   chunk: SpeakingChunk;
@@ -30,71 +30,99 @@ export const ChunkBlanksMode: React.FC<ChunkBlanksModeProps> = ({
   onShuffle,
   currentIndex,
   totalInQueue,
-  onEditChunk,
+  onEditChunk
 }) => {
   const [prevChunkId, setPrevChunkId] = useState(chunk.id);
-  const [userAnswer, setUserAnswer] = useState('');
+  const [activeExampleIndex, setActiveExampleIndex] = useState(0);
+  const [userAnswer, setUserAnswer] = useState("");
   const [isRevealed, setIsRevealed] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
-  const [showLettersHint, setShowLettersHint] = useState(false);
+  const [isHintOpen, setIsHintOpen] = useState(false);
+  const [playingAudioType, setPlayingAudioType] = useState<"normal" | "slow" | null>(null);
 
   // Reset state synchronously when chunk prop changes (React recommended pattern)
   if (prevChunkId !== chunk.id) {
     setPrevChunkId(chunk.id);
-    setUserAnswer('');
+    setActiveExampleIndex(0);
+    setUserAnswer("");
     setIsRevealed(false);
     setIsCorrect(null);
-    setShowLettersHint(false);
+    setIsHintOpen(false);
+    setPlayingAudioType(null);
   }
+
+  // Active example resolution
+  const activeExample = useMemo(() => {
+    if (chunk.examples && chunk.examples.length > 0) {
+      const idx = Math.min(activeExampleIndex, chunk.examples.length - 1);
+      return chunk.examples[idx] || chunk.examples[0];
+    }
+    return {
+      id: "primary",
+      sentence: chunk.exampleSentence || chunk.cleanExample || "",
+      cleanSentence: chunk.cleanExample || chunk.exampleSentence || "",
+      sentenceIpa: chunk.sentenceIpa || "",
+      translation: chunk.translation || "",
+      context: chunk.context || ""
+    };
+  }, [chunk, activeExampleIndex]);
 
   // Cleanly resolve both Chunk IPA and Sentence IPA with backwards compatibility
   const { chunkIpa, sentenceIpa } = useMemo(() => resolveChunkIpas(chunk), [chunk]);
+  const effectiveCleanSentence =
+    activeExample.cleanSentence || activeExample.sentence || chunk.cleanExample || chunk.exampleSentence || "";
+  const effectiveSentenceIpa = activeExample.sentenceIpa || sentenceIpa || "";
 
-  // Extract masked parts cleanly from exampleSentence
+  // Extract masked parts cleanly from activeExample
   const maskedParts = useMemo<MaskedParts>(() => {
-    const rawExample = chunk.exampleSentence || chunk.cleanExample || '';
+    const rawExample =
+      activeExample.sentence || activeExample.cleanSentence || chunk.exampleSentence || chunk.cleanExample || "";
 
     // 1. Primary: Match **`chunk`** or **chunk** markers in exampleSentence
     const boldMatch = rawExample.match(/^([\s\S]*?)\*\*`?([\s\S]+?)`?\*\*([\s\S]*)$/);
     if (boldMatch) {
       return {
-        before: boldMatch[1].replace(/`/g, '').trimStart(),
-        targetInSentence: boldMatch[2].replace(/`/g, '').trim(),
-        after: boldMatch[3].replace(/`/g, '').trimEnd(),
+        before: boldMatch[1].replace(/`/g, "").trimStart(),
+        targetInSentence: boldMatch[2].replace(/`/g, "").trim(),
+        after: boldMatch[3].replace(/`/g, "").trimEnd()
       };
     }
 
     // 2. Secondary: Direct substring match with chunk.chunk (case-insensitive)
-    const clean = chunk.cleanExample || rawExample.replace(/[\*`]/g, '');
-    const escaped = chunk.chunk.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-    const directMatch = clean.match(new RegExp(`^(.*?)(?:${escaped})(.*)$`, 'i'));
+    const clean = chunk.cleanExample || rawExample.replace(/[\*`]/g, "");
+    const escaped = chunk.chunk.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
+    const directMatch = clean.match(new RegExp(`^(.*?)(?:${escaped})(.*)$`, "i"));
     if (directMatch) {
       return {
         before: directMatch[1],
         targetInSentence: chunk.chunk,
-        after: directMatch[2],
+        after: directMatch[2]
       };
     }
 
     // 3. Fallback: Word by word smart pronoun replacement
-    const words = chunk.chunk.trim().replace(/[\.\?\!\,\:\;]+$/, '').split(/\s+/);
+    const words = chunk.chunk
+      .trim()
+      .replace(/[\.\?\!\,\:\;]+$/, "")
+      .split(/\s+/);
     const patternParts = words.map((w) => {
       const wl = w.toLowerCase();
-      if (["one's", "someone's", "sb's"].includes(wl)) return "(?:my|your|his|her|its|our|their|one's|someone's|[a-zA-Z]+\'s)";
+      if (["one's", "someone's", "sb's"].includes(wl))
+        return "(?:my|your|his|her|its|our|their|one's|someone's|[a-zA-Z]+\'s)";
       if (["someone", "somebody", "sb"].includes(wl)) return "(?:me|you|him|her|us|them|someone|somebody|[a-zA-Z]+)";
       if (["something", "sth"].includes(wl)) return "(?:something|sth|[\\w\\s]{1,30}?)";
       if (wl === "oneself") return "(?:myself|yourself|himself|herself|ourselves|themselves|oneself)";
-      return w.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+      return w.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
     });
 
     try {
-      const smartRegex = new RegExp(`^(.*?)\\b(${patternParts.join('\\s+')})\\b(.*)$`, 'i');
+      const smartRegex = new RegExp(`^(.*?)\\b(${patternParts.join("\\s+")})\\b(.*)$`, "i");
       const smartMatch = clean.match(smartRegex);
       if (smartMatch) {
         return {
           before: smartMatch[1],
           targetInSentence: smartMatch[2],
-          after: smartMatch[3],
+          after: smartMatch[3]
         };
       }
     } catch {
@@ -105,15 +133,13 @@ export const ChunkBlanksMode: React.FC<ChunkBlanksModeProps> = ({
     return {
       before: clean,
       targetInSentence: chunk.chunk,
-      after: '',
+      after: ""
     };
-  }, [chunk]);
+  }, [chunk, activeExample.cleanSentence, activeExample.sentence]);
 
   // Meaning to display: Prefer detailMeaning (specific) over general deck name
   const effectiveMeaning = useMemo(() => {
-    return chunk.detailMeaning && chunk.detailMeaning.trim().length > 0
-      ? chunk.detailMeaning.trim()
-      : chunk.meaning;
+    return chunk.detailMeaning && chunk.detailMeaning.trim().length > 0 ? chunk.detailMeaning.trim() : chunk.meaning;
   }, [chunk]);
 
   // Valid answer candidates
@@ -122,8 +148,8 @@ export const ChunkBlanksMode: React.FC<ChunkBlanksModeProps> = ({
     const norm = (s: string) =>
       s
         .toLowerCase()
-        .replace(/['"\.,/#!$%^&*;:{}=\-_`~()?]/g, '')
-        .replace(/\s+/g, ' ')
+        .replace(/['"\.,/#!$%^&*;:{}=\-_`~()?]/g, "")
+        .replace(/\s+/g, " ")
         .trim();
 
     set.add(norm(chunk.chunk));
@@ -131,10 +157,16 @@ export const ChunkBlanksMode: React.FC<ChunkBlanksModeProps> = ({
       set.add(norm(maskedParts.targetInSentence));
     }
 
-    const strippedChunk = norm(chunk.chunk).replace(/\b(ones|someones|someone|something|sth|sb)\b/g, '').replace(/\s+/g, ' ').trim();
+    const strippedChunk = norm(chunk.chunk)
+      .replace(/\b(ones|someones|someone|something|sth|sb)\b/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
     if (strippedChunk.length > 2) set.add(strippedChunk);
 
-    const strippedSentenceTarget = norm(maskedParts.targetInSentence).replace(/\b(my|your|his|her|its|our|their)\b/g, '').replace(/\s+/g, ' ').trim();
+    const strippedSentenceTarget = norm(maskedParts.targetInSentence)
+      .replace(/\b(my|your|his|her|its|our|their)\b/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
     if (strippedSentenceTarget.length > 2) set.add(strippedSentenceTarget);
 
     return Array.from(set);
@@ -157,14 +189,14 @@ export const ChunkBlanksMode: React.FC<ChunkBlanksModeProps> = ({
     setIsRevealed(true);
     const cleanUser = userAnswer
       .toLowerCase()
-      .replace(/['"\.,/#!$%^&*;:{}=\-_`~()?]/g, '')
-      .replace(/\s+/g, ' ')
+      .replace(/['"\.,/#!$%^&*;:{}=\-_`~()?]/g, "")
+      .replace(/\s+/g, " ")
       .trim();
 
     if (!cleanUser) {
       setIsCorrect(false);
       soundManager.playError();
-      speechService.speak(chunk.cleanExample);
+      speechService.speak(effectiveCleanSentence);
       return;
     }
 
@@ -184,15 +216,53 @@ export const ChunkBlanksMode: React.FC<ChunkBlanksModeProps> = ({
       soundManager.playError();
     }
 
-    speechService.speak(chunk.cleanExample);
+    playAudio(1.0);
   };
+
+  const playAudio = useCallback(
+    (speed: number = 1.0) => {
+      const isSlow = speed < 1.0;
+      setPlayingAudioType(isSlow ? "slow" : "normal");
+      soundManager.playClick();
+      speechService.speak(effectiveCleanSentence, speed, () => {
+        setPlayingAudioType(null);
+      });
+    },
+    [effectiveCleanSentence]
+  );
 
   const handleRevealDirectly = () => {
     setIsRevealed(true);
     setIsCorrect(false);
     soundManager.playClick();
-    speechService.speak(chunk.cleanExample);
+    playAudio(1.0);
   };
+
+  // Keyboard shortcut listener (Space = play audio, 1 = Chưa thuộc, 2/Enter/ArrowRight = Tiếp tục)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // If typing in input, let normal typing proceed
+      if (["INPUT", "TEXTAREA"].includes((e.target as HTMLElement)?.tagName)) {
+        return;
+      }
+
+      if (e.code === "Space") {
+        e.preventDefault();
+        playAudio(1.0);
+      } else if (isRevealed) {
+        if (e.key === "1") {
+          e.preventDefault();
+          onRate(1, isCorrect ? 100 : 30);
+        } else if (e.key === "2" || e.key === "Enter" || e.key === "ArrowRight") {
+          e.preventDefault();
+          onRate(3, isCorrect ? 100 : 85);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isRevealed, isCorrect, playAudio, onRate]);
 
   return (
     <div className="practice-card">
@@ -235,56 +305,61 @@ export const ChunkBlanksMode: React.FC<ChunkBlanksModeProps> = ({
         </div>
       </div>
 
-      {/* Challenge Title & Detailed Vietnamese Meaning */}
-      <div className="blanks-challenge-header">
-        <span className="challenge-tag">🧩 Active Recall: Điền cụm từ vào ô trống</span>
+      {/* 1. PRIMARY: Masked Sentence Display with Prominent [ ? ] Blank */}
+      <div className={`masked-sentence-card ${isRevealed ? "is-revealed" : ""}`}>
+        <div className="masked-card-header">
+          {/* Multi-example switcher if chunk has multiple examples */}
+          {chunk.examples && chunk.examples.length > 1 ? (
+            <div className="example-selector-bar blanks-selector-bar">
+              <span className="example-selector-label">Ngữ cảnh ({chunk.examples.length}):</span>
+              <div className="example-selector-pills">
+                {chunk.examples.map((ex, idx) => (
+                  <button
+                    key={ex.id || idx}
+                    type="button"
+                    className={`example-selector-pill ${activeExampleIndex === idx ? "active" : ""}`}
+                    onClick={() => {
+                      setActiveExampleIndex(idx);
+                      setUserAnswer("");
+                      setIsRevealed(false);
+                      setIsCorrect(null);
+                      setIsHintOpen(false);
+                      soundManager.playClick();
+                    }}
+                  >
+                    Ví dụ #{idx + 1}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div />
+          )}
 
-        {/* Highlighted Vietnamese Meaning of the Blank */}
-        <div className="target-meaning-highlight">
-          <span className="meaning-label-pill">Cụm từ tiếng Anh cần điền có nghĩa là:</span>
-          <h3 className="vietnamese-prompt">&ldquo;{effectiveMeaning}&rdquo;</h3>
-        </div>
-
-        {/* Full Vietnamese Translation of the Sentence */}
-        {chunk.translation && (
-          <div className="sentence-translation-hint-box">
-            <span className="translation-hint-label">🇻🇳 Dịch nghĩa câu:</span>
-            <p className="translation-hint-text">&ldquo;{chunk.translation}&rdquo;</p>
-          </div>
-        )}
-
-        {/* Smart Hint Chips Row */}
-        <div className="hints-chips-row">
-          <span className="hint-chip word-count-chip">
-            📝 Cần điền <strong>{wordCount} từ</strong>
-          </span>
-
-          {!showLettersHint ? (
+          {/* Single clean set of Loa + Rùa controls */}
+          <div className="duo-audio-controls-row">
             <button
               type="button"
-              className="hint-chip toggle-letters-chip"
-              onClick={() => setShowLettersHint(true)}
-              title="Xem gợi ý các chữ cái đầu của cụm từ"
+              className={`duo-audio-btn duo-normal-btn duo-compact ${playingAudioType === "normal" ? "is-playing" : ""}`}
+              onClick={() => playAudio(1.0)}
+              title="Phát âm tốc độ chuẩn (Phím Space)"
+              aria-label="Phát âm tốc độ chuẩn (Space)"
             >
-              <Lightbulb size={13} />
-              <span>Gợi ý chữ cái đầu?</span>
+              <span className="duo-speaker-icon" aria-hidden="true" />
             </button>
-          ) : (
-            <span className="hint-chip active-letters-chip">
-              💡 Bắt đầu bằng: <strong>{hintText}</strong>
-            </span>
-          )}
 
-          {chunk.context && (
-            <span className="hint-chip context-chip" title="Gợi ý ngữ cảnh sử dụng">
-              💡 {chunk.context}
-            </span>
-          )}
+            <button
+              type="button"
+              className={`duo-audio-btn duo-turtle-btn duo-compact ${playingAudioType === "slow" ? "is-playing" : ""}`}
+              onClick={() => playAudio(0.6)}
+              title="Phát âm chậm rãi từng từ (Tốc độ con rùa 0.6x)"
+              aria-label="Phát âm chậm tốc độ con rùa"
+            >
+              <span className="duo-turtle-icon" aria-hidden="true" />
+            </button>
+          </div>
         </div>
-      </div>
 
-      {/* Masked Sentence Display with Prominent [ ? ] Blank */}
-      <div className={`masked-sentence-card ${isRevealed ? 'is-revealed' : ''}`}>
         <p className="masked-text">
           &ldquo;{formatMarkdown(maskedParts.before)}
           {!isRevealed ? (
@@ -292,17 +367,56 @@ export const ChunkBlanksMode: React.FC<ChunkBlanksModeProps> = ({
               [ ? ]
             </span>
           ) : (
-            <span className="cloze-revealed-box">
-              {maskedParts.targetInSentence}
-            </span>
+            <span className="cloze-revealed-box">{maskedParts.targetInSentence}</span>
           )}
           {formatMarkdown(maskedParts.after)}&rdquo;
         </p>
+
+        {/* Full Vietnamese Translation of the Sentence */}
+        {(activeExample.translation || chunk.translation) && (
+          <p className="masked-sentence-translation">&ldquo;{activeExample.translation || chunk.translation}&rdquo;</p>
+        )}
       </div>
 
       {/* Interactive Input or Revealed Solution */}
       {!isRevealed ? (
         <div className="blanks-interaction-area">
+          {/* LeetCode-Style Single Hint Accordion */}
+          <div className="blanks-leetcode-hint-wrap">
+            <button
+              type="button"
+              className={`leetcode-hint-toggle-btn ${isHintOpen ? "is-open" : ""}`}
+              onClick={() => {
+                soundManager.playClick();
+                setIsHintOpen(!isHintOpen);
+              }}
+              title={isHintOpen ? "Thu gọn gợi ý" : "Bấm để mở các gợi ý của câu này"}
+            >
+              <Lightbulb size={14} className="hint-bulb-icon" />
+              <span>{isHintOpen ? "Ẩn gợi ý" : "Gợi ý"}</span>
+              <ChevronDown size={14} className={`hint-chevron ${isHintOpen ? "rotate-180" : ""}`} />
+            </button>
+
+            {isHintOpen && (
+              <div className="leetcode-hint-dropdown">
+                <div className="leetcode-hint-row">
+                  <span className="hint-tag">Hint 1</span>
+                  <span className="hint-desc">
+                    Cụm từ gồm <strong>{wordCount} từ</strong>, bắt đầu bằng: <code>{hintText}</code>
+                  </span>
+                </div>
+                {chunk.context && (
+                  <div className="leetcode-hint-row">
+                    <span className="hint-tag">Hint 2</span>
+                    <span className="hint-desc">
+                      <strong>Ngữ cảnh:</strong> {chunk.context}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
           <div className="answer-input-zone">
             <input
               type="text"
@@ -310,17 +424,17 @@ export const ChunkBlanksMode: React.FC<ChunkBlanksModeProps> = ({
               placeholder={`Gõ cụm từ tiếng Anh (${wordCount} từ)...`}
               value={userAnswer}
               onChange={(e) => setUserAnswer(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleCheck()}
+              onKeyDown={(e) => e.key === "Enter" && handleCheck()}
               autoFocus
             />
             <button className="submit-answer-btn" onClick={handleCheck}>
-              <span>Kiểm tra & Mở khóa (Enter)</span>
+              <span>Kiểm tra (Enter)</span>
             </button>
           </div>
 
           <div className="blanks-assist-row">
             <span className="assist-tip-text">
-              Nhấn <strong>Enter</strong> để kiểm tra hoặc nghe đáp án
+              Nhấn <strong>Enter</strong> để kiểm tra • Phím <strong>Space</strong> để nghe âm thanh
             </span>
             <button className="assist-btn text-muted-btn" onClick={handleRevealDirectly}>
               <span>Chưa nhớ ra? Xem đáp án ngay</span>
@@ -342,50 +456,58 @@ export const ChunkBlanksMode: React.FC<ChunkBlanksModeProps> = ({
                 <span>Đáp án đúng bên dưới, hãy nghe và nhại lại nhé:</span>
               </div>
             )}
-            <button className="play-audio-btn small" onClick={() => speechService.speak(chunk.cleanExample)}>
-              <Volume2 size={16} />
-              <span>Nghe câu mẫu</span>
-            </button>
           </div>
 
           <div className="revealed-chunk-display">
             <span className="revealed-chunk-name">{chunk.chunk}</span>
-            {chunkIpa && <span className="revealed-chunk-ipa" title="Phiên âm IPA cụm từ">{chunkIpa}</span>}
+            {chunkIpa && (
+              <span className="revealed-chunk-ipa" title="Phiên âm IPA chuẩn Anh - Mỹ của cụm từ">
+                /{chunkIpa.replace(/^\/|\/$/g, "")}/
+              </span>
+            )}
           </div>
 
-          <p className="full-revealed-sentence">&ldquo;{formatMarkdown(chunk.exampleSentence || chunk.cleanExample)}&rdquo;</p>
-          {sentenceIpa && (
+          <p className="revealed-chunk-meaning">➜ {effectiveMeaning}</p>
+
+          {effectiveSentenceIpa && (
             <div className="sentence-ipa-block blanks-sentence-ipa" title="Phiên âm ngữ âm cả câu ví dụ">
-              <p className="sentence-ipa-text">{sentenceIpa}</p>
+              <p className="sentence-ipa-text">/{effectiveSentenceIpa.replace(/^\/|\/$/g, "")}/</p>
             </div>
           )}
-          {chunk.translation && (
-            <p className="revealed-sentence-translation">➜ {chunk.translation}</p>
-          )}
 
-          {/* SRS Rating Bar */}
-          <div className="srs-rating-container" style={{ marginTop: '1.5rem' }}>
-            <span className="srs-label">Đánh giá để lên lịch ôn tập (SRS):</span>
-            <div className="srs-buttons-grid">
-              <button className="srs-btn srs-again" onClick={() => onRate(1, isCorrect ? 100 : 30)}>
-                <span className="srs-num">1</span>
-                <span className="srs-text">Chưa thuộc</span>
-                <span className="srs-sub">Ôn lại sớm</span>
+          {/* Streamlined Binary SRS Rating Bar */}
+          <div className="srs-rating-container" style={{ marginTop: "1.25rem" }}>
+            <div className="srs-header-row">
+              <span className="srs-label">Đánh giá mức độ thuộc (SRS):</span>
+              <span className="srs-hint-text">
+                Bấm &ldquo;Tiếp tục&rdquo; để tự động dãn cách ngày ôn tập theo thuật toán
+              </span>
+            </div>
+            <div className="srs-buttons-grid-binary">
+              <button
+                type="button"
+                className="srs-btn srs-btn-forget"
+                onClick={() => onRate(1, isCorrect ? 100 : 30)}
+                title="Đánh dấu cần ôn lại sớm (Phím tắt: 1)"
+              >
+                <div className="srs-btn-top">
+                  <span className="srs-text">Chưa thuộc</span>
+                  <span className="srs-shortcut-badge">Phím 1</span>
+                </div>
+                <span className="srs-sub">Ôn lại sớm (&lt; 1 ngày)</span>
               </button>
-              <button className="srs-btn srs-hard" onClick={() => onRate(2, isCorrect ? 100 : 60)}>
-                <span className="srs-num">2</span>
-                <span className="srs-text">Hơi khó</span>
-                <span className="srs-sub">2 ngày sau</span>
-              </button>
-              <button className="srs-btn srs-good" onClick={() => onRate(3, isCorrect ? 100 : 85)}>
-                <span className="srs-num">3</span>
-                <span className="srs-text">Nhớ tốt</span>
-                <span className="srs-sub">4 ngày sau</span>
-              </button>
-              <button className="srs-btn srs-easy" onClick={() => onRate(4, 100)}>
-                <span className="srs-num">4</span>
-                <span className="srs-text">Rất dễ</span>
-                <span className="srs-sub">7+ ngày sau</span>
+
+              <button
+                type="button"
+                className="srs-btn srs-btn-next"
+                onClick={() => onRate(3, isCorrect ? 100 : 85)}
+                title="Đã nhớ tốt, chuyển tiếp tục (Phím tắt: Enter hoặc 2)"
+              >
+                <div className="srs-btn-top">
+                  <span className="srs-text">Tiếp tục ➔</span>
+                  <span className="srs-shortcut-badge srs-badge-primary">Enter ↵</span>
+                </div>
+                <span className="srs-sub">Đã nhớ tốt • Tự động tăng chu kỳ SRS</span>
               </button>
             </div>
           </div>

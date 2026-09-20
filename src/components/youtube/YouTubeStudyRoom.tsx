@@ -12,7 +12,6 @@ import { SentenceList } from "./SentenceList";
 import { PracticeModeCards } from "./PracticeModeCards";
 import { YouTubeInputBar } from "./YouTubeInputBar";
 import { YouTubeRecentVideos } from "./YouTubeRecentVideos";
-import { YouTubeWelcomeGuide } from "./YouTubeWelcomeGuide";
 import { YouTubeReviewsCard } from "./YouTubeReviewsCard";
 import { ChevronRight, AlertCircle } from "lucide-react";
 
@@ -178,12 +177,6 @@ export const YouTubeStudyRoom: React.FC = () => {
               handleLoadVideo(url);
             }}
             isLoading={isLoading}
-          />
-          <YouTubeWelcomeGuide
-            onSelectVideo={(url) => {
-              setInputUrl(url);
-              handleLoadVideo(url);
-            }}
           />
         </div>
       )}

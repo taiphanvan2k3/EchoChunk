@@ -50,6 +50,7 @@ export const QuickReflexMode: React.FC<QuickReflexModeProps> = ({
 
   // Challenge execution state
   const [prevChunkId, setPrevChunkId] = useState(chunk.id);
+  const [activeExampleIndex, setActiveExampleIndex] = useState(0);
   const [timeLeft, setTimeLeft] = useState(10);
   const [isTimerRunning, setIsTimerRunning] = useState(true);
   const [isRevealed, setIsRevealed] = useState(false);
@@ -61,6 +62,7 @@ export const QuickReflexMode: React.FC<QuickReflexModeProps> = ({
   // Synchronous state reset on chunk change (React recommended pattern)
   if (prevChunkId !== chunk.id) {
     setPrevChunkId(chunk.id);
+    setActiveExampleIndex(0);
     setTimeLeft(speedOption === 0 ? 0 : speedOption);
     setIsTimerRunning(speedOption > 0);
     setIsRevealed(false);
@@ -71,10 +73,38 @@ export const QuickReflexMode: React.FC<QuickReflexModeProps> = ({
     setReflexAccuracy(null);
   }
 
+  // Active example resolution
+  const activeExample = useMemo(() => {
+    if (chunk.examples && chunk.examples.length > 0) {
+      const idx = Math.min(activeExampleIndex, chunk.examples.length - 1);
+      return chunk.examples[idx] || chunk.examples[0];
+    }
+    return {
+      id: 'primary',
+      sentence: chunk.exampleSentence || chunk.cleanExample || '',
+      cleanSentence: chunk.cleanExample || chunk.exampleSentence || '',
+      sentenceIpa: chunk.sentenceIpa || '',
+      translation: chunk.translation || '',
+      context: chunk.context || '',
+    };
+  }, [chunk, activeExampleIndex]);
+
+  const targetSentenceClean = useMemo(() => {
+    const s = activeExample.cleanSentence || activeExample.sentence || chunk.cleanExample || chunk.chunk;
+    return s.replace(/[*_`]/g, '');
+  }, [activeExample, chunk.cleanExample, chunk.chunk]);
+
+  const targetSentenceRaw = useMemo(() => {
+    return activeExample.sentence || activeExample.cleanSentence || chunk.exampleSentence || chunk.cleanExample || chunk.chunk;
+  }, [activeExample, chunk.exampleSentence, chunk.cleanExample, chunk.chunk]);
+
+  const targetTranslation = activeExample.translation || chunk.translation || chunk.meaning;
+  const targetContext = activeExample.context || chunk.context;
+
   const playAudio = useCallback((rate: number = 1.0) => {
     soundManager.playClick();
-    speechService.speak(chunk.cleanExample || chunk.chunk, rate);
-  }, [chunk.cleanExample, chunk.chunk]);
+    speechService.speak(targetSentenceClean || chunk.chunk, rate);
+  }, [targetSentenceClean, chunk.chunk]);
 
   // Evaluate translation match against target sentence and core chunk
   const calculateMatch = useCallback((userInput: string): number => {
@@ -87,7 +117,7 @@ export const QuickReflexMode: React.FC<QuickReflexModeProps> = ({
         .filter(Boolean);
 
     const userWords = normalize(userInput);
-    const targetWords = normalize(chunk.cleanExample || chunk.chunk);
+    const targetWords = normalize(targetSentenceClean || chunk.chunk);
     const chunkWords = normalize(chunk.chunk);
 
     if (userWords.length === 0) return 0;
@@ -111,7 +141,7 @@ export const QuickReflexMode: React.FC<QuickReflexModeProps> = ({
     }
 
     return Math.min(100, Math.max(0, score));
-  }, [chunk.cleanExample, chunk.chunk]);
+  }, [targetSentenceClean, chunk.chunk]);
 
   const revealSolution = useCallback((score: number) => {
     setIsTimerRunning(false);
@@ -349,15 +379,43 @@ export const QuickReflexMode: React.FC<QuickReflexModeProps> = ({
           )}
         </div>
 
+        {/* Multi-example switcher if chunk has multiple examples */}
+        {chunk.examples && chunk.examples.length > 1 && (
+          <div className="example-selector-bar reflex-selector-bar">
+            <span className="example-selector-label">Ngữ cảnh ví dụ ({chunk.examples.length}):</span>
+            <div className="example-selector-pills">
+              {chunk.examples.map((ex, idx) => (
+                <button
+                  key={ex.id || idx}
+                  type="button"
+                  className={`example-selector-pill ${activeExampleIndex === idx ? 'active' : ''}`}
+                  onClick={() => {
+                    setActiveExampleIndex(idx);
+                    setIsRevealed(false);
+                    setTextInput('');
+                    setSpokenTranscript('');
+                    setIsRecording(false);
+                    setReflexAccuracy(null);
+                    setTimeLeft(speedOption === 0 ? 0 : speedOption);
+                    soundManager.playClick();
+                  }}
+                >
+                  Ví dụ #{idx + 1}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <h2 className="vietnamese-sentence-prompt">
-          &ldquo;{chunk.translation || chunk.meaning}&rdquo;
+          &ldquo;{targetTranslation}&rdquo;
         </h2>
 
         {/* Optional Context & Chunk Hint */}
         <div className="reflex-hint-row">
-          {chunk.context && (
+          {targetContext && (
             <span className="reflex-context-pill">
-              💡 <strong>Ngữ cảnh:</strong> {chunk.context}
+              💡 <strong>Ngữ cảnh:</strong> {targetContext}
             </span>
           )}
 
@@ -488,7 +546,7 @@ export const QuickReflexMode: React.FC<QuickReflexModeProps> = ({
             <div className="comparison-card native-card">
               <span className="card-sub-label">🇬🇧🇺🇸 Câu chuẩn người bản xứ nói:</span>
               <p className="native-sentence-text">
-                &ldquo;{formatMarkdown(chunk.exampleSentence || chunk.cleanExample)}&rdquo;
+                &ldquo;{formatMarkdown(targetSentenceRaw)}&rdquo;
               </p>
               <div className="native-chunk-meta">
                 <span className="chunk-pill-highlight">
