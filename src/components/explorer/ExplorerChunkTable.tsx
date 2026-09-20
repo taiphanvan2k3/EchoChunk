@@ -279,9 +279,16 @@ export const ExplorerChunkTable: React.FC<ExplorerChunkTableProps> = ({
 
                   {/* Ví dụ */}
                   <td className="px-4 py-3 align-top hidden md:table-cell">
-                    <p className="text-gray-500 italic leading-snug text-[13px] line-clamp-2">
-                      &ldquo;{chunk.cleanExample}&rdquo;
-                    </p>
+                    <div className="flex flex-col gap-1">
+                      <p className="text-gray-500 italic leading-snug text-[13px] line-clamp-2">
+                        &ldquo;{chunk.cleanExample}&rdquo;
+                      </p>
+                      {chunk.examples && chunk.examples.length > 1 && (
+                        <span className="self-start text-[10px] font-medium text-blue-600 bg-blue-50 border border-blue-100 rounded px-1.5 py-0.5">
+                          +{chunk.examples.length - 1} ví dụ khác
+                        </span>
+                      )}
+                    </div>
                   </td>
 
                   {/* SRS */}

@@ -253,7 +253,12 @@ export const Navbar: React.FC<NavbarProps> = (props) => {
           <div className="nav-divider" />
 
           {/* Firebase Authentication Button / User Profile */}
-          {!loading && (
+          {loading ? (
+            <div className="user-avatar-skeleton" title="Đang kiểm tra đăng nhập...">
+              <div className="user-avatar-skeleton-circle" />
+              <div className="user-avatar-skeleton-text" />
+            </div>
+          ) : (
             <>
               {!user ? (
                 <button

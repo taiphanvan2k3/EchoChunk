@@ -1,5 +1,14 @@
 export type CEFRLevel = 'A2' | 'B1' | 'B2' | 'C1';
 
+export interface ChunkExample {
+  id: string;
+  sentence: string;
+  cleanSentence?: string;
+  sentenceIpa?: string;
+  translation?: string;
+  context?: string;
+}
+
 export interface SpeakingChunk {
   id: string;
   topicId: string;
@@ -21,6 +30,7 @@ export interface SpeakingChunk {
   tags: string[];
   isCustom?: boolean;
   userId?: string;
+  examples?: ChunkExample[];
 }
 
 export interface TopicMeta {
