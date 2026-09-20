@@ -1,13 +1,13 @@
 'use client';
 
 import React from 'react';
-import { YouTubeHistoryItem } from '@/types/youtube';
+import { useAuth } from '@/context/AuthContext';
+import { useYouTubeHistory } from '@/hooks/useYouTubeHistory';
+import { youtubeHistoryStore } from '@/stores/youtubeHistoryStore';
 import { Play, Trash2, Clock, CheckCircle2 } from 'lucide-react';
 
 interface YouTubeRecentVideosProps {
-  history: YouTubeHistoryItem[];
   onSelectVideo: (url: string) => void;
-  onRemoveVideo: (videoId: string) => void;
   isLoading?: boolean;
 }
 
@@ -31,14 +31,22 @@ function formatRelativeTime(timestamp: number): string {
 }
 
 export const YouTubeRecentVideos: React.FC<YouTubeRecentVideosProps> = ({
-  history,
   onSelectVideo,
-  onRemoveVideo,
   isLoading,
 }) => {
-  if (!history || history.length === 0) {
+  const { user } = useAuth();
+
+  // Subscribe this component to the store through useExternalStore
+  const historyItems = useYouTubeHistory(user?.uid);
+
+  // Không hiển thị nếu chưa có lịch sử học video nào
+  if (!historyItems || historyItems.length === 0) {
     return null;
   }
+
+  const handleRemoveVideo = (videoId: string) => {
+    youtubeHistoryStore.remove(videoId, user?.uid);
+  };
 
   return (
     <section className="yt-recent-section" aria-label="Video đã học gần đây">
@@ -46,12 +54,12 @@ export const YouTubeRecentVideos: React.FC<YouTubeRecentVideosProps> = ({
         <div className="yt-recent-title-group">
           <Clock size={17} className="text-blue-600" />
           <h3 className="yt-recent-title">Video đã học gần đây</h3>
-          <span className="yt-recent-count-badge">{history.length}</span>
+          <span className="yt-recent-count-badge">{historyItems.length}</span>
         </div>
       </div>
 
       <div className="yt-recent-grid">
-        {history.map((item) => {
+        {historyItems.map((item) => {
           const completed = item.completedSentencesCount || 0;
           const total = item.totalSentences || 1;
           const percent = Math.min(100, Math.round((completed / total) * 100));
@@ -97,7 +105,7 @@ export const YouTubeRecentVideos: React.FC<YouTubeRecentVideosProps> = ({
                   title="Xóa khỏi lịch sử"
                   onClick={(e) => {
                     e.stopPropagation();
-                    onRemoveVideo(item.videoId);
+                    handleRemoveVideo(item.videoId);
                   }}
                 >
                   <Trash2 size={13} />
