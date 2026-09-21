@@ -6,10 +6,14 @@ import { GetTranscriptResponse } from '@/types/youtube';
 /**
  * Server Action: Lấy phụ đề và mốc thời gian từng từ từ YouTube
  * Hàm này chạy 100% trên server Node.js, an toàn và bảo mật.
+ * userApiKeys: danh sách key riêng của user (decrypt client-side, gửi qua HTTPS)
  */
-export async function getYoutubeTranscriptAction(urlOrId: string): Promise<GetTranscriptResponse> {
+export async function getYoutubeTranscriptAction(
+  urlOrId: string,
+  userApiKeys?: string[]
+): Promise<GetTranscriptResponse> {
   try {
-    const data = await getYouTubeTranscript(urlOrId);
+    const data = await getYouTubeTranscript(urlOrId, userApiKeys);
     return {
       success: true,
       data,

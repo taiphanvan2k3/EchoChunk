@@ -14,12 +14,11 @@ export interface SpeakingChunk {
   topicId: string;
   topicName: string;
   topicIcon: string;
-  sectionTitle: string;
+  sectionTitle?: string;
   number: number;
   chunk: string;
   meaning: string;
   level: string;
-  detailMeaning: string;
   exampleSentence: string;
   cleanExample: string;
   ipa: string;

@@ -1,13 +1,15 @@
 'use client';
 
 import React from 'react';
-import { Video as VideoIcon, X, Play, Loader2 } from 'lucide-react';
+import { Video as VideoIcon, X, Play, Loader2, KeyRound } from 'lucide-react';
 
 interface YouTubeInputBarProps {
   inputUrl: string;
   onChangeUrl: (url: string) => void;
   onLoadVideo: (targetUrl?: string) => void;
   isLoading: boolean;
+  hasUserKeys?: boolean;
+  onOpenKeySettings?: () => void;
 }
 
 export const YouTubeInputBar: React.FC<YouTubeInputBarProps> = ({
@@ -15,6 +17,8 @@ export const YouTubeInputBar: React.FC<YouTubeInputBarProps> = ({
   onChangeUrl,
   onLoadVideo,
   isLoading,
+  hasUserKeys,
+  onOpenKeySettings,
 }) => {
   return (
     <div className="yt-input-bar-wrap">
@@ -62,6 +66,19 @@ export const YouTubeInputBar: React.FC<YouTubeInputBarProps> = ({
           </>
         )}
       </button>
+
+      {/* API Key settings button */}
+      {onOpenKeySettings && (
+        <button
+          type="button"
+          className={`yt-key-settings-btn${hasUserKeys ? ' has-keys' : ''}`}
+          onClick={onOpenKeySettings}
+          title={hasUserKeys ? 'Bạn đang dùng API key riêng' : 'Cài đặt API key riêng'}
+        >
+          <KeyRound size={14} />
+          <span className="hidden sm:inline">{hasUserKeys ? 'My Keys' : 'API Key'}</span>
+        </button>
+      )}
     </div>
   );
 };
