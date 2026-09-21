@@ -455,11 +455,18 @@ interface YTranscriptResponse {
  */
 async function fetchFromYTranscript(
   videoId: string,
-  fallbackTitle?: string
+  fallbackTitle?: string,
+  userApiKeys?: string[]
 ): Promise<YouTubeLessonData> {
   console.log(`[YT:${videoId}] Initiating ytranscript.com fallback...`);
 
-  if (YTRANSCRIPT_KEY_POOL.length === 0) {
+  // User keys được ưu tiên trước server keys (chạy trước trong pool)
+  const effectivePool = [
+    ...(userApiKeys?.filter(Boolean) ?? []),
+    ...YTRANSCRIPT_KEY_POOL,
+  ];
+
+  if (effectivePool.length === 0) {
     console.error(`[YT:${videoId}] Chưa cấu hình YTRANSCRIPT_API_KEY(S) trong biến môi trường.`);
     throw new Error('Chưa cấu hình YTRANSCRIPT_API_KEY(S) trong biến môi trường.');
   }
@@ -474,9 +481,10 @@ async function fetchFromYTranscript(
   let lastError: string = 'Tất cả API key đã hết quota. Vui lòng thử lại vào tháng sau.';
   let apiRes: Response | null = null;
 
-  for (let i = 0; i < YTRANSCRIPT_KEY_POOL.length; i++) {
-    const key = YTRANSCRIPT_KEY_POOL[i];
+  for (let i = 0; i < effectivePool.length; i++) {
+    const key = effectivePool[i];
     const maskedKey = key.slice(0, 8) + '...';
+    const keySource = i < (userApiKeys?.length ?? 0) ? 'USER' : 'SERVER';
 
     const res = await fetch(`${YTRANSCRIPT_API_URL}?videoId=${videoId}`, {
       headers: { Authorization: `Bearer ${key}` },
@@ -485,12 +493,12 @@ async function fetchFromYTranscript(
 
     const quotaUsed = res.headers.get('X-Quota-Used');
     const quotaLimit = res.headers.get('X-Quota-Limit');
-    console.log(`[YT:${videoId}] Key[${i + 1}/${YTRANSCRIPT_KEY_POOL.length}] ${maskedKey} → HTTP ${res.status} | Quota: ${quotaUsed}/${quotaLimit}`);
+    console.log(`[YT:${videoId}] [${keySource}] Key[${i + 1}/${effectivePool.length}] ${maskedKey} → HTTP ${res.status} | Quota: ${quotaUsed}/${quotaLimit}`);
 
     if (res.status === 429) {
       lastError = `Key [${i + 1}] hết quota (${quotaUsed}/${quotaLimit}), thử key tiếp theo...`;
       console.warn(`[YT:${videoId}] ${lastError}`);
-      continue; // thử key kế tiếp
+      continue;
     }
 
     if (!res.ok) {
@@ -500,7 +508,7 @@ async function fetchFromYTranscript(
     }
 
     apiRes = res;
-    break; // key này dùng được
+    break;
   }
 
   if (!apiRes) {
@@ -676,7 +684,10 @@ async function tryFetchNativeYouTube(videoId: string): Promise<YouTubeLessonData
  * Lấy danh sách câu và mốc thời gian từng từ của video YouTube.
  * Tự động thử native YouTube trước, nếu lỗi hoặc bị chặn IP thì chuyển sang ytranscript.com.
  */
-export async function getYouTubeTranscript(urlOrId: string): Promise<YouTubeLessonData> {
+export async function getYouTubeTranscript(
+  urlOrId: string,
+  userApiKeys?: string[]
+): Promise<YouTubeLessonData> {
   const videoId = extractVideoId(urlOrId);
   if (!videoId) {
     console.error('[YouTubeService] Invalid YouTube URL or ID:', urlOrId);
@@ -712,7 +723,7 @@ export async function getYouTubeTranscript(urlOrId: string): Promise<YouTubeLess
   // Bước 2: Fallback sang provider ytranscript.com khi YouTube chặn hoặc không có phụ đề trực tiếp
   if (!result) {
     console.log(`[YT:${videoId}] Native YouTube không khả dụng, đang chuyển sang Fallback (ytranscript.com)...`);
-    result = await fetchFromYTranscript(videoId);
+    result = await fetchFromYTranscript(videoId, undefined, userApiKeys);
     source = 'ytranscript';
   }
 

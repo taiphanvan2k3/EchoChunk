@@ -31,7 +31,14 @@ const lora = Lora({
 export const metadata: Metadata = {
   title: "EchoChunk - Contextual Speaking Chunks Fluency Engine",
   description:
-    "Master spoken English with context-driven speaking chunks, interactive voice shadowing, 5-second reflex drills, and smart spaced repetition."
+    "Master spoken English with context-driven speaking chunks, interactive voice shadowing, 5-second reflex drills, and smart spaced repetition.",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "32x32" }
+    ],
+    apple: "/icon.svg"
+  }
 };
 
 export default function RootLayout({

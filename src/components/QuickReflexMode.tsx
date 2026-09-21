@@ -431,7 +431,7 @@ export const QuickReflexMode: React.FC<QuickReflexModeProps> = ({
 
           {showChunkHint && (
             <div className="revealed-chunk-hint-box">
-              <span>Cụm cần dùng nghĩa là: <strong>{chunk.detailMeaning || chunk.meaning}</strong></span>
+              <span>Cụm cần dùng nghĩa là: <strong>{chunk.meaning}</strong></span>
               <span className="hint-chunk-start">➔ Bắt đầu bằng: <code>{chunk.chunk.slice(0, 3)}...</code></span>
             </div>
           )}
@@ -558,7 +558,7 @@ export const QuickReflexMode: React.FC<QuickReflexModeProps> = ({
                   </span>
                 )}
                 <span className="chunk-meaning-pill">
-                  ➜ {chunk.detailMeaning || chunk.meaning}
+                  ➜ {chunk.meaning}
                 </span>
               </div>
             </div>

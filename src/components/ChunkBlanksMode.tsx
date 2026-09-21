@@ -137,11 +137,6 @@ export const ChunkBlanksMode: React.FC<ChunkBlanksModeProps> = ({
     };
   }, [chunk, activeExample.cleanSentence, activeExample.sentence]);
 
-  // Meaning to display: Prefer detailMeaning (specific) over general deck name
-  const effectiveMeaning = useMemo(() => {
-    return chunk.detailMeaning && chunk.detailMeaning.trim().length > 0 ? chunk.detailMeaning.trim() : chunk.meaning;
-  }, [chunk]);
-
   // Valid answer candidates
   const validTargets = useMemo(() => {
     const set = new Set<string>();
@@ -467,7 +462,7 @@ export const ChunkBlanksMode: React.FC<ChunkBlanksModeProps> = ({
             )}
           </div>
 
-          <p className="revealed-chunk-meaning">➜ {effectiveMeaning}</p>
+          <p className="revealed-chunk-meaning">➜ {chunk.meaning}</p>
 
           {effectiveSentenceIpa && (
             <div className="sentence-ipa-block blanks-sentence-ipa" title="Phiên âm ngữ âm cả câu ví dụ">

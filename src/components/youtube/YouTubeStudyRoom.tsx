@@ -14,11 +14,15 @@ import { YouTubeInputBar } from "./YouTubeInputBar";
 import { YouTubeRecentVideos } from "./YouTubeRecentVideos";
 import { YouTubeReviewsCard } from "./YouTubeReviewsCard";
 import { YouTubeExploreLibrary } from "./YouTubeExploreLibrary";
+import { APIKeySettingsModal } from "@/components/settings/APIKeySettingsModal";
+import { useUserYTKeys } from "@/hooks/useUserYTKeys";
 import { ChevronRight, AlertCircle } from "lucide-react";
 
 export const YouTubeStudyRoom: React.FC = () => {
   const { user } = useAuth();
   const [inputUrl, setInputUrl] = useState("");
+  const [isKeyModalOpen, setIsKeyModalOpen] = useState(false);
+  const { decryptedKeys, storedKeys, reload: reloadKeys } = useUserYTKeys();
 
   // isFetching: đang chờ server trả lời
   // isPending:  React đang render hàng trăm câu — giữ spinner cho đến khi xong
@@ -47,7 +51,7 @@ export const YouTubeStudyRoom: React.FC = () => {
     });
 
     try {
-      const res = await getYoutubeTranscriptAction(url);
+      const res = await getYoutubeTranscriptAction(url, decryptedKeys);
       if (res.success && res.data) {
         const data = res.data;
 
@@ -153,12 +157,22 @@ export const YouTubeStudyRoom: React.FC = () => {
         </div>
       )}
 
-      {/* 3. Thanh nhập URL YouTube */}
+      {/* Input bar + settings button */}
       <YouTubeInputBar
         inputUrl={inputUrl}
         onChangeUrl={setInputUrl}
         onLoadVideo={handleLoadVideo}
         isLoading={isLoading}
+        hasUserKeys={storedKeys.length > 0}
+        onOpenKeySettings={() => setIsKeyModalOpen(true)}
+      />
+
+      {/* API Key Settings Modal */}
+      <APIKeySettingsModal
+        isOpen={isKeyModalOpen}
+        onClose={() => setIsKeyModalOpen(false)}
+        storedKeys={storedKeys}
+        onKeysChanged={reloadKeys}
       />
 
       {/* Thông báo lỗi nếu có */}

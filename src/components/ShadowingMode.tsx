@@ -352,7 +352,7 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
           </div>
         )}
 
-        <p className="core-meaning-text">➜ {chunk.detailMeaning || chunk.meaning}</p>
+        <p className="core-meaning-text">➜ {chunk.meaning}</p>
       </div>
 
       {/* Example Sentence with highlighted chunk */}
