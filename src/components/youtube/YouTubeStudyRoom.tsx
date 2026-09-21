@@ -16,10 +16,15 @@ import { YouTubeReviewsCard } from "./YouTubeReviewsCard";
 import { YouTubeExploreLibrary } from "./YouTubeExploreLibrary";
 import { APIKeySettingsModal } from "@/components/settings/APIKeySettingsModal";
 import { useUserYTKeys } from "@/hooks/useUserYTKeys";
-import { ChevronRight, AlertCircle } from "lucide-react";
+import { useYouTubeHistory } from "@/hooks/useYouTubeHistory";
+import { ChevronRight, AlertCircle, Clock, Sparkles } from "lucide-react";
 
 export const YouTubeStudyRoom: React.FC = () => {
   const { user } = useAuth();
+  const historyItems = useYouTubeHistory(user?.uid);
+  const [selectedTab, setSelectedTab] = useState<'recent' | 'explore' | null>(null);
+  const activeTab = selectedTab ?? (historyItems.length > 0 ? 'recent' : 'explore');
+
   const [inputUrl, setInputUrl] = useState("");
   const [isKeyModalOpen, setIsKeyModalOpen] = useState(false);
   const { decryptedKeys, storedKeys, reload: reloadKeys } = useUserYTKeys();
@@ -186,21 +191,60 @@ export const YouTubeStudyRoom: React.FC = () => {
       {/* 4. Trạng thái khám phá & video đã học khi chưa tải bài học */}
       {!lessonData && !isLoading && (
         <div className="yt-empty-container">
-          <YouTubeRecentVideos
-            onSelectVideo={(url) => {
-              setInputUrl(url);
-              handleLoadVideo(url);
-            }}
-            isLoading={isLoading}
-          />
-          <YouTubeExploreLibrary
-            onSelectVideo={(videoId) => {
-              const url = `https://www.youtube.com/watch?v=${videoId}`;
-              setInputUrl(url);
-              handleLoadVideo(url);
-            }}
-            isLoading={isLoading}
-          />
+          {/* Segmented Pill Tabs */}
+          <div className="yt-study-tabs-bar">
+            <div className="yt-study-tabs-group" role="tablist">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeTab === "recent"}
+                className={`yt-study-tab-btn ${activeTab === "recent" ? "is-active" : ""}`}
+                onClick={() => setSelectedTab("recent")}
+              >
+                <Clock size={16} />
+                <span>Video đã học gần đây</span>
+                {historyItems.length > 0 && (
+                  <span className="yt-study-tab-badge">{historyItems.length}</span>
+                )}
+              </button>
+
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeTab === "explore"}
+                className={`yt-study-tab-btn ${activeTab === "explore" ? "is-active" : ""}`}
+                onClick={() => setSelectedTab("explore")}
+              >
+                <Sparkles size={16} />
+                <span>Thư viện bài học gợi ý</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Tab Content Panel */}
+          <div className="yt-study-tab-content" key={activeTab}>
+            {activeTab === "recent" && (
+              <YouTubeRecentVideos
+                onSelectVideo={(url) => {
+                  setInputUrl(url);
+                  handleLoadVideo(url);
+                }}
+                onSwitchToExplore={() => setSelectedTab("explore")}
+                isLoading={isLoading}
+              />
+            )}
+
+            {activeTab === "explore" && (
+              <YouTubeExploreLibrary
+                onSelectVideo={(videoId) => {
+                  const url = `https://www.youtube.com/watch?v=${videoId}`;
+                  setInputUrl(url);
+                  handleLoadVideo(url);
+                }}
+                isLoading={isLoading}
+              />
+            )}
+          </div>
         </div>
       )}
 

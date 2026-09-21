@@ -1,8 +1,11 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Sparkles, Play, Search } from 'lucide-react';
+import { Sparkles, Play, Search, ChevronDown } from 'lucide-react';
 import { TranscribedVideoSummary } from '@/lib/firebase/firestore/youtubeTranscript';
+
+const INITIAL_VISIBLE_COUNT = 6;
+const BATCH_SIZE = 6;
 
 interface YouTubeExploreLibraryProps {
   onSelectVideo: (videoId: string) => void;
@@ -34,6 +37,7 @@ export const YouTubeExploreLibrary: React.FC<YouTubeExploreLibraryProps> = ({
   // Start in fetching state to show skeletons immediately on mount
   const [isFetching, setIsFetching] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
 
   useEffect(() => {
     let cancelled = false;
@@ -62,6 +66,11 @@ export const YouTubeExploreLibrary: React.FC<YouTubeExploreLibraryProps> = ({
     const q = searchQuery.toLowerCase();
     return videos.filter((v) => v.videoTitle.toLowerCase().includes(q));
   }, [videos, searchQuery]);
+
+  const displayedVideos = useMemo(() => {
+    if (searchQuery.trim()) return filtered;
+    return filtered.slice(0, visibleCount);
+  }, [filtered, searchQuery, visibleCount]);
 
   // Don't render at all if Firestore returned nothing and we're done fetching
   if (!isFetching && videos.length === 0) return null;
@@ -92,6 +101,16 @@ export const YouTubeExploreLibrary: React.FC<YouTubeExploreLibraryProps> = ({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
+          {searchQuery && (
+            <button
+              type="button"
+              className="yt-explore-search-clear-btn"
+              onClick={() => setSearchQuery('')}
+              title="Xóa tìm kiếm"
+            >
+              ✕
+            </button>
+          )}
         </div>
       )}
 
@@ -99,12 +118,12 @@ export const YouTubeExploreLibrary: React.FC<YouTubeExploreLibraryProps> = ({
       <div className="yt-explore-grid">
         {isFetching ? (
           <SkeletonCards />
-        ) : filtered.length === 0 ? (
+        ) : displayedVideos.length === 0 ? (
           <p className="yt-explore-empty-msg" style={{ gridColumn: '1 / -1' }}>
-            Không tìm thấy video phù hợp. Thử từ khoá khác nhé!
+            Không tìm thấy video phù hợp với từ khóa &ldquo;{searchQuery}&rdquo;. Thử từ khoá khác nhé!
           </p>
         ) : (
-          filtered.map((video) => (
+          displayedVideos.map((video) => (
             <div
               key={video.videoId}
               className={`yt-explore-card${isLoading ? ' is-disabled' : ''}`}
@@ -158,6 +177,20 @@ export const YouTubeExploreLibrary: React.FC<YouTubeExploreLibraryProps> = ({
           ))
         )}
       </div>
+
+      {/* Load more button */}
+      {!searchQuery.trim() && filtered.length > visibleCount && (
+        <div className="yt-explore-load-more-wrap">
+          <button
+            type="button"
+            className="yt-explore-load-more-btn"
+            onClick={() => setVisibleCount((prev) => prev + BATCH_SIZE)}
+          >
+            <span>Xem thêm video ({filtered.length - visibleCount} video còn lại)</span>
+            <ChevronDown size={15} />
+          </button>
+        </div>
+      )}
     </section>
   );
 };

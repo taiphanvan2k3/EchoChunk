@@ -1,13 +1,14 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useYouTubeHistory } from '@/hooks/useYouTubeHistory';
 import { youtubeHistoryStore } from '@/stores/youtubeHistoryStore';
-import { Play, Trash2, Clock, CheckCircle2 } from 'lucide-react';
+import { Play, Trash2, Clock, CheckCircle2, Search, Sparkles } from 'lucide-react';
 
 interface YouTubeRecentVideosProps {
   onSelectVideo: (url: string) => void;
+  onSwitchToExplore?: () => void;
   isLoading?: boolean;
 }
 
@@ -32,16 +33,48 @@ function formatRelativeTime(timestamp: number): string {
 
 export const YouTubeRecentVideos: React.FC<YouTubeRecentVideosProps> = ({
   onSelectVideo,
+  onSwitchToExplore,
   isLoading,
 }) => {
   const { user } = useAuth();
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Subscribe this component to the store through useExternalStore
   const historyItems = useYouTubeHistory(user?.uid);
 
-  // Không hiển thị nếu chưa có lịch sử học video nào
+  const filteredItems = useMemo(() => {
+    if (!searchQuery.trim()) return historyItems;
+    const q = searchQuery.toLowerCase();
+    return historyItems.filter((item) =>
+      item.videoTitle.toLowerCase().includes(q)
+    );
+  }, [historyItems, searchQuery]);
+
+  // Trạng thái khi chưa có video nào trong lịch sử
   if (!historyItems || historyItems.length === 0) {
-    return null;
+    return (
+      <section className="yt-recent-section" aria-label="Video đã học gần đây">
+        <div className="yt-recent-empty-state">
+          <div className="yt-recent-empty-icon">
+            <Clock size={32} />
+          </div>
+          <h4 className="yt-recent-empty-title">Chưa có video nào trong lịch sử học</h4>
+          <p className="yt-recent-empty-desc">
+            Dán link YouTube bất kỳ ở thanh trên để bắt đầu, hoặc khám phá các video phụ đề có sẵn trong thư viện.
+          </p>
+          {onSwitchToExplore && (
+            <button
+              type="button"
+              className="yt-recent-empty-action-btn"
+              onClick={onSwitchToExplore}
+            >
+              <Sparkles size={15} />
+              <span>Khám phá Thư viện gợi ý</span>
+            </button>
+          )}
+        </div>
+      </section>
+    );
   }
 
   const handleRemoveVideo = (videoId: string) => {
@@ -56,10 +89,46 @@ export const YouTubeRecentVideos: React.FC<YouTubeRecentVideosProps> = ({
           <h3 className="yt-recent-title">Video đã học gần đây</h3>
           <span className="yt-recent-count-badge">{historyItems.length}</span>
         </div>
+
+        {/* Thanh tìm kiếm nhanh video trong lịch sử */}
+        <div className="yt-recent-search-wrap">
+          <Search size={14} className="yt-recent-search-icon" />
+          <input
+            type="text"
+            className="yt-recent-search-input"
+            placeholder="Tìm trong video đã học..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              className="yt-recent-search-clear-btn"
+              onClick={() => setSearchQuery('')}
+              title="Xóa tìm kiếm"
+            >
+              ✕
+            </button>
+          )}
+        </div>
       </div>
 
-      <div className="yt-recent-grid">
-        {historyItems.map((item) => {
+      {filteredItems.length === 0 ? (
+        <div className="yt-recent-search-empty">
+          <p>
+            Không tìm thấy video nào khớp với từ khóa &ldquo;<strong>{searchQuery}</strong>&rdquo;.
+          </p>
+          <button
+            type="button"
+            className="yt-recent-search-clear"
+            onClick={() => setSearchQuery('')}
+          >
+            Xóa tìm kiếm
+          </button>
+        </div>
+      ) : (
+        <div className="yt-recent-grid">
+          {filteredItems.map((item) => {
           const completed = item.completedSentencesCount || 0;
           const total = item.totalSentences || 1;
           const percent = Math.min(100, Math.round((completed / total) * 100));
@@ -157,7 +226,8 @@ export const YouTubeRecentVideos: React.FC<YouTubeRecentVideosProps> = ({
             </div>
           );
         })}
-      </div>
+        </div>
+      )}
     </section>
   );
 };
