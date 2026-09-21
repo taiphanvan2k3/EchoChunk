@@ -1,7 +1,16 @@
-"use client";
-
-import React from "react";
-import { Volume2, Trash2, Wand2, Highlighter, Sparkles, Eraser, MessageSquare, AlertTriangle } from "lucide-react";
+import React, { useState } from "react";
+import {
+  Volume2,
+  Trash2,
+  Wand2,
+  Highlighter,
+  Sparkles,
+  Eraser,
+  MessageSquare,
+  AlertTriangle,
+  PenLine,
+  Eye
+} from "lucide-react";
 import { formatMarkdown } from "@/lib/formatMarkdown";
 import { ModalExampleItem } from "@/hooks/useChunkEditor";
 
@@ -42,6 +51,8 @@ export const ExampleCard: React.FC<ExampleCardProps> = ({
   onAutoHighlight,
   onClearHighlight
 }) => {
+  const [activeTab, setActiveTab] = useState<"edit" | "preview">("edit");
+
   return (
     <div className="notion-callout-editor notion-example-item-card">
       {/* Card header */}
@@ -74,74 +85,115 @@ export const ExampleCard: React.FC<ExampleCardProps> = ({
         </div>
       </div>
 
-      {/* Formatting toolbar */}
-      <div className="example-editor-toolbar">
-        <div className="editor-toolbar-actions">
-          <button
-            type="button"
-            className="editor-toolbar-btn highlight"
-            onClick={() => onToggleHighlight(index)}
-            title="Bôi đen chữ rồi bấm (hoặc bấm phím tắt Ctrl+B) để highlight cụm từ"
-          >
-            <Highlighter size={13} />
-            <span>Highlight cụm</span>
-            <kbd className="toolbar-kbd">Ctrl+B</kbd>
-          </button>
-
-          <button
-            type="button"
-            className="editor-toolbar-btn auto"
-            onClick={() => onAutoHighlight(index)}
-            disabled={!chunkText.trim()}
-            title={
-              chunkText.trim()
-                ? `Tự động tìm và bôi đậm cụm "${chunkText}" trong câu`
-                : "Cần nhập cụm từ trước"
-            }
-          >
-            <Sparkles size={13} />
-            <span>Tự tìm cụm</span>
-          </button>
-
-          <button
-            type="button"
-            className="editor-toolbar-btn clear"
-            onClick={() => onClearHighlight(index)}
-            title="Xóa toàn bộ ký tự định dạng (** hoặc `)"
-          >
-            <Eraser size={13} />
-            <span>Bỏ highlight</span>
-          </button>
-        </div>
-        <span className="editor-toolbar-hint">Enter để xuống dòng</span>
-      </div>
-
-      {/* Main sentence textarea */}
-      <textarea
-        ref={textareaRef}
-        className="notion-callout-textarea"
-        rows={3}
-        placeholder={`Ví dụ #${index + 1}: Bấm Enter thoải mái để xuống dòng (hỗ trợ câu hội thoại nhiều người)...`}
-        value={ex.sentence}
-        onChange={(e) => onSentenceChange(index, e.target.value)}
-        onKeyDown={(e) => {
-          if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "b") {
-            e.preventDefault();
-            onToggleHighlight(index);
-          }
-        }}
-      />
-
-      {/* Live preview */}
-      {ex.sentence.trim() && (
-        <div className="example-live-preview">
-          <div className="preview-label-row">
-            <span className="preview-label">👁️ Xem trước câu:</span>
-            <span className="preview-hint">Cụm được bôi đậm sẽ hiển thị thế này khi học</span>
+      {/* Tabbed Editor Box (Soạn thảo / Xem chi tiết) */}
+      <div className="example-sentence-editor-box">
+        {/* Editor Tab Bar */}
+        <div className="example-editor-tabs-bar">
+          <div className="example-editor-tabs" role="tablist">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === "edit"}
+              className={`example-editor-tab ${activeTab === "edit" ? "active" : ""}`}
+              onClick={() => setActiveTab("edit")}
+            >
+              <PenLine size={13} />
+              <span>Soạn thảo</span>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === "preview"}
+              className={`example-editor-tab ${activeTab === "preview" ? "active" : ""}`}
+              onClick={() => setActiveTab("preview")}
+            >
+              <Eye size={13} />
+              <span>Xem chi tiết</span>
+            </button>
           </div>
-          <div className="preview-bubble">&ldquo;{formatMarkdown(ex.sentence)}&rdquo;</div>
+
+          <span className="editor-toolbar-hint">
+            {activeTab === "edit" ? "Enter để xuống dòng" : "Xem trước hiển thị câu khi học"}
+          </span>
         </div>
-      )}
+
+        {/* Tab 1: Soạn thảo */}
+        {activeTab === "edit" && (
+          <div className="example-editor-edit-pane">
+            {/* Formatting toolbar */}
+            <div className="example-editor-toolbar">
+              <div className="editor-toolbar-actions">
+                <button
+                  type="button"
+                  className="editor-toolbar-btn highlight"
+                  onClick={() => onToggleHighlight(index)}
+                  title="Bôi đen chữ rồi bấm (hoặc bấm phím tắt Ctrl+B) để highlight cụm từ"
+                >
+                  <Highlighter size={13} />
+                  <span>Highlight cụm</span>
+                  <kbd className="toolbar-kbd">Ctrl+B</kbd>
+                </button>
+
+                <button
+                  type="button"
+                  className="editor-toolbar-btn auto"
+                  onClick={() => onAutoHighlight(index)}
+                  disabled={!chunkText.trim()}
+                  title={
+                    chunkText.trim()
+                      ? `Tự động tìm và bôi đậm cụm "${chunkText}" trong câu`
+                      : "Cần nhập cụm từ trước"
+                  }
+                >
+                  <Sparkles size={13} />
+                  <span>Tự tìm cụm</span>
+                </button>
+
+                <button
+                  type="button"
+                  className="editor-toolbar-btn clear"
+                  onClick={() => onClearHighlight(index)}
+                  title="Xóa toàn bộ ký tự định dạng (** hoặc `)"
+                >
+                  <Eraser size={13} />
+                  <span>Bỏ highlight</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Main sentence textarea */}
+            <textarea
+              ref={textareaRef}
+              className="notion-callout-textarea"
+              rows={3}
+              placeholder={`Ví dụ #${index + 1}: Bấm Enter thoải mái để xuống dòng (hỗ trợ câu hội thoại nhiều người)...`}
+              value={ex.sentence}
+              onChange={(e) => onSentenceChange(index, e.target.value)}
+              onKeyDown={(e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "b") {
+                  e.preventDefault();
+                  onToggleHighlight(index);
+                }
+              }}
+            />
+          </div>
+        )}
+
+        {/* Tab 2: Xem chi tiết */}
+        {activeTab === "preview" && (
+          <div className="example-editor-preview-pane">
+            {ex.sentence.trim() ? (
+              <div className="preview-main-quote">
+                &ldquo;{formatMarkdown(ex.sentence)}&rdquo;
+              </div>
+            ) : (
+              <div className="example-detail-empty">
+                <p className="empty-text">Chưa có nội dung câu ví dụ để xem trước.</p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Sentence IPA row */}
       <div className="callout-sentence-ipa-row">
