@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useRef } from "react";
 import { SpeakingChunk, TopicMeta, ChunkExample } from "@/types";
-import { speechService } from "@/lib/speech";
-import { soundManager } from "@/lib/sound";
-import { getPhraseIpa, resolveChunkIpas } from "@/lib/ipa";
+import { speechService } from "@/lib/client/speech";
+import { soundManager } from "@/lib/client/sound";
+import { getPhraseIpa, resolveChunkIpas } from "@/lib/shared/ipa";
 
 export interface ModalExampleItem {
   id: string;

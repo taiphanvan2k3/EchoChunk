@@ -1,13 +1,12 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { usePractice } from '@/context/PracticeContext';
-import { TopicFilterBar } from '@/components/TopicFilterBar';
-import { ChunkBlanksMode } from '@/components/ChunkBlanksMode';
-import { SearchX, RotateCcw, Plus } from 'lucide-react';
-import { soundManager } from '@/lib/sound';
+import { usePractice } from "@/context/PracticeContext";
+import { TopicFilterBar } from "@/components/TopicFilterBar";
+import { ShadowingMode } from "@/components/ShadowingMode";
+import { SearchX, RotateCcw, Plus } from "lucide-react";
+import { soundManager } from "@/lib/client/sound";
 
-export default function BlanksPage() {
+export default function ShadowingPage() {
   const {
     isClient,
     dynamicTopics,
@@ -24,12 +23,14 @@ export default function BlanksPage() {
     resetFilters,
     practiceQueue,
     currentChunk,
+    progressMap,
     handleRateChunk,
+    handleNext,
     handleShuffle,
-    queueIndex,
+    queueIndex
   } = usePractice();
 
-  if (!isClient) {
+  if (!isClient && !currentChunk) {
     return (
       <div className="notion-skeleton-container">
         <div className="skeleton-filter-bar" />
@@ -80,31 +81,26 @@ export default function BlanksPage() {
             </div>
             <h3 className="empty-state-title">Không tìm thấy chunk nào phù hợp</h3>
             <p className="empty-state-desc">
-              Không có cụm từ nào khớp với bộ lọc hoặc từ khóa hiện tại. Hãy thử đặt lại bộ lọc để xem toàn bộ kho từ vựng hoặc tạo một chunk mới cho chủ đề này.
+              Không có cụm từ nào khớp với bộ lọc hoặc từ khóa hiện tại. Hãy thử đặt lại bộ lọc để xem toàn bộ kho từ
+              vựng hoặc tạo một chunk mới cho chủ đề này.
             </p>
             <div className="empty-state-actions">
-              <button
-                type="button"
-                className="notion-btn-secondary"
-                onClick={resetFilters}
-              >
+              <button type="button" className="notion-btn-secondary" onClick={resetFilters}>
                 <RotateCcw size={15} />
                 <span>Đặt lại bộ lọc</span>
               </button>
-              <button
-                type="button"
-                className="notion-btn-primary"
-                onClick={openAddChunk}
-              >
+              <button type="button" className="notion-btn-primary" onClick={openAddChunk}>
                 <Plus size={15} />
                 <span>Tạo Chunk Mới Ngay</span>
               </button>
             </div>
           </div>
         ) : (
-          <ChunkBlanksMode
+          <ShadowingMode
             chunk={currentChunk}
+            progress={progressMap[currentChunk.id]}
             onRate={handleRateChunk}
+            onNext={handleNext}
             onShuffle={handleShuffle}
             currentIndex={queueIndex}
             totalInQueue={practiceQueue.length}

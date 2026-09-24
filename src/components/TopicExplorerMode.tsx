@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { SpeakingChunk, TopicMeta, ChunkProgress } from "@/types";
-import { soundManager } from "@/lib/sound";
+import { soundManager } from "@/lib/client/sound";
 import { Play, Plus, Search, X, Menu } from "lucide-react";
 import { SidebarSection } from "./explorer/ExplorerNavItem";
 import { ExplorerSidebarShell } from "./explorer/ExplorerSidebar";

@@ -1,6 +1,6 @@
 'use client';
 
-import { soundManager } from '@/lib/sound';
+import { soundManager } from '@/lib/client/sound';
 
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { TopicMeta } from '@/types';

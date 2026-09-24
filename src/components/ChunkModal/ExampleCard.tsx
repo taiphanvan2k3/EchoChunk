@@ -11,7 +11,7 @@ import {
   PenLine,
   Eye
 } from "lucide-react";
-import { formatMarkdown } from "@/lib/formatMarkdown";
+import { formatMarkdown } from "@/lib/shared/formatMarkdown";
 import { ModalExampleItem } from "@/hooks/useChunkEditor";
 
 interface ExampleCardProps {

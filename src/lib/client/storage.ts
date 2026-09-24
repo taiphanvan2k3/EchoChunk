@@ -1,30 +1,32 @@
 // LocalStorage Manager with Streak, Progress & Full CRUD Vocabulary
-import { ChunkProgress, SpeakingChunk, UserStats } from '@/types';
+import { mergeCustomChunksWithBase } from "@/lib/shared/chunksMerge";
 
-const PROGRESS_KEY = 'echo_chunk_progress_v1';
-const STATS_KEY = 'echo_chunk_stats_v1';
-const CUSTOM_CHUNKS_KEY = 'echo_chunk_custom_chunks_v1';
-const DELETED_CHUNK_IDS_KEY = 'echo_chunk_deleted_ids_v1';
+import { ChunkProgress, SpeakingChunk, UserStats } from "@/types";
+
+const PROGRESS_KEY = "echo_chunk_progress_v1";
+const STATS_KEY = "echo_chunk_stats_v1";
+const CUSTOM_CHUNKS_KEY = "echo_chunk_custom_chunks_v1";
+const DELETED_CHUNK_IDS_KEY = "echo_chunk_deleted_ids_v1";
 
 export function getTodayDateStr(): string {
-  return new Date().toISOString().split('T')[0];
+  return new Date().toISOString().split("T")[0];
 }
 
 function getStorageKey(baseKey: string, uid?: string | null): string {
-  if (!uid || uid === 'guest') {
+  if (!uid || uid === "guest") {
     return `${baseKey}_guest`;
   }
   return `${baseKey}_${uid}`;
 }
 
 function getItemWithFallback(baseKey: string, uid?: string | null): string | null {
-  if (typeof window === 'undefined') return null;
+  if (typeof window === "undefined") return null;
   const key = getStorageKey(baseKey, uid);
   const val = localStorage.getItem(key);
   if (val !== null) return val;
 
   // Fallback / legacy migration for guest
-  if (!uid || uid === 'guest') {
+  if (!uid || uid === "guest") {
     const legacy = localStorage.getItem(baseKey);
     if (legacy !== null) {
       localStorage.setItem(key, legacy);
@@ -36,7 +38,7 @@ function getItemWithFallback(baseKey: string, uid?: string | null): string | nul
 }
 
 export function clearGuestStorage(): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
   localStorage.removeItem(`${PROGRESS_KEY}_guest`);
   localStorage.removeItem(`${STATS_KEY}_guest`);
   localStorage.removeItem(`${CUSTOM_CHUNKS_KEY}_guest`);
@@ -48,23 +50,23 @@ export function clearGuestStorage(): void {
 }
 
 export function loadProgressMap(uid?: string | null): Record<string, ChunkProgress> {
-  if (typeof window === 'undefined') return {};
+  if (typeof window === "undefined") return {};
   try {
     const raw = getItemWithFallback(PROGRESS_KEY, uid);
     return raw ? JSON.parse(raw) : {};
   } catch (e) {
-    console.error('Failed to load progress', e);
+    console.error("Failed to load progress", e);
     return {};
   }
 }
 
 export function saveProgressMap(map: Record<string, ChunkProgress>, uid?: string | null) {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
   try {
     const key = getStorageKey(PROGRESS_KEY, uid);
     localStorage.setItem(key, JSON.stringify(map));
   } catch (e) {
-    console.error('Failed to save progress', e);
+    console.error("Failed to save progress", e);
   }
 }
 
@@ -74,10 +76,10 @@ export function loadUserStats(uid?: string | null): UserStats {
     lastActiveDate: getTodayDateStr(),
     todayReviewedCount: 0,
     totalPracticedCount: 0,
-    dailyGoal: 20,
+    dailyGoal: 20
   };
 
-  if (typeof window === 'undefined') return defaultStats;
+  if (typeof window === "undefined") return defaultStats;
 
   try {
     const raw = getItemWithFallback(STATS_KEY, uid);
@@ -107,12 +109,12 @@ export function loadUserStats(uid?: string | null): UserStats {
 }
 
 export function saveUserStats(stats: UserStats, uid?: string | null) {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
   try {
     const key = getStorageKey(STATS_KEY, uid);
     localStorage.setItem(key, JSON.stringify(stats));
   } catch (e) {
-    console.error('Failed to save stats', e);
+    console.error("Failed to save stats", e);
   }
 }
 
@@ -129,78 +131,52 @@ export function recordChunkReviewed(chunkId: string, accuracy: number, uid?: str
 // --------------------------------------------------------------------------
 
 export function loadCustomChunks(uid?: string | null): SpeakingChunk[] {
-  if (typeof window === 'undefined') return [];
+  if (typeof window === "undefined") return [];
   try {
     const raw = getItemWithFallback(CUSTOM_CHUNKS_KEY, uid);
     return raw ? JSON.parse(raw) : [];
   } catch (e) {
-    console.error('Failed to load custom chunks', e);
+    console.error("Failed to load custom chunks", e);
     return [];
   }
 }
 
 export function saveCustomChunks(chunks: SpeakingChunk[], uid?: string | null) {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
   try {
     const key = getStorageKey(CUSTOM_CHUNKS_KEY, uid);
     localStorage.setItem(key, JSON.stringify(chunks));
   } catch (e) {
-    console.error('Failed to save custom chunks', e);
+    console.error("Failed to save custom chunks", e);
   }
 }
 
 export function loadDeletedChunkIds(uid?: string | null): string[] {
-  if (typeof window === 'undefined') return [];
+  if (typeof window === "undefined") return [];
   try {
     const raw = getItemWithFallback(DELETED_CHUNK_IDS_KEY, uid);
     return raw ? JSON.parse(raw) : [];
   } catch (e) {
-    console.error('Failed to load deleted chunk ids', e);
+    console.error("Failed to load deleted chunk ids", e);
     return [];
   }
 }
 
 export function saveDeletedChunkIds(ids: string[], uid?: string | null) {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
   try {
     const key = getStorageKey(DELETED_CHUNK_IDS_KEY, uid);
     localStorage.setItem(key, JSON.stringify(ids));
   } catch (e) {
-    console.error('Failed to save deleted chunk ids', e);
+    console.error("Failed to save deleted chunk ids", e);
   }
 }
 
 export function getMergedChunks(baseChunks: SpeakingChunk[], uid?: string | null): SpeakingChunk[] {
   const customChunks = loadCustomChunks(uid);
   const deletedIds = new Set(loadDeletedChunkIds(uid));
-
-  const customMap = new Map<string, SpeakingChunk>();
-  for (const c of customChunks) {
-    // Filter out chunks that belong to a different user
-    if (uid && c.userId && c.userId !== uid && c.userId !== 'guest') {
-      continue;
-    }
-    customMap.set(c.id, c);
-  }
-
-  const result: SpeakingChunk[] = [];
-  for (const base of baseChunks) {
-    if (deletedIds.has(base.id)) continue;
-    if (customMap.has(base.id)) {
-      result.push(customMap.get(base.id)!);
-      customMap.delete(base.id);
-    } else {
-      result.push(base);
-    }
-  }
-
-  for (const newChunk of customMap.values()) {
-    if (!deletedIds.has(newChunk.id)) {
-      result.unshift(newChunk); // Show custom chunks near the top
-    }
-  }
-
-  return result;
+  const userFiltered = customChunks.filter((c) => !uid || !c.userId || c.userId === uid || c.userId === "guest");
+  return mergeCustomChunksWithBase(baseChunks, userFiltered, deletedIds);
 }
 
 export function saveChunk(chunk: SpeakingChunk, uid?: string | null): SpeakingChunk[] {
@@ -208,7 +184,7 @@ export function saveChunk(chunk: SpeakingChunk, uid?: string | null): SpeakingCh
   const index = customChunks.findIndex((c) => c.id === chunk.id);
   const chunkToSave: SpeakingChunk = {
     ...chunk,
-    userId: uid || 'guest',
+    userId: uid || "guest"
   };
 
   if (index >= 0) {
@@ -220,7 +196,10 @@ export function saveChunk(chunk: SpeakingChunk, uid?: string | null): SpeakingCh
 
   const deletedIds = loadDeletedChunkIds(uid);
   if (deletedIds.includes(chunk.id)) {
-    saveDeletedChunkIds(deletedIds.filter((id) => id !== chunk.id), uid);
+    saveDeletedChunkIds(
+      deletedIds.filter((id) => id !== chunk.id),
+      uid
+    );
   }
 
   return customChunks;
@@ -253,7 +232,7 @@ export function exportBackupJSON(): string {
       progress,
       stats,
       customChunks,
-      deletedChunkIds,
+      deletedChunkIds
     },
     null,
     2
@@ -273,7 +252,7 @@ export function importBackupJSON(jsonStr: string): boolean {
     }
     return true;
   } catch (e) {
-    console.error('Import failed', e);
+    console.error("Import failed", e);
     return false;
   }
 }

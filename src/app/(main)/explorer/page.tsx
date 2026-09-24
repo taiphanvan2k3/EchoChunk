@@ -17,7 +17,7 @@ export default function ExplorerPage() {
     handleDeleteChunk,
   } = usePractice();
 
-  if (!isClient) {
+  if (!isClient && allChunks.length === 0) {
     return (
       <div className="notion-skeleton-container">
         <div className="skeleton-filter-bar" />

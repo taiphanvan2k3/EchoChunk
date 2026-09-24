@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { getUserYTKeys, StoredYTKey } from '@/lib/firebase/firestore/userYTKeys';
-import { decryptApiKey } from '@/lib/crypto/apiKeyEncryption';
+import { getUserYTKeys, StoredYTKey } from '@/lib/client/firebase/firestore/userYTKeys';
+import { decryptApiKey } from '@/lib/client/crypto/apiKeyEncryption';
 
 interface UseUserYTKeysResult {
   /** Danh sách keys đã decrypt, sẵn sàng gửi cho server */
@@ -31,7 +31,7 @@ export function useUserYTKeys(): UseUserYTKeysResult {
 
 
     getUserYTKeys(user.uid)
-      .then(async (keys) => {
+      .then(async (keys: StoredYTKey[]) => {
         if (cancelled) return;
         setStoredKeys(keys);
 

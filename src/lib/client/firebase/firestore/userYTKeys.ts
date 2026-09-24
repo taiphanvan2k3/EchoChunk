@@ -1,16 +1,8 @@
-import {
-  collection,
-  doc,
-  getDocs,
-  setDoc,
-  deleteDoc,
-  serverTimestamp,
-} from 'firebase/firestore';
-import { db } from '../config';
-import { EncryptedKey } from '@/lib/crypto/apiKeyEncryption';
+import { collection, doc, getDocs, setDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
+import { db } from "../config";
+import { EncryptedKey } from "@/lib/client/crypto/apiKeyEncryption";
 
-const getUserKeysCol = (uid: string) =>
-  collection(db, 'users', uid, 'yt_api_keys');
+const getUserKeysCol = (uid: string) => collection(db, "users", uid, "yt_api_keys");
 
 export interface StoredYTKey {
   id: string;
@@ -21,18 +13,14 @@ export interface StoredYTKey {
 }
 
 /** Lưu 1 encrypted key vào Firestore của user */
-export async function saveUserYTKey(
-  uid: string,
-  label: string,
-  encrypted: EncryptedKey
-): Promise<string> {
+export async function saveUserYTKey(uid: string, label: string, encrypted: EncryptedKey): Promise<string> {
   const colRef = getUserKeysCol(uid);
   const docRef = doc(colRef); // auto-ID
   await setDoc(docRef, {
     label,
     ciphertext: encrypted.ciphertext,
     iv: encrypted.iv,
-    createdAt: serverTimestamp(),
+    createdAt: serverTimestamp()
   });
   return docRef.id;
 }
@@ -45,10 +33,10 @@ export async function getUserYTKeys(uid: string): Promise<StoredYTKey[]> {
     const data = d.data();
     list.push({
       id: d.id,
-      label: data.label || 'API Key',
+      label: data.label || "API Key",
       ciphertext: data.ciphertext,
       iv: data.iv,
-      createdAt: data.createdAt?.toMillis?.() || Date.now(),
+      createdAt: data.createdAt?.toMillis?.() || Date.now()
     });
   });
   // Sắp xếp theo thời gian tạo

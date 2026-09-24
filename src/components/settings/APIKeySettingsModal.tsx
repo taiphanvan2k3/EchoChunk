@@ -1,16 +1,28 @@
-'use client';
+"use client";
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef } from "react";
 import {
-  KeyRound, Plus, Trash2, X, Eye, EyeOff, ShieldCheck,
-  AlertTriangle, Loader2, CheckCircle2, Download, Upload,
-} from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
+  KeyRound,
+  Plus,
+  Trash2,
+  X,
+  Eye,
+  EyeOff,
+  ShieldCheck,
+  AlertTriangle,
+  Loader2,
+  CheckCircle2,
+  Download,
+  Upload
+} from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 import {
-  encryptApiKey, hasMasterKey,
-  downloadMasterKeyBackup, importMasterKeyBackup,
-} from '@/lib/crypto/apiKeyEncryption';
-import { saveUserYTKey, deleteUserYTKey, StoredYTKey } from '@/lib/firebase/firestore/userYTKeys';
+  encryptApiKey,
+  hasMasterKey,
+  downloadMasterKeyBackup,
+  importMasterKeyBackup
+} from "@/lib/client/crypto/apiKeyEncryption";
+import { saveUserYTKey, deleteUserYTKey, StoredYTKey } from "@/lib/client/firebase/firestore/userYTKeys";
 
 interface Props {
   isOpen: boolean;
@@ -19,22 +31,17 @@ interface Props {
   onKeysChanged: () => void;
 }
 
-export const APIKeySettingsModal: React.FC<Props> = ({
-  isOpen,
-  onClose,
-  storedKeys,
-  onKeysChanged,
-}) => {
+export const APIKeySettingsModal: React.FC<Props> = ({ isOpen, onClose, storedKeys, onKeysChanged }) => {
   const { user } = useAuth();
-  const [newLabel, setNewLabel] = useState('');
-  const [newKey, setNewKey] = useState('');
+  const [newLabel, setNewLabel] = useState("");
+  const [newKey, setNewKey] = useState("");
   const [showKey, setShowKey] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [successMsg, setSuccessMsg] = useState('');
-  const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
   const [showBackupBanner, setShowBackupBanner] = useState(false);
-  const [restoreStatus, setRestoreStatus] = useState<'idle' | 'ok' | 'error'>('idle');
+  const [restoreStatus, setRestoreStatus] = useState<"idle" | "ok" | "error">("idle");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!isOpen) return null;
@@ -48,19 +55,19 @@ export const APIKeySettingsModal: React.FC<Props> = ({
     if (!key) return;
 
     setIsSaving(true);
-    setErrorMsg('');
-    setSuccessMsg('');
+    setErrorMsg("");
+    setSuccessMsg("");
     try {
       const encrypted = await encryptApiKey(key);
       await saveUserYTKey(user.uid, label, encrypted);
-      setNewKey('');
-      setNewLabel('');
-      setSuccessMsg('Đã lưu key thành công!');
+      setNewKey("");
+      setNewLabel("");
+      setSuccessMsg("Đã lưu key thành công!");
       setShowBackupBanner(true); // ← nhắc download backup
       onKeysChanged();
-      setTimeout(() => setSuccessMsg(''), 4000);
+      setTimeout(() => setSuccessMsg(""), 4000);
     } catch (e) {
-      setErrorMsg('Lỗi khi lưu key. Vui lòng thử lại.');
+      setErrorMsg("Lỗi khi lưu key. Vui lòng thử lại.");
       console.error(e);
     } finally {
       setIsSaving(false);
@@ -84,11 +91,11 @@ export const APIKeySettingsModal: React.FC<Props> = ({
     const file = e.target.files?.[0];
     if (!file) return;
     const ok = await importMasterKeyBackup(file);
-    setRestoreStatus(ok ? 'ok' : 'error');
+    setRestoreStatus(ok ? "ok" : "error");
     if (ok) onKeysChanged(); // re-decrypt with restored key
     // reset input
-    if (fileInputRef.current) fileInputRef.current.value = '';
-    setTimeout(() => setRestoreStatus('idle'), 4000);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    setTimeout(() => setRestoreStatus("idle"), 4000);
   };
 
   return (
@@ -115,8 +122,8 @@ export const APIKeySettingsModal: React.FC<Props> = ({
         <div className="yt-key-security-note">
           <ShieldCheck size={15} className="text-emerald-600 shrink-0 mt-0.5" />
           <p>
-            Key của bạn được <strong>mã hóa ngay trên thiết bị</strong> trước khi lưu lên đám mây —
-            chúng tôi không thể đọc được nó. Hãy giữ file backup để dùng lại trên thiết bị khác.
+            Key của bạn được <strong>mã hóa ngay trên thiết bị</strong> trước khi lưu lên đám mây — chúng tôi không thể
+            đọc được nó. Hãy giữ file backup để dùng lại trên thiết bị khác.
           </p>
         </div>
 
@@ -125,8 +132,8 @@ export const APIKeySettingsModal: React.FC<Props> = ({
           <div className="yt-key-device-warn">
             <AlertTriangle size={15} className="text-amber-600 shrink-0 mt-0.5" />
             <p>
-              Thiết bị này chưa có encryption key. Keys từ thiết bị cũ không giải mã được ở đây.
-              Hãy <strong>khôi phục từ file backup</strong> bên dưới, hoặc thêm lại keys của bạn.
+              Thiết bị này chưa có encryption key. Keys từ thiết bị cũ không giải mã được ở đây. Hãy{" "}
+              <strong>khôi phục từ file backup</strong> bên dưới, hoặc thêm lại keys của bạn.
             </p>
           </div>
         )}
@@ -139,17 +146,12 @@ export const APIKeySettingsModal: React.FC<Props> = ({
               <div>
                 <p className="font-semibold">Tải file backup ngay!</p>
                 <p className="text-xs opacity-80 mt-0.5">
-                  File này chứa encryption key để khôi phục trên thiết bị khác.
-                  Giữ nó an toàn như password.
+                  File này chứa encryption key để khôi phục trên thiết bị khác. Giữ nó an toàn như password.
                 </p>
               </div>
             </div>
             <div className="yt-key-backup-actions">
-              <button
-                type="button"
-                className="yt-key-backup-download-btn"
-                onClick={downloadMasterKeyBackup}
-              >
+              <button type="button" className="yt-key-backup-download-btn" onClick={downloadMasterKeyBackup}>
                 <Download size={13} />
                 Tải backup
               </button>
@@ -181,20 +183,14 @@ export const APIKeySettingsModal: React.FC<Props> = ({
                   disabled={deletingId === k.id}
                   aria-label={`Xóa ${k.label}`}
                 >
-                  {deletingId === k.id
-                    ? <Loader2 size={14} className="animate-spin" />
-                    : <Trash2 size={14} />}
+                  {deletingId === k.id ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
                 </button>
               </div>
             ))}
 
             {/* Download backup button khi đã có keys */}
             {!showBackupBanner && (
-              <button
-                type="button"
-                className="yt-key-backup-btn"
-                onClick={downloadMasterKeyBackup}
-              >
+              <button type="button" className="yt-key-backup-btn" onClick={downloadMasterKeyBackup}>
                 <Download size={13} />
                 Tải file backup (dùng cho thiết bị mới)
               </button>
@@ -218,18 +214,20 @@ export const APIKeySettingsModal: React.FC<Props> = ({
             />
             <div className="yt-key-secret-wrap">
               <input
-                type={showKey ? 'text' : 'password'}
+                type={showKey ? "text" : "password"}
                 className="yt-key-input"
                 placeholder="yk_live_..."
                 value={newKey}
                 onChange={(e) => setNewKey(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') handleAdd(); }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleAdd();
+                }}
               />
               <button
                 type="button"
                 className="yt-key-show-btn"
                 onClick={() => setShowKey((v) => !v)}
-                aria-label={showKey ? 'Ẩn key' : 'Hiện key'}
+                aria-label={showKey ? "Ẩn key" : "Hiện key"}
               >
                 {showKey ? <EyeOff size={14} /> : <Eye size={14} />}
               </button>
@@ -243,15 +241,16 @@ export const APIKeySettingsModal: React.FC<Props> = ({
               </p>
             )}
 
-            <button
-              type="button"
-              className="yt-key-save-btn"
-              disabled={!newKey.trim() || isSaving}
-              onClick={handleAdd}
-            >
-              {isSaving
-                ? <><Loader2 size={14} className="animate-spin" /> Đang mã hóa &amp; lưu...</>
-                : <><Plus size={14} /> Thêm key</>}
+            <button type="button" className="yt-key-save-btn" disabled={!newKey.trim() || isSaving} onClick={handleAdd}>
+              {isSaving ? (
+                <>
+                  <Loader2 size={14} className="animate-spin" /> Đang mã hóa &amp; lưu...
+                </>
+              ) : (
+                <>
+                  <Plus size={14} /> Thêm key
+                </>
+              )}
             </button>
           </div>
         )}
@@ -274,23 +273,28 @@ export const APIKeySettingsModal: React.FC<Props> = ({
             <Upload size={13} />
             Chọn file backup (.json)
           </label>
-          {restoreStatus === 'ok' && (
+          {restoreStatus === "ok" && (
             <p className="yt-key-success mt-1">
               <CheckCircle2 size={14} />
               Khôi phục thành công! Keys của bạn đã sẵn sàng.
             </p>
           )}
-          {restoreStatus === 'error' && (
+          {restoreStatus === "error" && (
             <p className="yt-key-error mt-1">File không hợp lệ hoặc không phải backup của EchoChunk.</p>
           )}
         </div>
 
         {/* Footer */}
         <p className="yt-key-footer-hint">
-          Lấy API key miễn phí tại{' '}
-          <a href="https://ytranscript.com/developers" target="_blank" rel="noreferrer" className="text-blue-600 underline">
+          Lấy API key miễn phí tại{" "}
+          <a
+            href="https://ytranscript.com/developers"
+            target="_blank"
+            rel="noreferrer"
+            className="text-blue-600 underline"
+          >
             ytranscript.com
-          </a>{' '}
+          </a>{" "}
           → API Access → Free (50 req/tháng/account)
         </p>
       </div>

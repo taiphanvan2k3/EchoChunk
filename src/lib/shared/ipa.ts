@@ -7,7 +7,7 @@
  * - File: src/data/american-ipa.json
  */
 import ipaData from "@/data/american-ipa.json";
-import { getEnrichedIpaSync, prefetchEnrichedIpa } from "@/lib/firebase/firestore/ipaEnriched";
+import { getEnrichedIpaSync, prefetchEnrichedIpa } from "@/lib/client/firebase/firestore/ipaEnriched";
 
 const ipaDict: Record<string, string> = ipaData as Record<string, string>;
 

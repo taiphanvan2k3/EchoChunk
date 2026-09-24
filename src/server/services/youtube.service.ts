@@ -13,14 +13,12 @@
 
 import { fetch as undiciFetch, ProxyAgent } from 'undici';
 import { YouTubeLessonData, YouTubeSentence, YouTubeWord } from '@/types/youtube';
-import { getCachedTranscript, saveCachedTranscript } from '@/lib/firebase/firestore/youtubeTranscript';
+import { getCachedTranscript, saveCachedTranscript } from '@/lib/client/firebase/firestore/youtubeTranscript';
+import { extractVideoId } from '@/lib/shared/youtube';
 
 const INNERTUBE_API_URL = 'https://www.youtube.com/youtubei/v1/player?prettyPrint=false';
 const INNERTUBE_CLIENT_VERSION = '20.10.38';
 const INNERTUBE_USER_AGENT = `com.google.android.youtube/${INNERTUBE_CLIENT_VERSION} (Linux; U; Android 14)`;
-
-const RE_YOUTUBE = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
-const RE_RAW_ID = /^[a-zA-Z0-9_-]{11}$/;
 
 const YTRANSCRIPT_API_URL = 'https://ytranscript.com/api/v1/transcript';
 
@@ -77,17 +75,6 @@ async function fetchWithProxy(url: string | URL, init: RequestInit = {}): Promis
   return fetch(url, init);
 }
 
-/**
- * Trích xuất video ID từ URL YouTube hoặc chuỗi ID trực tiếp
- */
-export function extractVideoId(urlOrId: string): string | null {
-  const clean = urlOrId.trim();
-  if (RE_RAW_ID.test(clean)) {
-    return clean;
-  }
-  const match = clean.match(RE_YOUTUBE);
-  return match ? match[1] : null;
-}
 
 /**
  * Giải mã các HTML entities thông dụng trong phụ đề
@@ -730,7 +717,7 @@ export async function getYouTubeTranscript(
   // Bước 3: Tự động lưu kết quả vào Firestore Cache (bất đồng bộ để không chặn kết quả trả về)
   if (result && result.sentences.length > 0) {
     result.source = source;
-    saveCachedTranscript(result, source).catch((saveErr) => {
+    saveCachedTranscript(result, source).catch((saveErr: unknown) => {
       console.warn(`[YT:${videoId}] Không thể lưu cache Firestore:`, saveErr);
     });
   }
