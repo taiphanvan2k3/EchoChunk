@@ -268,7 +268,6 @@ export const ChunkBlanksMode: React.FC<ChunkBlanksModeProps> = ({
             {chunk.topicIcon} {chunk.topicName}
           </span>
           <span className="badge level-badge">{chunk.level}</span>
-          <span className="badge number-badge">#{chunk.number}</span>
         </div>
 
         <div className="card-top-actions">

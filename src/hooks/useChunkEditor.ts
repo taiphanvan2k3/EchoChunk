@@ -40,8 +40,8 @@ export function useChunkEditor({
   const [chunkIpa, setChunkIpa] = useState("");
   const [isChunkIpaEdited, setIsChunkIpaEdited] = useState(false);
   const [level, setLevel] = useState("B1");
-  const [topicId, setTopicId] = useState(existingTopics[0]?.topicId || "CUSTOM");
-  const [customTopicName, setCustomTopicName] = useState("");
+  const [topicId, setTopicId] = useState("CUSTOM");
+  const [customTopicName, setCustomTopicName] = useState("Từ vựng của tôi");
   const [tags, setTags] = useState<string[]>(["custom", "speaking"]);
   const [examples, setExamples] = useState<ModalExampleItem[]>([
     { id: "ex_init_1", sentence: "", translation: "", sentenceIpa: "", context: "" }
@@ -69,8 +69,11 @@ export function useChunkEditor({
       setChunkIpa(resolved.chunkIpa);
       setIsChunkIpaEdited(Boolean(chunkToEdit.chunkIpa || chunkToEdit.ipa));
       setLevel(chunkToEdit.level || "B1");
-      setTopicId(chunkToEdit.topicId || "CUSTOM");
-      setCustomTopicName(chunkToEdit.topicName || "");
+      const safeTopicId = (!chunkToEdit.topicId || chunkToEdit.topicId === "STUDIED" || chunkToEdit.topicId === "ALL")
+        ? "CUSTOM"
+        : chunkToEdit.topicId;
+      setTopicId(safeTopicId);
+      setCustomTopicName(chunkToEdit.topicName || "Từ vựng của tôi");
       setTags(chunkToEdit.tags && chunkToEdit.tags.length > 0 ? chunkToEdit.tags : ["custom", "speaking"]);
 
       if (chunkToEdit.examples && chunkToEdit.examples.length > 0) {
@@ -104,7 +107,7 @@ export function useChunkEditor({
       setChunkIpa("");
       setIsChunkIpaEdited(false);
       setLevel("B1");
-      setTopicId(existingTopics[0]?.topicId || "CUSTOM");
+      setTopicId("CUSTOM");
       setCustomTopicName("Từ vựng của tôi");
       setTags(["custom", "speaking"]);
       setExamples([{ id: "ex_default_1", sentence: "", translation: "", sentenceIpa: "", context: "" }]);
@@ -342,9 +345,11 @@ export function useChunkEditor({
       context: ""
     };
 
+    const cleanTopicId = (!topicId || topicId === "STUDIED" || topicId === "ALL") ? "CUSTOM" : topicId;
+
     const updatedChunk: SpeakingChunk = {
       id: chunkToEdit?.id || `custom_chunk_${Date.now()}`,
-      topicId,
+      topicId: cleanTopicId,
       topicName: resolvedTopicName,
       topicIcon: resolvedTopicIcon,
       sectionTitle: chunkToEdit?.sectionTitle || resolvedTopicName,
@@ -380,9 +385,9 @@ export function useChunkEditor({
 
   // ── Derived values ────────────────────────────────────────────────────────
   const currentSelectedTopic =
-    topicId === "CUSTOM"
+    topicId === "CUSTOM" || topicId === "STUDIED" || topicId === "ALL"
       ? { topicId: "CUSTOM", topicName: customTopicName || "Từ vựng tự tạo / Khác", icon: "⭐" }
-      : existingTopics.find((t) => t.topicId === topicId) || {
+      : existingTopics.find((t) => t.topicId === topicId && t.topicId !== "STUDIED" && t.topicId !== "ALL") || {
           topicId: "CUSTOM",
           topicName: "Từ vựng tự tạo",
           icon: "⭐"

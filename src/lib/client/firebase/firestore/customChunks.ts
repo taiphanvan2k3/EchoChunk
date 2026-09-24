@@ -3,23 +3,27 @@ import { db } from "../config";
 import { SpeakingChunk } from "@/types";
 
 /**
- * Lưu từ vựng tự tạo của người dùng lên Cloud
+ * Lưu/Cập nhật từ vựng tự tạo của người dùng lên Cloud Firestore (mỗi câu 1 document riêng biệt).
  */
 export async function syncCustomChunk(uid: string, chunk: SpeakingChunk): Promise<void> {
   try {
     const ref = doc(db, "users", uid, "customChunks", chunk.id);
-    await setDoc(ref, {
-      ...chunk,
-      userId: uid,
-      updatedAt: serverTimestamp()
-    });
+    await setDoc(
+      ref,
+      {
+        ...chunk,
+        userId: uid,
+        updatedAt: serverTimestamp()
+      },
+      { merge: true }
+    );
   } catch (error) {
     console.error(`Failed to sync custom chunk ${chunk.id}:`, error);
   }
 }
 
 /**
- * Xóa từ vựng tự tạo khỏi Cloud
+ * Xóa từ vựng tự tạo khỏi Cloud Firestore.
  */
 export async function deleteCustomChunk(uid: string, chunkId: string): Promise<void> {
   try {
@@ -31,7 +35,7 @@ export async function deleteCustomChunk(uid: string, chunkId: string): Promise<v
 }
 
 /**
- * Lấy danh sách từ vựng tự tạo từ Cloud
+ * Lấy toàn bộ danh sách từ vựng tự tạo từ Cloud Firestore.
  */
 export async function fetchCustomChunks(uid: string): Promise<SpeakingChunk[]> {
   try {

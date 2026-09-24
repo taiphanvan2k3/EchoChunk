@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { usePractice } from '@/context/PracticeContext';
 import { TopicFilterBar } from '@/components/TopicFilterBar';
 import { QuickReflexMode } from '@/components/QuickReflexMode';

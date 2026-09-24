@@ -152,6 +152,7 @@ export const PracticeProvider: React.FC<{
         }
       );
     }
+ 
     const local = loadUserStats(user?.uid);
     if (local.totalPracticedCount > 0) return local;
     return initialData?.userStats ?? local;
@@ -199,16 +200,22 @@ export const PracticeProvider: React.FC<{
         }
       } else {
         // Normal login / account switch: fetch this user's OWN cloud data
+        // Kiểm tra LocalStorage: Nếu thiết bị đã có sẵn danh sách customChunks, dùng luôn và KHÔNG gọi Cloud (0 Read)
+        const existingLocalCustom = loadCustomChunks(user.uid);
+        const shouldFetchCustomFromCloud = existingLocalCustom.length === 0;
+
         const [cloudProgress, cloudStats, cloudCustom] = await Promise.all([
           fetchUserProgressMap(user.uid),
           fetchUserStats(user.uid),
-          fetchCustomChunks(user.uid),
+          shouldFetchCustomFromCloud ? fetchCustomChunks(user.uid) : Promise.resolve(null),
         ]);
 
         if (isMounted) {
           saveProgressMap(cloudProgress, user.uid);
           if (cloudStats) saveUserStats(cloudStats, user.uid);
-          saveCustomChunks(cloudCustom, user.uid);
+          if (cloudCustom !== null) {
+            saveCustomChunks(cloudCustom, user.uid);
+          }
           setStoreVersion((v) => v + 1);
         }
       }
@@ -235,19 +242,28 @@ export const PracticeProvider: React.FC<{
 
   // Compute Dynamic Topics
   const dynamicTopics = useMemo<TopicMeta[]>(() => {
+    // Khi đang SSR hoặc trước khi client hydrate xong, dùng trực tiếp dynamicTopics từ server để tránh nhảy layout
+    if (!isClient && initialData?.dynamicTopics && initialData.dynamicTopics.length > 0) {
+      return initialData.dynamicTopics;
+    }
+
     const counts: Record<string, number> = {};
     let customCount = 0;
-    let studiedCount = 0;
 
     allChunks.forEach((c) => {
       counts[c.topicId] = (counts[c.topicId] || 0) + 1;
       if (c.isCustom || c.topicId === 'CUSTOM') {
         customCount += 1;
       }
-      if (progressMap[c.id] && progressMap[c.id].repetitions > 0) {
-        studiedCount += 1;
-      }
     });
+
+    if (customCount === 0) {
+      customCount = userStats.customChunksCount ?? initialData?.userStats?.customChunksCount ?? 0;
+    }
+
+    const studiedCount = Object.values(progressMap).filter(
+      (p) => p && p.repetitions > 0
+    ).length;
 
     const list = data.topics.map((t) => ({
       ...t,
@@ -273,7 +289,7 @@ export const PracticeProvider: React.FC<{
     }
 
     return list;
-  }, [allChunks, progressMap]);
+  }, [isClient, initialData, allChunks, progressMap, userStats.customChunksCount]);
 
   // Filter chunks
   const filteredChunks = useMemo(() => {
@@ -334,16 +350,23 @@ export const PracticeProvider: React.FC<{
   }, [practiceQueue, queueIndex]);
 
   const reviewDueCount = useMemo(() => {
-    return allChunks.filter((c) => {
-      const prog = progressMap[c.id];
+    if (!isClient && initialData?.reviewDueCount !== undefined) {
+      return initialData.reviewDueCount;
+    }
+
+    return Object.values(progressMap).filter((prog) => {
       if (!prog || prog.repetitions === 0) return false;
       return new Date(prog.dueDate).getTime() <= todayTimestamp;
     }).length;
-  }, [allChunks, progressMap, todayTimestamp]);
+  }, [isClient, initialData, progressMap, todayTimestamp]);
 
   const unstudiedCount = useMemo(() => {
+    if (!isClient && initialData?.unstudiedCount !== undefined) {
+      return initialData.unstudiedCount;
+    }
+
     return allChunks.filter((c) => !progressMap[c.id]).length;
-  }, [allChunks, progressMap]);
+  }, [isClient, initialData, allChunks, progressMap]);
 
   // Handle SRS Rating
   const handleRateChunk = useCallback(
@@ -488,18 +511,34 @@ export const PracticeProvider: React.FC<{
         ...chunk,
         userId: user ? user.uid : 'guest',
       };
+
+      const existingChunks = loadCustomChunks(user?.uid);
+      const isNew = !existingChunks.some((c) => c.id === chunk.id);
+
       saveChunk(chunkWithUser, user?.uid);
       setStoreVersion((v) => v + 1);
       if (user) {
         syncCustomChunk(user.uid, chunkWithUser);
+
+        if (isNew) {
+          const updatedStats = {
+            ...userStats,
+            customChunksCount: (userStats.customChunksCount ?? existingChunks.length) + 1,
+          };
+
+          saveUserStats(updatedStats, user.uid);
+          syncUserStats(user.uid, updatedStats);
+        }
       }
       setIsChunkModalOpen(false);
     },
-    [user]
+    [user, userStats]
   );
 
   const handleDeleteChunk = useCallback(
     (chunkId: string) => {
+      const existingChunks = loadCustomChunks(user?.uid);
+
       removeChunk(chunkId, user?.uid);
       setStoreVersion((v) => v + 1);
       if (queueIndex > 0) {
@@ -507,10 +546,18 @@ export const PracticeProvider: React.FC<{
       }
       if (user) {
         deleteCustomChunk(user.uid, chunkId);
+
+        const updatedStats = {
+          ...userStats,
+          customChunksCount: Math.max(0, (userStats.customChunksCount ?? existingChunks.length) - 1),
+        };
+
+        saveUserStats(updatedStats, user.uid);
+        syncUserStats(user.uid, updatedStats);
       }
       setIsChunkModalOpen(false);
     },
-    [queueIndex, user]
+    [queueIndex, user, userStats]
   );
 
   const reloadStore = useCallback(() => {

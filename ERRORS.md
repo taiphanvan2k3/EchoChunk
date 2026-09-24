@@ -1,8 +1,8 @@
 # ERRORS.md — Nhật ký Lỗi, Nguyên nhân Gốc rễ & Giải pháp (EchoChunk)
 
 > **Dự án:** EchoChunk  
-> **Cập nhật lần cuối:** 2026-09-20  
-> **Phạm vi:** YouTube Transcript, Player, React 19 Lifecycle, SSR Hydration, ESLint Rules, TTS Audio Engine, Phonetics IPA, Webshare Rotating Proxy
+> **Cập nhật lần cuối:** 2026-09-25  
+> **Phạm vi:** YouTube Transcript, Player, React 19 Lifecycle, SSR Hydration, ESLint Rules, TTS Audio Engine, Phonetics IPA, Webshare Rotating Proxy, Firestore Quota Optimization, NoSQL Data Modeling, Next.js 16 Auth & Jose Overrides
 
 ---
 
@@ -17,6 +17,11 @@
 8. [Lỗi thư viện `@travisvn/edge-tts` bị treo vô hạn (hang/freeze) trên Node.js runtime](#8-lỗi-thư-viện-travisvnedge-tts-bị-treo-vô-hạn-hangfreeze-trên-nodejs-runtime)
 9. [Bộ từ điển `american-ipa.json` bị cắt cụt (truncated) và sự cố nghẽn mạng từ `api.dictionaryapi.dev`](#9-bộ-từ-điển-american-ipajson-bị-cắt-cụt-truncated-và-sự-cố-nghẽn-mạng-từ-apidictionaryapidev)
 10. [YouTube chặn IP Datacenter/Server khi lấy Transcript & Giải pháp Webshare Rotating Proxy kết hợp Android InnerTube Client](#10-youtube-chặn-ip-datacenterserver-khi-lấy-transcript--giải-pháp-webshare-rotating-proxy-kết-hợp-android-innertube-client)
+11. [Xung đột phiên bản `jose` với `firebase-admin` trong môi trường Next.js 16](#11-xung-đột-phiên-bản-jose-với-firebase-admin-trong-môi-trường-nextjs-16)
+12. [Cạn kiệt Quota đọc Firestore & Chiến lược Single Document Summary + Client Cache-First](#12-cạn-kiệt-quota-đọc-firestore--chiến-lược-single-document-summary--client-cache-first)
+13. [Khắc phục Overfetching danh mục YouTube bằng Cursor-based Pagination & Infinite Scroll](#13-khắc-phục-overfetching-danh-mục-youtube-bằng-cursor-based-pagination--infinite-scroll)
+14. [Lỗi Hydration Mismatch, Cascading Refresh trong `AuthContext` & Chập chờn giao diện SSR vs Client](#14-lỗi-hydration-mismatch-cascading-refresh-trong-authcontext--chập-chờn-giao-diện-ssr-vs-client)
+15. [Lỗi logic gán nhầm `topicId: 'STUDIED'` cho từ vựng mới trong modal thêm chunk](#15-lỗi-logic-gán-nhầm-topicid-studied-cho-từ-vựng-mới-trong-modal-thêm-chunk)
 
 ---
 
@@ -480,3 +485,211 @@ const res = await tts.synthesize(); // <--- Treo vô hạn ở đây
      ```
    - 100% các câu có đầy đủ mốc thời gian từng từ (`srv3`), sẵn sàng cho tính năng phát sáng Karaoke theo thời gian thực.
    - Mỗi lần gọi API, Webshare tự động phân luồng qua một IP sạch mới (Mỹ, Châu Âu...), triệt tiêu hoàn toàn nguy cơ bị gắn cờ bot.
+
+---
+
+## 11. Xung đột phiên bản `jose` với `firebase-admin` trong môi trường Next.js 16
+
+### Triệu chứng
+Khi build hoặc khởi chạy môi trường phát triển `next dev` (Next.js 16.3.4 với Turbopack) có tích hợp `firebase-admin` (v14.4.0), ứng dụng văng lỗi phân giải module hoặc sập runtime:
+```text
+TypeError: Cannot read properties of undefined (reading 'importJWK')
+// Hoặc:
+Attempted import error: 'jwtVerify' is not exported from 'jose'
+```
+
+### Nguyên nhân gốc rễ
+1. `firebase-admin` phụ thuộc vào thư viện `jose` để thực hiện xác thực và phân giải JWT (`verifySessionCookie`, `verifyIdToken`).
+2. Gói `jose` từ phiên bản v5.x và v6.x có các thay đổi phá vỡ tương thích (breaking changes) về cấu trúc export ESM/CJS và signature hàm so với chuẩn mà `firebase-admin` và Turbopack runtime trong Next.js 16 mong đợi.
+3. Khi `pnpm` hoặc `npm` giải quyết cây phụ thuộc (dependency resolution), các phiên bản `jose` mới hơn bị lồng vào, gây xung đột định dạng runtime giữa Next.js SSR và Firebase Admin SDK.
+
+### Cách khắc phục
+Cấu hình khóa cứng (override) phiên bản `jose` tương thích cao nhất đã được kiểm chứng ổn định (`4.15.9`) trong file [`package.json`](file:///d:/SelfLearning/EchoChunk/package.json):
+```json
+{
+  "pnpm": {
+    "overrides": {
+      "jose": "4.15.9"
+    }
+  },
+  "overrides": {
+    "jose": "4.15.9"
+  }
+}
+```
+Sau đó thực hiện cài đặt lại phụ thuộc:
+```bash
+pnpm install
+```
+Việc này đảm bảo 100% các package con trong toàn bộ dự án đồng nhất sử dụng bản `jose@4.15.9`, triệt tiêu hoàn toàn lỗi import JWT trên Next.js 16.
+
+---
+
+## 12. Cạn kiệt Quota đọc Firestore & Chiến lược Single Document Summary + Client Cache-First
+
+### Triệu chứng
+- Dự án chạm trần 50,000 lượt đọc/ngày của gói Free Tier Firebase Spark chỉ sau một vài phiên thử nghiệm.
+- Mỗi lần người dùng F5 hoặc điều hướng qua lại giữa các tab chế độ học, Firestore ngốn từ 200–500 lượt Read cho mỗi người dùng.
+
+### Cơ chế tính Quota Read của Cloud Firestore & Dẫn chứng chính thức
+
+Dựa trên tài liệu chính thức của Google Firebase:
+- 🔗 **Firebase Pricing Overview:** [firebase.google.com/docs/firestore/pricing](https://firebase.google.com/docs/firestore/pricing)
+- 🔗 **Firestore Quotas and Limits:** [firebase.google.com/docs/firestore/quotas](https://firebase.google.com/docs/firestore/quotas)
+- 🔗 **Aggregation Queries Pricing:** [firebase.google.com/docs/firestore/query-data/aggregation-queries#pricing_for_count_queries](https://firebase.google.com/docs/firestore/query-data/aggregation-queries#pricing_for_count_queries)
+
+| Loại thao tác | Quy tắc tính phí Read | Ví dụ thực tế |
+|---|---|---|
+| **Lấy tài liệu (`getDoc`)** | 1 Document Read cho mỗi tài liệu (kể cả khi doc không tồn tại) | Gọi đọc 1 doc profile = **1 Read** |
+| **Truy vấn danh sách (`getDocs`)** | **1 Read cho MỖI document được trả về** trong kết quả | Collection có 193 chunks $\rightarrow$ `getDocs()` ngốn **193 Reads** |
+| **Truy vấn không có kết quả (Empty Query)** | Tối thiểu **1 Read** cho bản thân câu truy vấn | Query tìm kiếm không khớp dòng nào $\rightarrow$ Vẫn tính **1 Read** |
+| **Phân trang bằng `offset(n)`** | **Tính phí TOÀN BỘ số document bị bỏ qua** | `offset(100).limit(10)` sẽ bị tính **110 Reads** (100 doc skip + 10 doc lấy)! |
+| **Truy vấn tổng hợp đếm (`count()`)** | **1 Read cho mỗi tối đa 1,000 index entries** được quét | Đếm 193 custom chunks chỉ tốn đúng **1 Read** (thay vì 193 Reads) |
+| **Giới hạn dung lượng 1 Document** | **Tối đa 1 MiB (1,048,576 bytes)** cho mỗi document | Vượt 1MB sẽ văng lỗi `Document exceeds maximum size limit` |
+| **Định mức gói Free (Spark Plan)** | **50,000 Reads / ngày** (reset lúc 00:00 PST / 14:00 theo giờ VN) | 200 lần F5 với code cũ là sạch 50k reads |
+
+### Nguyên nhân gốc rễ
+1. **Mô hình Subcollection phân mảnh cho `progress`**:
+   - Trước đây, mỗi câu học được lưu thành 1 document riêng trong `users/{uid}/progress/{chunkId}`.
+   - Khi người dùng vào trang, client gọi `getDocs(collection(db, 'users', uid, 'progress'))`. Nếu người dùng đã học 100 câu, 1 lần F5 = 100 Reads.
+2. **Kéo toàn bộ Subcollection `customChunks` khi vào trang**:
+   - 193 từ vựng cá nhân được kéo về bằng `getDocs(collection(db, 'users', uid, 'customChunks'))` ở mỗi lần vào trang hoặc chuyển tài khoản. 1 lần F5 = 193 Reads.
+3. **Hiểm họa giới hạn 1MB/doc nếu gộp toàn bộ `customChunks` vào 1 document**:
+   - Nếu nhét toàn bộ 193 custom chunks (chứa nhiều ví dụ, ngữ cảnh, IPA tùy biến) vào chung 1 tài liệu Firestore, kích thước tài liệu sẽ nhanh chóng vượt quá trần 1MB của Firestore (`Document exceeds maximum size limit: 1048576 bytes`), làm sập toàn bộ tính năng lưu dữ liệu.
+
+### Cách khắc phục (Kiến trúc Zero-Read / Single Document Pattern)
+
+1. **Single Document Summary Pattern cho `progress`**:
+   - `progress` là các entity rất nhẹ (chỉ gồm `repetitions`, `intervalDays`, `dueDate`, `confidenceScore`...). 500 progress chỉ chiếm ~30KB (dưới 3% giới hạn 1MB).
+   - Gom toàn bộ tiến độ vào 1 document duy nhất: `users/{uid}/progress_summary/current`.
+   - **Hiệu quả**: 1 lần vào trang = đúng **1 Read duy nhất** (tiết kiệm 99% lượt đọc cho tiến độ).
+
+2. **Bảo tồn Subcollection NoSQL cho `customChunks` + Chiến lược Client Cache-First**:
+   - Giữ nguyên cấu trúc NoSQL chuẩn: `users/{uid}/customChunks/{chunkId}` để không bao giờ lo chạm trần 1MB document limit.
+   - Áp dụng nguyên tắc **Client Cache-First**: Khi vào trang, client kiểm tra LocalStorage (`loadCustomChunks(user.uid)`). Nếu thiết bị đã có sẵn dữ liệu từ trước, sử dụng luôn và **KHÔNG** gọi Firestore Cloud $\rightarrow$ **0 Read** khi reload trang hoặc chuyển tab.
+   - Chỉ gọi Cloud khi thiết bị mới / trình duyệt mới chưa có cache.
+
+3. **Lưu trường đếm `customChunksCount` trong `stats/current` & Aggregation Query**:
+   - Thêm trường `customChunksCount` vào document `users/{uid}/stats/current`. Khi người dùng tạo hoặc xóa từ vựng, client cập nhật trực tiếp biến đếm này cùng với stats.
+   - Phía Server SSR (`practiceData.ts`), khi pre-fetch chỉ cần đọc `stats` và chạy truy vấn tổng hợp `collection('customChunks').count().get()` (chỉ tính 1 Read cho 1,000 index entries) để lấy số lượng hiển thị tab mà không cần tải nội dung 193 tài liệu.
+
+---
+
+## 13. Khắc phục Overfetching danh mục YouTube bằng Cursor-based Pagination & Infinite Scroll
+
+### Triệu chứng
+- Tab Khám phá video YouTube (`/api/youtube/explore`) và Lịch sử xem (`YouTubeRecentVideos`) tải toàn bộ danh mục từ Cloud mỗi khi người dùng truy cập.
+- Khi kho video mở rộng, lượng Firestore Read tăng đột biến theo cấp số nhân và gây giật lag DOM khi render quá nhiều video cùng lúc.
+
+### Nguyên nhân gốc rễ
+- Thiếu cơ chế phân trang cursor-based trên Firestore.
+- Nếu dùng phân trang truyền thống bằng `offset(n)` trong Firestore thì không hiệu quả vì Firestore vẫn tính phí đọc cho toàn bộ $n$ documents bị bỏ qua.
+
+### Cách khắc phục
+1. **Cursor-based Pagination trên Firestore**:
+   - Phía backend Firestore ([`youtubeTranscript.ts`](file:///d:/SelfLearning/EchoChunk/src/lib/client/firebase/firestore/youtubeTranscript.ts) & [`route.ts`](file:///d:/SelfLearning/EchoChunk/src/app/api/youtube/explore/route.ts)), áp dụng:
+     ```ts
+     let q = query(collection(db, 'youtube_transcripts'), orderBy('updatedAt', 'desc'), limit(12));
+     if (cursor) {
+       q = query(..., startAfter(Timestamp.fromMillis(cursor)), limit(12));
+     }
+     ```
+   - Trả về `nextCursor` là `updatedAt` của phần tử cuối cùng để client làm mốc tiếp tục.
+2. **Infinite Scroll mượt mà bằng `IntersectionObserver`**:
+   - Trong [`YouTubeExploreLibrary.tsx`](file:///d:/SelfLearning/EchoChunk/src/components/youtube/YouTubeExploreLibrary.tsx), đặt thẻ sentinel ở cuối danh sách với `rootMargin: '300px'`. Khi người dùng cuộn gần tới đáy, request batch tiếp theo tự động được kích hoạt ngầm, hiển thị hàng skeleton tạm thời mà không chặn thao tác người dùng.
+3. **Giới hạn dung lượng Lịch sử xem**:
+   - Giới hạn tải tối đa 30 video từ Cloud ([`youtubeHistory.ts`](file:///d:/SelfLearning/EchoChunk/src/lib/client/firebase/firestore/youtubeHistory.ts)), lưu trữ tối đa 50 video trên Local Storage ([`youtubeHistoryStore.ts`](file:///d:/SelfLearning/EchoChunk/src/stores/youtubeHistoryStore.ts)).
+   - Tại component hiển thị ([`YouTubeRecentVideos.tsx`](file:///d:/SelfLearning/EchoChunk/src/components/youtube/YouTubeRecentVideos.tsx)), áp dụng phân trang batch 6 video/lượt cuộn kèm theo sentinel observer.
+
+---
+
+## 14. Lỗi Hydration Mismatch, Cascading Refresh trong `AuthContext` & Chập chờn giao diện SSR vs Client
+
+### Triệu chứng
+1. Console trình duyệt xuất hiện cảnh báo đỏ:
+   ```text
+   Can't perform a React state update on a component that hasn't mounted yet...
+   Hydration failed because the server rendered HTML didn't match the client.
+   ```
+2. Thẻ bao ngoài `<div className="app-layout">` bị Next.js tạm thời thay thế bằng `<div hidden="">` (Suspense transition) khi tải trang.
+3. Terminal ghi nhận `GET /luyen-noi` bị gọi lại 3 lần liên tiếp trong chưa đầy 1 giây.
+4. Giao diện bị chập chờn / nhảy vọt (flicker):
+   - Tab *"⭐ Từ vựng của tôi"* không hiển thị lúc đầu (SSR), sau khi client mount xong mới bất ngờ chèn vào làm xô lệch toàn bộ thanh tab sang phải.
+   - Thẻ thống kê hiển thị *"8 cần ôn"*, sau khi client mount xong nhảy vọt lên *"13 cần ôn"*.
+   - Thẻ học bài bị ép hiển thị Skeleton chập chờn 1 nhịp dù server đã có sẵn dữ liệu.
+
+### Nguyên nhân gốc rễ
+1. **Side-effect trong hàm updater của `setUser`**:
+   - Trong [`AuthContext.tsx`](file:///d:/SelfLearning/EchoChunk/src/context/AuthContext.tsx), `router.refresh()` bị đặt bên trong callback updater:
+     ```tsx
+     // ❌ SAI: Side-effect bên trong pure updater function
+     setUser((prev) => {
+       if (!prev && currentUser) {
+         router.refresh();
+       }
+       return currentUser;
+     });
+     ```
+   - Khi Firebase Auth khởi tạo lúc client chưa mount xong, callback này chạy và gọi `router.refresh()`, ép Next.js refetch server components ngay giữa lúc React đang hydrate dở cây DOM $\rightarrow$ Gây lỗi Hydration Mismatch và DevTools panic.
+2. **Tính toán `dynamicTopics` phụ thuộc `allChunks`**:
+   - Ở SSR, `allChunks` chỉ có 361 câu mặc định. Thuộc tính `c.isCustom` đều bằng false $\rightarrow$ `customCount = 0` $\rightarrow$ Tab *"⭐ Từ vựng của tôi"* không được sinh ra. Khi client mount xong, LocalStorage nạp 193 custom chunks $\rightarrow$ Tab bị chèn bất ngờ vào vị trí số 1.
+3. **Tính `reviewDueCount` bằng cách lọc `allChunks`**:
+   - Code cũ: `allChunks.filter(c => progressMap[c.id] && isDue)`. Vì `allChunks` ở SSR chỉ có 361 câu, nó chỉ lọc được 8 câu mặc định đến hạn. Khi sang client có thêm 193 custom chunks, nó lọc thêm 5 câu custom đến hạn $\rightarrow$ Con số nhảy từ 8 lên 13.
+4. **Ép buộc Skeleton `!isClient` trong các trang học**:
+   - Điều kiện `{!isClient ? <Skeleton /> : ...}` tại `shadowing`, `reflex`, `blanks` ép buộc trình duyệt luôn phải hiển thị khung xám Skeleton dù `initialPracticeData` từ SSR đã có sẵn `currentChunk`.
+
+### Cách khắc phục
+1. **Chuẩn hóa `AuthContext.tsx`**:
+   - Loại bỏ hoàn toàn `router.refresh()` khỏi hàm updater `setUser`.
+   - Sử dụng `isMountedRef` và chỉ gọi `router.refresh()` trong `useEffect` khi phiên người dùng thực sự thay đổi so với SSR:
+     ```tsx
+     if (isMountedRef.current && currentUser?.uid !== initialUser?.uid) {
+       router.refresh();
+     }
+     ```
+2. **Đồng bộ hóa `dynamicTopics` từ SSR**:
+   - Trong [`PracticeContext.tsx`](file:///d:/SelfLearning/EchoChunk/src/context/PracticeContext.tsx), khi `!isClient`, ưu tiên giữ nguyên `initialData.dynamicTopics` từ server.
+   - Tính toán `customCount` với fallback sang `userStats.customChunksCount` để tab "Từ vựng của tôi (193)" luôn hiển thị ngay từ HTML đầu tiên.
+3. **Tính `reviewDueCount` trực tiếp từ `progressMap`**:
+   - Thay vì lặp qua `allChunks`, lọc trực tiếp trên `Object.values(progressMap)`:
+     ```typescript
+     const reviewDueCount = Object.values(progressMap).filter((prog) => {
+       if (!prog || prog.repetitions === 0) return false;
+       return new Date(prog.dueDate).getTime() <= todayTimestamp;
+     }).length;
+     ```
+   - Cả Server và Client đều đếm đúng **13 câu cần ôn** ngay từ đầu.
+4. **Gỡ bỏ Skeleton ép buộc**:
+   - Chỉ hiển thị Skeleton khi thực sự không có `currentChunk` (`if (!isClient && !currentChunk)`). Dữ liệu có sẵn từ SSR được render thẳng vào DOM ngay lập tức.
+
+---
+
+## 15. Lỗi logic gán nhầm `topicId: 'STUDIED'` cho từ vựng mới trong modal thêm chunk
+
+### Triệu chứng
+- Khi người dùng bấm "+ Thêm Chunk", ô "Chủ đề" mặc định hiển thị "🧠 Đã luyện tập".
+- Trong Firestore, có tới 173/193 custom chunks của người dùng bị gán nhầm `topicId: "STUDIED"`.
+- Menu dropdown chọn chủ đề xuất hiện cả mục "🧠 Đã luyện tập" như một chủ đề nội dung.
+
+### Nguyên nhân gốc rễ
+1. Trong [`PracticeModals.tsx`](file:///d:/SelfLearning/EchoChunk/src/components/PracticeModals.tsx), modal nhận danh sách `existingTopics` lấy từ `dynamicTopics`.
+2. Do tab "🧠 Đã luyện tập" (`topicId: 'STUDIED'`) nằm ở vị trí đầu tiên (index 0) của `dynamicTopics`, hook [`useChunkEditor.ts`](file:///d:/SelfLearning/EchoChunk/src/hooks/useChunkEditor.ts) trước đó khởi tạo:
+   ```ts
+   // ❌ Lấy trúng topicId: 'STUDIED' ở index 0
+   const [topicId, setTopicId] = useState(existingTopics[0]?.topicId || "CUSTOM");
+   ```
+3. Component [`TopicDropdown.tsx`](file:///d:/SelfLearning/EchoChunk/src/components/ChunkModal/TopicDropdown.tsx) chỉ lọc bỏ `CUSTOM`, chưa lọc bỏ `STUDIED`. Trong khi đó, "Đã luyện tập" là trạng thái ôn tập (learning status), không phải chủ đề nội dung.
+
+### Cách khắc phục
+1. **Đặt mặc định chuẩn khi thêm mới**:
+   Trong [`useChunkEditor.ts`](file:///d:/SelfLearning/EchoChunk/src/hooks/useChunkEditor.ts), luôn gán mặc định `topicId: "CUSTOM"` và `customTopicName: "Từ vựng của tôi"`.
+2. **Lọc sạch danh sách chủ đề**:
+   Cả ở `PracticeModals` và `TopicDropdown`, lọc bỏ hoàn toàn các mục trạng thái:
+   ```tsx
+   existingTopics.filter((t) => t.topicId !== "CUSTOM" && t.topicId !== "STUDIED" && t.topicId !== "ALL")
+   ```
+3. **Tự động chuẩn hóa dữ liệu cũ**:
+   Khi nạp chunk để sửa hoặc khi lưu, nếu phát hiện `topicId === "STUDIED"` hoặc `"ALL"`, hệ thống tự động đưa về `"CUSTOM"`.
+4. **Đơn giản hóa giao diện**:
+   Xóa bỏ dòng nhập "Tên chủ đề riêng" dư thừa trong modal theo yêu cầu của người dùng, đặt nhãn thống nhất là **"⭐ Từ vựng của tôi"**.
+
