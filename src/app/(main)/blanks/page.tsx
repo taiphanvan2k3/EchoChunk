@@ -25,7 +25,8 @@ export default function BlanksPage() {
     currentChunk,
     handleRateChunk,
     handleShuffle,
-    queueIndex
+    queueIndex,
+    totalChunksCount
   } = usePractice();
 
   if (!isClient && !currentChunk) {
@@ -49,6 +50,7 @@ export default function BlanksPage() {
     <>
       <TopicFilterBar
         topics={dynamicTopics}
+        totalChunksCount={totalChunksCount}
         selectedTopicId={selectedTopicId}
         onSelectTopic={(tId) => {
           soundManager.playClick();

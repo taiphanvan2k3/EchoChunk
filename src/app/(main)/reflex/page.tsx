@@ -26,6 +26,7 @@ export default function ReflexPage() {
     handleRateChunk,
     handleShuffle,
     queueIndex,
+    totalChunksCount,
   } = usePractice();
 
   if (!isClient && !currentChunk) {
@@ -49,6 +50,7 @@ export default function ReflexPage() {
     <>
       <TopicFilterBar
         topics={dynamicTopics}
+        totalChunksCount={totalChunksCount}
         selectedTopicId={selectedTopicId}
         onSelectTopic={(tId) => {
           soundManager.playClick();

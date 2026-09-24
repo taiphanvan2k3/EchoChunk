@@ -27,7 +27,8 @@ export default function ShadowingPage() {
     handleRateChunk,
     handleNext,
     handleShuffle,
-    queueIndex
+    queueIndex,
+    totalChunksCount
   } = usePractice();
 
   if (!isClient && !currentChunk) {
@@ -51,6 +52,7 @@ export default function ShadowingPage() {
     <>
       <TopicFilterBar
         topics={dynamicTopics}
+        totalChunksCount={totalChunksCount}
         selectedTopicId={selectedTopicId}
         onSelectTopic={(tId) => {
           soundManager.playClick();

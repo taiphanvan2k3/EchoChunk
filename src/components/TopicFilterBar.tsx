@@ -15,6 +15,7 @@ interface TopicFilterBarProps {
   searchQuery: string;
   onSearchChange: (q: string) => void;
   onOpenAddChunk?: () => void;
+  totalChunksCount?: number;
 }
 
 export const TopicFilterBar: React.FC<TopicFilterBarProps> = ({
@@ -25,6 +26,7 @@ export const TopicFilterBar: React.FC<TopicFilterBarProps> = ({
   onSelectLevel,
   searchQuery,
   onSearchChange,
+  totalChunksCount,
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -134,7 +136,13 @@ export const TopicFilterBar: React.FC<TopicFilterBarProps> = ({
           >
             <span className="topic-emoji">✨</span>
             <span className="topic-name">Tất cả chủ đề</span>
-            <span className="topic-count">{topics.reduce((acc, t) => acc + t.chunkCount, 0)}</span>
+            <span className="topic-count">
+              {totalChunksCount !== undefined
+                ? totalChunksCount
+                : topics
+                    .filter((t) => t.topicId !== 'STUDIED' && t.topicId !== 'ALL')
+                    .reduce((acc, t) => acc + t.chunkCount, 0)}
+            </span>
           </button>
 
           {topics.map((t) => (
