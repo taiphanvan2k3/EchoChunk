@@ -24,6 +24,7 @@ export interface InitialPracticeData {
   practiceQueue: SpeakingChunk[];
   reviewDueCount: number;
   unstudiedCount: number;
+  totalChunksCount: number;
 }
 
 export interface InitialServerResult {
@@ -44,9 +45,10 @@ function computeDynamicTopics(
   let customCount = customChunksCount;
 
   allChunks.forEach((c) => {
-    counts[c.topicId] = (counts[c.topicId] || 0) + 1;
     if (c.isCustom || c.topicId === 'CUSTOM') {
       customCount += 1;
+    } else {
+      counts[c.topicId] = (counts[c.topicId] || 0) + 1;
     }
   });
 
@@ -200,6 +202,10 @@ export async function getInitialServerData(): Promise<InitialServerResult> {
               ? countFromSnap
               : (Number(raw.customChunksCount) || 0);
 
+            const savedTotalChunksCount = typeof raw.totalChunksCount === 'number'
+              ? Number(raw.totalChunksCount)
+              : undefined;
+
             userStats = {
               streakDays,
               lastActiveDate: today,
@@ -207,6 +213,7 @@ export async function getInitialServerData(): Promise<InitialServerResult> {
               totalPracticedCount: Number(raw.totalPracticedCount) || 0,
               dailyGoal: Number(raw.dailyGoal) || 20,
               customChunksCount,
+              totalChunksCount: savedTotalChunksCount,
             };
           } else if (customSnap) {
             userStats.customChunksCount = customSnap.data().count;
@@ -231,7 +238,7 @@ export async function getInitialServerData(): Promise<InitialServerResult> {
     return new Date(prog.dueDate).getTime() <= todayTimestamp;
   }).length;
 
-  const totalChunksCount = allChunks.length + (userStats.customChunksCount || 0);
+  const totalChunksCount = userStats.totalChunksCount ?? (allChunks.length + (userStats.customChunksCount || 0));
   const studiedKeysCount = Object.keys(progressMap).filter((k) => progressMap[k]?.repetitions > 0).length;
   const unstudiedCount = Math.max(0, totalChunksCount - studiedKeysCount);
 
@@ -245,6 +252,7 @@ export async function getInitialServerData(): Promise<InitialServerResult> {
       practiceQueue,
       reviewDueCount,
       unstudiedCount,
+      totalChunksCount,
     },
   });
 }

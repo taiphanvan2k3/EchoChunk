@@ -77,6 +77,7 @@ interface PracticeContextType {
   dynamicTopics: TopicMeta[];
   reviewDueCount: number;
   unstudiedCount: number;
+  totalChunksCount: number;
   handleRateChunk: (rating: SRSRating, accuracy: number) => void;
   handleNext: () => void;
   handleShuffle: () => void;
@@ -251,9 +252,10 @@ export const PracticeProvider: React.FC<{
     let customCount = 0;
 
     allChunks.forEach((c) => {
-      counts[c.topicId] = (counts[c.topicId] || 0) + 1;
       if (c.isCustom || c.topicId === 'CUSTOM') {
         customCount += 1;
+      } else {
+        counts[c.topicId] = (counts[c.topicId] || 0) + 1;
       }
     });
 
@@ -367,6 +369,13 @@ export const PracticeProvider: React.FC<{
 
     return allChunks.filter((c) => !progressMap[c.id]).length;
   }, [isClient, initialData, allChunks, progressMap]);
+
+  const totalChunksCount = useMemo(() => {
+    if (!isClient && initialData?.totalChunksCount !== undefined) {
+      return initialData.totalChunksCount;
+    }
+    return allChunks.length;
+  }, [isClient, initialData, allChunks.length]);
 
   // Handle SRS Rating
   const handleRateChunk = useCallback(
@@ -521,9 +530,15 @@ export const PracticeProvider: React.FC<{
         syncCustomChunk(user.uid, chunkWithUser);
 
         if (isNew) {
+          const isBaseChunk = data.chunks.some((c) => c.id === chunk.id);
+          const nextTotal = isBaseChunk
+            ? (userStats.totalChunksCount ?? allChunks.length)
+            : (userStats.totalChunksCount ?? allChunks.length) + 1;
+
           const updatedStats = {
             ...userStats,
             customChunksCount: (userStats.customChunksCount ?? existingChunks.length) + 1,
+            totalChunksCount: nextTotal,
           };
 
           saveUserStats(updatedStats, user.uid);
@@ -532,7 +547,7 @@ export const PracticeProvider: React.FC<{
       }
       setIsChunkModalOpen(false);
     },
-    [user, userStats]
+    [allChunks.length, user, userStats]
   );
 
   const handleDeleteChunk = useCallback(
@@ -550,6 +565,7 @@ export const PracticeProvider: React.FC<{
         const updatedStats = {
           ...userStats,
           customChunksCount: Math.max(0, (userStats.customChunksCount ?? existingChunks.length) - 1),
+          totalChunksCount: Math.max(0, (userStats.totalChunksCount ?? allChunks.length) - 1),
         };
 
         saveUserStats(updatedStats, user.uid);
@@ -557,7 +573,7 @@ export const PracticeProvider: React.FC<{
       }
       setIsChunkModalOpen(false);
     },
-    [queueIndex, user, userStats]
+    [allChunks.length, queueIndex, user, userStats]
   );
 
   const reloadStore = useCallback(() => {
@@ -589,6 +605,7 @@ export const PracticeProvider: React.FC<{
       dynamicTopics,
       reviewDueCount,
       unstudiedCount,
+      totalChunksCount,
       handleRateChunk,
       handleNext,
       handleShuffle,
@@ -627,6 +644,7 @@ export const PracticeProvider: React.FC<{
       dynamicTopics,
       reviewDueCount,
       unstudiedCount,
+      totalChunksCount,
       handleRateChunk,
       handleNext,
       handleShuffle,

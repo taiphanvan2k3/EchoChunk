@@ -75,6 +75,7 @@ export interface UserStats {
   totalPracticedCount: number;
   dailyGoal: number; // default 20
   customChunksCount?: number;
+  totalChunksCount?: number;
 }
 
 export type PracticeMode = 'shadowing' | 'blanks' | 'reflex' | 'browse' | 'analytics';

@@ -533,20 +533,47 @@ Việc này đảm bảo 100% các package con trong toàn bộ dự án đồng
 
 ### Cơ chế tính Quota Read của Cloud Firestore & Dẫn chứng chính thức
 
-Dựa trên tài liệu chính thức của Google Firebase:
-- 🔗 **Firebase Pricing Overview:** [firebase.google.com/docs/firestore/pricing](https://firebase.google.com/docs/firestore/pricing)
-- 🔗 **Firestore Quotas and Limits:** [firebase.google.com/docs/firestore/quotas](https://firebase.google.com/docs/firestore/quotas)
-- 🔗 **Aggregation Queries Pricing:** [firebase.google.com/docs/firestore/query-data/aggregation-queries#pricing_for_count_queries](https://firebase.google.com/docs/firestore/query-data/aggregation-queries#pricing_for_count_queries)
+Trong tài liệu chính thức của Google Firebase, Firestore định nghĩa mô hình tính phí dựa trên **Document Operations (Các thao tác trên tài liệu)**:
 
-| Loại thao tác | Quy tắc tính phí Read | Ví dụ thực tế |
+#### 1. Trích dẫn nguyên văn từ tài liệu Firebase:
+- 🔗 **Mục [Operations Pricing](https://firebase.google.com/docs/firestore/pricing#operations) (hoặc [Google Cloud Firestore Pricing](https://cloud.google.com/firestore/pricing#operations)):**
+  > *"When you use Cloud Firestore, you are charged for the following:*
+  > *- **Document operations:** The number of documents you read, write, and delete.*
+  > *- **When you perform a query, you are charged for a read for each document that is retrieved.**"*
+  > 
+  > *(Dịch: Khi bạn thực hiện một câu truy vấn (query/getDocs), bạn bị tính phí 1 lượt đọc cho MỖI tài liệu được lấy về.)*
+
+- 🔗 **Mục [Minimum charge for queries](https://firebase.google.com/docs/firestore/pricing#minimum_charge_for_queries):**
+  > *"There is a minimum charge of one document read for each query that you perform, even if the query returns no results."*
+  > 
+  > *(Dịch: Luôn có một khoản phí tối thiểu là 1 lượt đọc cho mỗi query bạn thực hiện, kể cả khi query đó không trả về document nào.)*
+
+- 🔗 **Mục [Offsets in queries](https://firebase.google.com/docs/firestore/pricing#offsets):**
+  > *"You are charged for document reads skipped by an offset. For example, if your query has an offset of 10, and the query returns 1 document, you are charged for 11 document reads."*
+  > 
+  > *(Dịch: Bạn bị tính phí cho tất cả các tài liệu bị bỏ qua bởi `offset`. Ví dụ: nếu query có `offset(10)` và trả về 1 document, bạn bị tính tổng cộng 11 lượt đọc!)*
+
+- 🔗 **Mục [Aggregation Queries Pricing (count)](https://firebase.google.com/docs/firestore/query-data/aggregation-queries#pricing_for_count_queries):**
+  > *"For aggregation queries such as `count()`, you are charged one document read for each batch of up to 1,000 index entries matched by the query."*
+  > 
+  > *(Dịch: Đối với các truy vấn tổng hợp như `count()`, bạn chỉ bị tính 1 lượt đọc cho mỗi lô tối đa 1.000 mục index khớp với truy vấn.)*
+
+- 🔗 **Mục [Spark Free Tier Quota](https://firebase.google.com/docs/firestore/quotas#free-quota):**
+  > *"Document reads: 50,000 per day"*
+  > 
+  > *(Dịch: Hạn mức miễn phí gói Spark là 50.000 lượt đọc tài liệu mỗi ngày, reset lúc 00:00 PST / 14:00 giờ Việt Nam.)*
+
+#### 2. Bảng đối chiếu thực tế:
+
+| Loại thao tác | Quy tắc tính phí Read | Hệ quả thực tế với EchoChunk |
 |---|---|---|
-| **Lấy tài liệu (`getDoc`)** | 1 Document Read cho mỗi tài liệu (kể cả khi doc không tồn tại) | Gọi đọc 1 doc profile = **1 Read** |
-| **Truy vấn danh sách (`getDocs`)** | **1 Read cho MỖI document được trả về** trong kết quả | Collection có 193 chunks $\rightarrow$ `getDocs()` ngốn **193 Reads** |
+| **Lấy 1 tài liệu (`getDoc`)** | 1 Document Read cho mỗi tài liệu (kể cả khi doc không tồn tại) | Đọc doc `stats/current` = **1 Read** |
+| **Truy vấn danh sách (`getDocs`)** | **1 Read cho MỖI document được trả về** trong kết quả | 193 custom chunks $\rightarrow$ `getDocs()` ngốn **193 Reads** mỗi lần F5! |
 | **Truy vấn không có kết quả (Empty Query)** | Tối thiểu **1 Read** cho bản thân câu truy vấn | Query tìm kiếm không khớp dòng nào $\rightarrow$ Vẫn tính **1 Read** |
-| **Phân trang bằng `offset(n)`** | **Tính phí TOÀN BỘ số document bị bỏ qua** | `offset(100).limit(10)` sẽ bị tính **110 Reads** (100 doc skip + 10 doc lấy)! |
+| **Phân trang bằng `offset(n)`** | **Tính phí TOÀN BỘ số document bị bỏ qua** | `offset(100).limit(10)` sẽ bị tính **110 Reads**! Do đó bắt buộc phải dùng cursor (`startAfter`). |
 | **Truy vấn tổng hợp đếm (`count()`)** | **1 Read cho mỗi tối đa 1,000 index entries** được quét | Đếm 193 custom chunks chỉ tốn đúng **1 Read** (thay vì 193 Reads) |
 | **Giới hạn dung lượng 1 Document** | **Tối đa 1 MiB (1,048,576 bytes)** cho mỗi document | Vượt 1MB sẽ văng lỗi `Document exceeds maximum size limit` |
-| **Định mức gói Free (Spark Plan)** | **50,000 Reads / ngày** (reset lúc 00:00 PST / 14:00 theo giờ VN) | 200 lần F5 với code cũ là sạch 50k reads |
+| **Định mức gói Free (Spark Plan)** | **50,000 Reads / ngày** | 250 reads/lượt tải $\rightarrow$ Chỉ 200 lượt F5 là cạn sạch 50k reads của ngày |
 
 ### Nguyên nhân gốc rễ
 1. **Mô hình Subcollection phân mảnh cho `progress`**:
