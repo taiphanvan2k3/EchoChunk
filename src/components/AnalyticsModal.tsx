@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import { ChunkProgress, UserStats } from '@/types';
-import { exportBackupJSON, importBackupJSON } from '@/lib/storage';
-import { soundManager } from '@/lib/sound';
+import { exportBackupJSON, importBackupJSON } from '@/lib/client/storage';
+import { soundManager } from '@/lib/client/sound';
 import { X, Flame, CheckCircle, Download, Upload, BarChart2, ShieldCheck } from 'lucide-react';
 
 interface AnalyticsModalProps {

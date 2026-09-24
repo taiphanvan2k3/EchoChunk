@@ -3,7 +3,7 @@
 import { useSyncExternalStore, useEffect, useCallback, useState } from 'react';
 import { youtubeHistoryStore } from '@/stores/youtubeHistoryStore';
 import { YouTubeHistoryItem } from '@/types/youtube';
-import { getCallerComponentName } from '@/lib/debug';
+import { getCallerComponentName } from '@/lib/client/debug';
 
 const EMPTY_HISTORY: YouTubeHistoryItem[] = [];
 

@@ -8,12 +8,8 @@ import {
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from './config';
 
-export interface AuthUser {
-  uid: string;
-  email: string | null;
-  displayName: string | null;
-  photoURL: string | null;
-}
+import { AuthUser } from '@/types';
+export type { AuthUser };
 
 const googleProvider = new GoogleAuthProvider();
 googleProvider.addScope('profile');
@@ -41,6 +37,18 @@ export async function signInWithGoogle(): Promise<AuthUser> {
       { merge: true }
     );
 
+    // Đồng bộ session cookie với Server Next.js
+    const idToken = await user.getIdToken();
+    try {
+      await fetch('/api/auth/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken }),
+      });
+    } catch (sessionErr) {
+      console.error('Session sync error:', sessionErr);
+    }
+
     return {
       uid: user.uid,
       email: user.email,
@@ -60,6 +68,13 @@ export async function signInWithGoogle(): Promise<AuthUser> {
 
 export async function signOutUser(): Promise<void> {
   try {
+    try {
+      await fetch('/api/auth/session', {
+        method: 'DELETE',
+      });
+    } catch (sessionErr) {
+      console.error('Session clear error:', sessionErr);
+    }
     await signOut(auth);
   } catch (error) {
     console.error('Sign-Out Error:', error);
@@ -68,14 +83,27 @@ export async function signOutUser(): Promise<void> {
 }
 
 export function onAuthChange(callback: (user: AuthUser | null) => void): () => void {
-  return onAuthStateChanged(auth, (firebaseUser: User | null) => {
+  return onAuthStateChanged(auth, async (firebaseUser: User | null) => {
     if (firebaseUser) {
-      callback({
+      const authUser: AuthUser = {
         uid: firebaseUser.uid,
         email: firebaseUser.email,
         displayName: firebaseUser.displayName,
         photoURL: firebaseUser.photoURL,
-      });
+      };
+      callback(authUser);
+
+      // Đảm bảo session cookie luôn tồn tại và khớp với phiên đăng nhập hiện tại
+      try {
+        const idToken = await firebaseUser.getIdToken();
+        await fetch('/api/auth/session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken }),
+        });
+      } catch (err) {
+        console.error('[Auth] Error syncing session cookie in onAuthChange:', err);
+      }
     } else {
       callback(null);
     }

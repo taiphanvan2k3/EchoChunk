@@ -2,12 +2,12 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { ChunkProgress, SpeakingChunk, SpeechEvalResult, SRSRating } from "@/types";
-import { speechService } from "@/lib/speech";
-import { soundManager } from "@/lib/sound";
-import { getAmericanIpa, getPhraseIpa, resolveChunkIpas } from "@/lib/ipa";
+import { speechService } from "@/lib/client/speech";
+import { soundManager } from "@/lib/client/sound";
+import { getAmericanIpa, getPhraseIpa, resolveChunkIpas } from "@/lib/shared/ipa";
 import { Volume2, Mic, MicOff, CheckCircle2, Eye, EyeOff, Edit2, RotateCcw, Shuffle } from "lucide-react";
 import confetti from "canvas-confetti";
-import { formatMarkdown } from "@/lib/formatMarkdown";
+import { formatMarkdown } from "@/lib/shared/formatMarkdown";
 
 interface ShadowingModeProps {
   chunk: SpeakingChunk;

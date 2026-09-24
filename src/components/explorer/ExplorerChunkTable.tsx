@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { SpeakingChunk, ChunkProgress } from "@/types";
-import { speechService } from "@/lib/speech";
+import { speechService } from "@/lib/client/speech";
 import {
   Volume2,
   Play,

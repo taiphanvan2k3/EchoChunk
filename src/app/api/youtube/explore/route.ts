@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getTranscribedVideosList } from '@/lib/firebase/firestore/youtubeTranscript';
+import { getTranscribedVideosList } from '@/lib/client/firebase/firestore/youtubeTranscript';
 
 export const revalidate = 60;
 

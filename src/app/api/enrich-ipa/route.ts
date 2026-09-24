@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { saveEnrichedIpa, getEnrichedIpaSync, isEnrichedCacheReady } from '@/lib/firebase/firestore/ipaEnriched';
+import { NextRequest, NextResponse } from "next/server";
+import { saveEnrichedIpa, getEnrichedIpaSync, isEnrichedCacheReady } from "@/lib/client/firebase/firestore/ipaEnriched";
 
 /**
  * POST /api/enrich-ipa
@@ -13,14 +13,17 @@ export async function POST(req: NextRequest) {
     const { word, ipa } = (await req.json()) as { word?: string; ipa?: string };
 
     if (!word || !ipa) {
-      return NextResponse.json({ ok: false, error: 'Missing word or ipa' }, { status: 400 });
+      return NextResponse.json({ ok: false, error: "Missing word or ipa" }, { status: 400 });
     }
 
-    const clean = word.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
-    const cleanIpa = ipa.replace(/^\/+|\/+$/g, '').trim();
+    const clean = word
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, "")
+      .trim();
+    const cleanIpa = ipa.replace(/^\/+|\/+$/g, "").trim();
 
     if (!clean || !cleanIpa) {
-      return NextResponse.json({ ok: false, error: 'Invalid input' }, { status: 400 });
+      return NextResponse.json({ ok: false, error: "Invalid input" }, { status: 400 });
     }
 
     const status = await saveEnrichedIpa(clean, cleanIpa);
@@ -36,13 +39,16 @@ export async function POST(req: NextRequest) {
  * Returns the enriched IPA for a word (dev utility / debugging).
  */
 export async function GET(req: NextRequest) {
-  const word = req.nextUrl.searchParams.get('word') ?? '';
-  const clean = word.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
-  const ipa = clean ? getEnrichedIpaSync(clean) : '';
+  const word = req.nextUrl.searchParams.get("word") ?? "";
+  const clean = word
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "")
+    .trim();
+  const ipa = clean ? getEnrichedIpaSync(clean) : "";
 
   return NextResponse.json({
     word: clean,
     ipa: ipa || null,
-    cacheReady: isEnrichedCacheReady(),
+    cacheReady: isEnrichedCacheReady()
   });
 }

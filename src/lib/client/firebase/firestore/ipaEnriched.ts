@@ -9,7 +9,7 @@
  * Writes go directly to Firestore — works in both dev and production.
  */
 
-import { db } from '@/lib/firebase/config';
+import { db } from '@/lib/client/firebase/config';
 import {
   collection,
   doc,

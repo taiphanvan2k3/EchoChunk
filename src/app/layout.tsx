@@ -10,14 +10,14 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin", "vietnamese"],
   weight: ["400", "500", "600", "700", "800"],
   variable: "--font-jakarta",
-  display: "swap",
+  display: "swap"
 });
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
   variable: "--font-jetbrains",
-  display: "swap",
+  display: "swap"
 });
 
 const lora = Lora({
@@ -25,7 +25,7 @@ const lora = Lora({
   weight: ["400", "500", "600", "700"],
   style: ["normal", "italic"],
   variable: "--font-lora",
-  display: "swap",
+  display: "swap"
 });
 
 export const metadata: Metadata = {
@@ -41,11 +41,15 @@ export const metadata: Metadata = {
   }
 };
 
-export default function RootLayout({
+import { getInitialServerData } from "@/lib/server/practiceData";
+
+export default async function RootLayout({
   children
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { initialUser, initialPracticeData } = await getInitialServerData();
+
   return (
     <html
       lang="vi"
@@ -53,8 +57,8 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body suppressHydrationWarning>
-        <AuthProvider>
-          <PracticeProvider>
+        <AuthProvider initialUser={initialUser}>
+          <PracticeProvider initialData={initialPracticeData}>
             <div className="app-layout">
               <Navbar />
               <main className="main-content">{children}</main>

@@ -7,6 +7,7 @@ import React, {
   useMemo,
   useCallback,
   useEffect,
+  useRef,
 } from 'react';
 import { useRouter } from 'next/navigation';
 import { useIsClient } from '@/hooks/useIsClient';
@@ -19,7 +20,7 @@ import {
   UserStats,
   TopicMeta,
 } from '@/types';
-import { calculateNextReview, sortQueue, shuffleWithSeed } from '@/lib/srs';
+import { calculateNextReview, sortQueue, shuffleWithSeed } from '@/lib/shared/srs';
 import {
   loadProgressMap,
   saveProgressMap,
@@ -32,7 +33,7 @@ import {
   saveChunk,
   removeChunk,
   clearGuestStorage,
-} from '@/lib/storage';
+} from '@/lib/client/storage';
 import { useAuth } from '@/context/AuthContext';
 import {
   syncChunkProgress,
@@ -43,8 +44,8 @@ import {
   fetchUserProgressMap,
   fetchUserStats,
   fetchCustomChunks,
-} from '@/lib/firebase/firestore';
-import { soundManager } from '@/lib/sound';
+} from '@/lib/client/firebase/firestore';
+import { soundManager } from '@/lib/client/sound';
 import confetti from 'canvas-confetti';
 
 const data = dataset as unknown as ChunksDataset;
@@ -97,7 +98,12 @@ interface PracticeContextType {
 
 const PracticeContext = createContext<PracticeContextType | undefined>(undefined);
 
-export const PracticeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+import { InitialPracticeData } from '@/lib/server/practiceData';
+
+export const PracticeProvider: React.FC<{
+  initialData?: InitialPracticeData;
+  children: React.ReactNode;
+}> = ({ initialData, children }) => {
   const router = useRouter();
   const { user } = useAuth();
   const isClient = useIsClient();
@@ -118,32 +124,38 @@ export const PracticeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [isChunkModalOpen, setIsChunkModalOpen] = useState(false);
   const [chunkToEdit, setChunkToEdit] = useState<SpeakingChunk | null>(null);
 
-  // Data loaded from storage (partitioned by current user's UID)
+  // Data loaded from storage or SSR initialData (partitioned by current user's UID)
   const allChunks = useMemo<SpeakingChunk[]>(() => {
     void storeVersion;
-    if (!isClient) return data.chunks;
+    if (!isClient) return initialData?.allChunks ?? data.chunks;
     return getMergedChunks(data.chunks, user?.uid);
-  }, [isClient, storeVersion, user?.uid]);
+  }, [isClient, storeVersion, user?.uid, initialData]);
 
   const progressMap = useMemo<Record<string, ChunkProgress>>(() => {
     void storeVersion;
-    if (!isClient) return {};
-    return loadProgressMap(user?.uid);
-  }, [isClient, storeVersion, user?.uid]);
+    if (!isClient) return initialData?.progressMap ?? {};
+    const local = loadProgressMap(user?.uid);
+    if (Object.keys(local).length > 0) return local;
+    return initialData?.progressMap ?? {};
+  }, [isClient, storeVersion, user?.uid, initialData]);
 
   const userStats = useMemo<UserStats>(() => {
     void storeVersion;
     if (!isClient) {
-      return {
-        streakDays: 1,
-        lastActiveDate: '',
-        todayReviewedCount: 0,
-        totalPracticedCount: 0,
-        dailyGoal: 20,
-      };
+      return (
+        initialData?.userStats ?? {
+          streakDays: 1,
+          lastActiveDate: '',
+          todayReviewedCount: 0,
+          totalPracticedCount: 0,
+          dailyGoal: 20,
+        }
+      );
     }
-    return loadUserStats(user?.uid);
-  }, [isClient, storeVersion, user?.uid]);
+    const local = loadUserStats(user?.uid);
+    if (local.totalPracticedCount > 0) return local;
+    return initialData?.userStats ?? local;
+  }, [isClient, storeVersion, user?.uid, initialData]);
 
   // Cloud Sync: Handle user login, logout, and guest data merge
   useEffect(() => {
@@ -164,7 +176,7 @@ export const PracticeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const guestStats = loadUserStats(null);
       const hasGuestData =
         guestCustom.length > 0 ||
-        Object.values(guestProgress).some((p) => p.repetitions > 0) ||
+        Object.values(guestProgress).some((p: ChunkProgress) => p.repetitions > 0) ||
         guestStats.totalPracticedCount > 0;
 
       if (hasGuestData) {
@@ -207,7 +219,7 @@ export const PracticeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return () => {
       isMounted = false;
     };
-  }, [isClient, user]);
+  }, [isClient, user?.uid]);
 
   const toggleSound = useCallback(() => {
     setSoundEnabled((prev) => !prev);
@@ -301,6 +313,25 @@ export const PracticeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, [filteredChunks, progressMap, shuffleSeed]);
 
   const currentChunk = practiceQueue[queueIndex] || practiceQueue[0];
+
+  // Chunk Anchoring: Ghi nhớ ID của chunk người dùng đang xem để tránh bị nhảy từ khi queue re-sort ngầm
+  const activeChunkIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (currentChunk) {
+      activeChunkIdRef.current = currentChunk.id;
+    }
+  }, [currentChunk]);
+
+  // Nếu queue thay đổi thứ tự do background sync, tìm lại vị trí của từ hiện tại để không giật đổi từ vựng
+  useEffect(() => {
+    if (activeChunkIdRef.current && practiceQueue.length > 0) {
+      const existingIdx = practiceQueue.findIndex((c: SpeakingChunk) => c.id === activeChunkIdRef.current);
+      if (existingIdx !== -1 && existingIdx !== queueIndex) {
+        setQueueIndex(existingIdx);
+      }
+    }
+  }, [practiceQueue, queueIndex]);
 
   const reviewDueCount = useMemo(() => {
     return allChunks.filter((c) => {
@@ -414,7 +445,7 @@ export const PracticeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       });
 
       const sortedCandidates = sortQueue(candidateList, progressMap);
-      const idx = sortedCandidates.findIndex((c) => c.id === chunk.id);
+      const idx = sortedCandidates.findIndex((c: SpeakingChunk) => c.id === chunk.id);
       if (idx >= 0) {
         setQueueIndex(idx);
       } else {

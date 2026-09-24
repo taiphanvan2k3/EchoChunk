@@ -6,12 +6,14 @@ import { Mic, Edit3, MessageSquare, BookOpen } from 'lucide-react';
 interface PracticeModeCardsProps {
   completedCount: number;
   totalCount: number;
+  isLoading?: boolean;
   onSelectMode?: (mode: 'shadowing' | 'dictation' | 'aitalk' | 'vocab') => void;
 }
 
 export const PracticeModeCards: React.FC<PracticeModeCardsProps> = ({
   completedCount,
   totalCount,
+  isLoading = false,
   onSelectMode,
 }) => {
   return (
@@ -24,8 +26,8 @@ export const PracticeModeCards: React.FC<PracticeModeCardsProps> = ({
       <div className="yt-practice-cards-grid">
         {/* 1. Shadowing */}
         <div
-          className="yt-mode-card card-shadowing"
-          onClick={() => onSelectMode?.('shadowing')}
+          className={`yt-mode-card card-shadowing ${isLoading ? "is-loading opacity-75 cursor-wait" : ""}`}
+          onClick={() => !isLoading && onSelectMode?.('shadowing')}
         >
           <div className="yt-mode-icon-wrap">
             <Mic size={22} className="yt-mode-icon" />
@@ -34,15 +36,19 @@ export const PracticeModeCards: React.FC<PracticeModeCardsProps> = ({
             <h4 className="yt-mode-name">Shadowing</h4>
             <p className="yt-mode-desc">Listen and repeat each sentence</p>
           </div>
-          <div className="yt-mode-badge badge-shadowing">
-            {completedCount}/{totalCount}
+          <div className="yt-mode-badge badge-shadowing flex items-center justify-center min-w-[42px]">
+            {isLoading ? (
+              <span className="inline-block w-7 h-3 rounded bg-sky-300/60 animate-pulse" />
+            ) : (
+              `${completedCount}/${totalCount}`
+            )}
           </div>
         </div>
 
         {/* 2. Dictation */}
         <div
-          className="yt-mode-card card-dictation"
-          onClick={() => onSelectMode?.('dictation')}
+          className={`yt-mode-card card-dictation ${isLoading ? "is-loading opacity-75 cursor-wait" : ""}`}
+          onClick={() => !isLoading && onSelectMode?.('dictation')}
         >
           <div className="yt-mode-icon-wrap">
             <Edit3 size={22} className="yt-mode-icon" />
@@ -51,8 +57,12 @@ export const PracticeModeCards: React.FC<PracticeModeCardsProps> = ({
             <h4 className="yt-mode-name">Dictation</h4>
             <p className="yt-mode-desc">Listen and type what you hear</p>
           </div>
-          <div className="yt-mode-badge badge-dictation">
-            0/{totalCount}
+          <div className="yt-mode-badge badge-dictation flex items-center justify-center min-w-[42px]">
+            {isLoading ? (
+              <span className="inline-block w-7 h-3 rounded bg-amber-300/60 animate-pulse" />
+            ) : (
+              `0/${totalCount}`
+            )}
           </div>
         </div>
 

@@ -9,6 +9,7 @@ import { useAuth } from "@/context/AuthContext";
 import { youtubeHistoryStore } from "@/stores/youtubeHistoryStore";
 import { YouTubePlayer } from "./YouTubePlayer";
 import { SentenceList } from "./SentenceList";
+import { SentenceListSkeleton } from "./SentenceListSkeleton";
 import { PracticeModeCards } from "./PracticeModeCards";
 import { YouTubeInputBar } from "./YouTubeInputBar";
 import { YouTubeRecentVideos } from "./YouTubeRecentVideos";
@@ -17,6 +18,7 @@ import { YouTubeExploreLibrary } from "./YouTubeExploreLibrary";
 import { APIKeySettingsModal } from "@/components/settings/APIKeySettingsModal";
 import { useUserYTKeys } from "@/hooks/useUserYTKeys";
 import { useYouTubeHistory } from "@/hooks/useYouTubeHistory";
+import { extractVideoId } from "@/lib/shared/youtube";
 import { ChevronRight, AlertCircle, Clock, Sparkles } from "lucide-react";
 
 export const YouTubeStudyRoom: React.FC = () => {
@@ -38,22 +40,50 @@ export const YouTubeStudyRoom: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [lessonData, setLessonData] = useState<YouTubeLessonData | null>(null);
 
+  // ID của video đang tải (dùng để show ngay YouTube Player + Skeleton trước khi phụ đề sẵn sàng)
+  const [loadingVideoId, setLoadingVideoId] = useState<string | null>(null);
+  const [previewTitle, setPreviewTitle] = useState<string | null>(null);
+
   // Trạng thái theo dõi thời gian và tương tác
   const [currentTime, setCurrentTime] = useState(0);
   const [seekToTime, setSeekToTime] = useState<number | null>(null);
   const [activeSentenceId, setActiveSentenceId] = useState<string | null>(null);
   const [completedIds, setCompletedIds] = useState<Set<string>>(new Set());
 
+  // Video ID và tiêu đề hiển thị (kể cả khi đang tải)
+  const activeVideoId = lessonData?.videoId || loadingVideoId;
+  const displayTitle = lessonData?.videoTitle || previewTitle;
+
   // Hàm xử lý nạp video từ link
   const handleLoadVideo = async (targetUrl?: string) => {
     const url = (targetUrl || inputUrl).trim();
     if (!url) return;
 
-    // flushSync: spinner hiện ngay trước khi network call bắt đầu
+    const parsedVideoId = extractVideoId(url);
+    if (!parsedVideoId) {
+      setErrorMessage("Đường dẫn YouTube không hợp lệ. Vui lòng kiểm tra lại link video.");
+      return;
+    }
+
+    // flushSync: hiển thị ngay giao diện học với video player và skeleton transcript
     flushSync(() => {
       setIsFetching(true);
       setErrorMessage(null);
+      setLoadingVideoId(parsedVideoId);
+      if (lessonData?.videoId !== parsedVideoId) {
+        setPreviewTitle(null);
+      }
     });
+
+    // Thử lấy tiêu đề video cực nhanh qua YouTube oEmbed công khai (không cần API key)
+    fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${parsedVideoId}&format=json`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((oembedData) => {
+        if (oembedData?.title) {
+          setPreviewTitle(oembedData.title);
+        }
+      })
+      .catch(() => {});
 
     try {
       const res = await getYoutubeTranscriptAction(url, decryptedKeys);
@@ -76,6 +106,8 @@ export const YouTubeStudyRoom: React.FC = () => {
         // startTransition: React render hàng nghìn câu không-blocking
         startTransition(() => {
           setLessonData(data);
+          setLoadingVideoId(null);
+          setPreviewTitle(null);
           setActiveSentenceId(data.sentences[0]?.id || null);
           setCompletedIds(new Set());
           setCurrentTime(0);
@@ -83,9 +115,13 @@ export const YouTubeStudyRoom: React.FC = () => {
         });
       } else {
         setErrorMessage(res.error || "Không thể tải phụ đề cho video này.");
+        setLoadingVideoId(null);
+        setPreviewTitle(null);
       }
     } catch {
       setErrorMessage("Đã xảy ra lỗi kết nối. Vui lòng thử lại.");
+      setLoadingVideoId(null);
+      setPreviewTitle(null);
     } finally {
       setIsFetching(false);
     }
@@ -130,8 +166,8 @@ export const YouTubeStudyRoom: React.FC = () => {
 
   return (
     <div className="yt-study-room-container">
-      {/* 1. Breadcrumbs Navigation (Khi đã có bài học) */}
-      {lessonData && (
+      {/* 1. Breadcrumbs Navigation (Khi đang tải hoặc đã có bài học) */}
+      {activeVideoId && (
         <nav className="yt-breadcrumbs" aria-label="Breadcrumb">
           <Link href="/" className="yt-breadcrumb-link" title="Về trang chủ">
             Trang chủ
@@ -142,6 +178,8 @@ export const YouTubeStudyRoom: React.FC = () => {
             className="yt-breadcrumb-link"
             onClick={() => {
               setLessonData(null);
+              setLoadingVideoId(null);
+              setPreviewTitle(null);
               setErrorMessage(null);
             }}
             title="Quay lại chọn video khác"
@@ -149,16 +187,27 @@ export const YouTubeStudyRoom: React.FC = () => {
             Luyện tập YouTube
           </button>
           <ChevronRight size={14} className="yt-breadcrumb-sep" />
-          <span className="yt-breadcrumb-current" title={lessonData.videoTitle}>
-            {lessonData.videoTitle}
-          </span>
+          {displayTitle ? (
+            <span className="yt-breadcrumb-current" title={displayTitle}>
+              {displayTitle}
+            </span>
+          ) : (
+            <span className="yt-skeleton-shimmer inline-block w-48 h-3.5 rounded align-middle" />
+          )}
         </nav>
       )}
 
       {/* 2. Tiêu đề bài học */}
-      {lessonData && (
+      {activeVideoId && (
         <div className="yt-lesson-header">
-          <h1 className="yt-lesson-title">Shadowing Practice: {lessonData.videoTitle}</h1>
+          <h1 className="yt-lesson-title">
+            Shadowing Practice:{" "}
+            {displayTitle ? (
+              <span>{displayTitle}</span>
+            ) : (
+              <span className="yt-skeleton-shimmer inline-block w-72 h-6 rounded-md align-middle" />
+            )}
+          </h1>
         </div>
       )}
 
@@ -188,8 +237,8 @@ export const YouTubeStudyRoom: React.FC = () => {
         </div>
       )}
 
-      {/* 4. Trạng thái khám phá & video đã học khi chưa tải bài học */}
-      {!lessonData && !isLoading && (
+      {/* 4. Trạng thái khám phá & video đã học khi chưa nạp video */}
+      {!activeVideoId && !isLoading && (
         <div className="yt-empty-container">
           {/* Segmented Pill Tabs */}
           <div className="yt-study-tabs-bar">
@@ -248,13 +297,13 @@ export const YouTubeStudyRoom: React.FC = () => {
         </div>
       )}
 
-      {/* 5. Khối bài học 2 cột khi đã có dữ liệu */}
-      {lessonData && (
+      {/* 5. Khối bài học 2 cột khi có video (kể cả đang tải transcript hay đã tải xong) */}
+      {activeVideoId && (
         <div className="yt-study-workspace-grid">
           {/* CỘT TRÁI: Video Player + Chế Độ Luyện Tập + Reviews + Tags */}
           <div className="yt-workspace-left-col">
             <YouTubePlayer
-              videoId={lessonData.videoId}
+              videoId={activeVideoId}
               onTimeUpdate={setCurrentTime}
               seekToTime={seekToTime}
               onSeekHandled={() => setSeekToTime(null)}
@@ -262,7 +311,8 @@ export const YouTubeStudyRoom: React.FC = () => {
 
             <PracticeModeCards
               completedCount={completedIds.size}
-              totalCount={lessonData.totalSentences}
+              totalCount={lessonData?.totalSentences || 0}
+              isLoading={!lessonData}
               onSelectMode={(mode) => {
                 console.log("Selected mode:", mode);
               }}
@@ -271,16 +321,20 @@ export const YouTubeStudyRoom: React.FC = () => {
             <YouTubeReviewsCard />
           </div>
 
-          {/* CỘT PHẢI: Danh Sách Câu Tương Tác Kèm Karaoke Word Highlighting */}
+          {/* CỘT PHẢI: Danh Sách Câu (hoặc Skeleton khi đang load transcript) */}
           <div className="yt-workspace-right-col">
-            <SentenceList
-              sentences={augmentedSentences}
-              currentTime={currentTime}
-              activeSentenceId={activeSentenceId}
-              source={lessonData.source}
-              onSelectSentence={handleSelectSentence}
-              onToggleComplete={handleToggleComplete}
-            />
+            {lessonData ? (
+              <SentenceList
+                sentences={augmentedSentences}
+                currentTime={currentTime}
+                activeSentenceId={activeSentenceId}
+                source={lessonData.source}
+                onSelectSentence={handleSelectSentence}
+                onToggleComplete={handleToggleComplete}
+              />
+            ) : (
+              <SentenceListSkeleton />
+            )}
           </div>
         </div>
       )}

@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { Sparkles, Play, Search, ChevronDown } from 'lucide-react';
-import { TranscribedVideoSummary } from '@/lib/firebase/firestore/youtubeTranscript';
+import React, { useState, useEffect, useMemo } from "react";
+import { Sparkles, Play, Search, ChevronDown } from "lucide-react";
+import { TranscribedVideoSummary } from "@/lib/client/firebase/firestore/youtubeTranscript";
 
 const INITIAL_VISIBLE_COUNT = 6;
 const BATCH_SIZE = 6;
@@ -29,20 +29,18 @@ function SkeletonCards() {
   );
 }
 
-export const YouTubeExploreLibrary: React.FC<YouTubeExploreLibraryProps> = ({
-  onSelectVideo,
-  isLoading,
-}) => {
+export const YouTubeExploreLibrary: React.FC<YouTubeExploreLibraryProps> = ({ onSelectVideo, isLoading }) => {
   const [videos, setVideos] = useState<TranscribedVideoSummary[]>([]);
+
   // Start in fetching state to show skeletons immediately on mount
   const [isFetching, setIsFetching] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
 
   useEffect(() => {
     let cancelled = false;
 
-    fetch('/api/youtube/explore')
+    fetch("/api/youtube/explore")
       .then((res) => res.json())
       .then((json) => {
         if (!cancelled && json.success && Array.isArray(json.videos)) {
@@ -105,7 +103,7 @@ export const YouTubeExploreLibrary: React.FC<YouTubeExploreLibraryProps> = ({
             <button
               type="button"
               className="yt-explore-search-clear-btn"
-              onClick={() => setSearchQuery('')}
+              onClick={() => setSearchQuery("")}
               title="Xóa tìm kiếm"
             >
               ✕
@@ -119,14 +117,14 @@ export const YouTubeExploreLibrary: React.FC<YouTubeExploreLibraryProps> = ({
         {isFetching ? (
           <SkeletonCards />
         ) : displayedVideos.length === 0 ? (
-          <p className="yt-explore-empty-msg" style={{ gridColumn: '1 / -1' }}>
+          <p className="yt-explore-empty-msg" style={{ gridColumn: "1 / -1" }}>
             Không tìm thấy video phù hợp với từ khóa &ldquo;{searchQuery}&rdquo;. Thử từ khoá khác nhé!
           </p>
         ) : (
           displayedVideos.map((video) => (
             <div
               key={video.videoId}
-              className={`yt-explore-card${isLoading ? ' is-disabled' : ''}`}
+              className={`yt-explore-card${isLoading ? " is-disabled" : ""}`}
               onClick={() => {
                 if (!isLoading) onSelectVideo(video.videoId);
               }}
@@ -149,9 +147,7 @@ export const YouTubeExploreLibrary: React.FC<YouTubeExploreLibraryProps> = ({
                 {/* Bottom badges */}
                 <div className="yt-explore-badge-row">
                   <span className="yt-explore-sentence-badge">{video.totalSentences} câu</span>
-                  {video.source === 'native' && (
-                    <span className="yt-explore-native-badge">🟢 YouTube</span>
-                  )}
+                  {video.source === "native" && <span className="yt-explore-native-badge">🟢 YouTube</span>}
                 </div>
               </div>
 

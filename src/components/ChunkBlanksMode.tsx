@@ -2,12 +2,12 @@
 
 import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { SpeakingChunk, SRSRating } from "@/types";
-import { soundManager } from "@/lib/sound";
-import { speechService } from "@/lib/speech";
-import { resolveChunkIpas } from "@/lib/ipa";
+import { soundManager } from "@/lib/client/sound";
+import { speechService } from "@/lib/client/speech";
+import { resolveChunkIpas } from "@/lib/shared/ipa";
 import { CheckCircle2, HelpCircle, Edit2, Lightbulb, ChevronDown, ArrowRight, Shuffle } from "lucide-react";
 import confetti from "canvas-confetti";
-import { formatMarkdown } from "@/lib/formatMarkdown";
+import { formatMarkdown } from "@/lib/shared/formatMarkdown";
 
 interface ChunkBlanksModeProps {
   chunk: SpeakingChunk;

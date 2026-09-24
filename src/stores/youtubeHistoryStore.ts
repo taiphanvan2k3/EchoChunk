@@ -6,7 +6,7 @@ import {
   syncYouTubeHistoryToCloud,
   removeYouTubeHistoryFromCloud,
   mergeYouTubeHistoryLocalAndCloud
-} from "@/lib/firebase/firestore/youtubeHistory";
+} from "@/lib/client/firebase/firestore/youtubeHistory";
 
 const BASE_HISTORY_KEY = "echo_yt_history_v1";
 const MAX_HISTORY_ITEMS = 20;
@@ -153,7 +153,7 @@ export function save(
     emitChange();
 
     if (uid && uid !== "guest") {
-      syncYouTubeHistoryToCloud(uid, updatedItem).catch((err) => {
+      syncYouTubeHistoryToCloud(uid, updatedItem).catch((err: unknown) => {
         console.warn("[YouTubeHistoryStore] Lỗi sync video lên Cloud:", err);
       });
     }
@@ -181,7 +181,7 @@ export function updateProgress(videoId: string, completedCount: number, uid?: st
     emitChange();
 
     if (uid && uid !== "guest") {
-      syncYouTubeHistoryToCloud(uid, target).catch((err) => {
+      syncYouTubeHistoryToCloud(uid, target).catch((err: unknown) => {
         console.warn("[YouTubeHistoryStore] Lỗi sync tiến độ video lên Cloud:", err);
       });
     }
@@ -204,7 +204,7 @@ export function remove(videoId: string, uid?: string | null): void {
     emitChange();
 
     if (uid && uid !== "guest") {
-      removeYouTubeHistoryFromCloud(uid, videoId).catch((err) => {
+      removeYouTubeHistoryFromCloud(uid, videoId).catch((err: unknown) => {
         console.warn("[YouTubeHistoryStore] Lỗi xóa video trên Cloud:", err);
       });
     }

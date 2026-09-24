@@ -3,11 +3,11 @@
 import React from 'react';
 import { usePractice } from '@/context/PracticeContext';
 import { TopicFilterBar } from '@/components/TopicFilterBar';
-import { ShadowingMode } from '@/components/ShadowingMode';
+import { QuickReflexMode } from '@/components/QuickReflexMode';
 import { SearchX, RotateCcw, Plus } from 'lucide-react';
-import { soundManager } from '@/lib/sound';
+import { soundManager } from '@/lib/client/sound';
 
-export default function ShadowingPage() {
+export default function ReflexPage() {
   const {
     isClient,
     dynamicTopics,
@@ -24,14 +24,12 @@ export default function ShadowingPage() {
     resetFilters,
     practiceQueue,
     currentChunk,
-    progressMap,
     handleRateChunk,
-    handleNext,
     handleShuffle,
     queueIndex,
   } = usePractice();
 
-  if (!isClient) {
+  if (!isClient && !currentChunk) {
     return (
       <div className="notion-skeleton-container">
         <div className="skeleton-filter-bar" />
@@ -104,11 +102,9 @@ export default function ShadowingPage() {
             </div>
           </div>
         ) : (
-          <ShadowingMode
+          <QuickReflexMode
             chunk={currentChunk}
-            progress={progressMap[currentChunk.id]}
             onRate={handleRateChunk}
-            onNext={handleNext}
             onShuffle={handleShuffle}
             currentIndex={queueIndex}
             totalInQueue={practiceQueue.length}
