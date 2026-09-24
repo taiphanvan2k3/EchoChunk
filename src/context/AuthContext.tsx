@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, useMemo } from "react";
+import React, { createContext, useContext, useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { AuthUser, onAuthChange, signInWithGoogle, signOutUser } from "@/lib/client/firebase/auth";
 
 import { useRouter } from "next/navigation";
@@ -23,13 +23,13 @@ export const AuthProvider: React.FC<{
   const [user, setUser] = useState<AuthUser | null>(initialUser);
   const [loading, setLoading] = useState(false);
   const [isSigningIn, setIsSigningIn] = useState(false);
+  const isMountedRef = useRef(false);
 
   useEffect(() => {
+    isMountedRef.current = true;
+
     const unsubscribe = onAuthChange((currentUser: AuthUser | null) => {
       setUser((prev) => {
-        if (!prev && currentUser) {
-          router.refresh();
-        }
         if (
           prev &&
           currentUser &&
@@ -43,12 +43,20 @@ export const AuthProvider: React.FC<{
         return currentUser;
       });
       setLoading(false);
+
+      // Chỉ refresh khi người dùng thay đổi trạng thái thực sự so với SSR sau khi đã mount
+      if (isMountedRef.current && currentUser?.uid !== initialUser?.uid) {
+        router.refresh();
+      }
     });
 
-    return () => unsubscribe();
-  }, [router]);
+    return () => {
+      isMountedRef.current = false;
+      unsubscribe();
+    };
+  }, [initialUser?.uid, router]);
 
-  const handleSignIn = async () => {
+  const handleSignIn = useCallback(async () => {
     try {
       setIsSigningIn(true);
       const authUser = await signInWithGoogle();
@@ -62,9 +70,9 @@ export const AuthProvider: React.FC<{
     } finally {
       setIsSigningIn(false);
     }
-  };
+  }, [router]);
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     try {
       await signOutUser();
       setUser(null);
@@ -72,7 +80,7 @@ export const AuthProvider: React.FC<{
     } catch (error) {
       console.error("Logout failed:", error);
     }
-  };
+  }, [router]);
 
   const contextValue = useMemo(
     () => ({
@@ -82,7 +90,7 @@ export const AuthProvider: React.FC<{
       signInWithGoogle: handleSignIn,
       logout: handleLogout
     }),
-    [user, loading, isSigningIn]
+    [user, loading, isSigningIn, handleSignIn, handleLogout]
   );
 
   return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;

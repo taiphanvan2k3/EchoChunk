@@ -6,6 +6,10 @@ import {
   getDocs,
   serverTimestamp,
   writeBatch,
+  query,
+  orderBy,
+  limit,
+  startAfter,
 } from 'firebase/firestore';
 import { db } from '../config';
 import { YouTubeHistoryItem } from '@/types/youtube';
@@ -60,16 +64,25 @@ export async function removeYouTubeHistoryFromCloud(
 }
 
 /**
- * Lấy toàn bộ danh sách video đã học của người dùng từ Cloud Firestore
+ * Lấy danh sách video đã học gần đây của người dùng từ Cloud Firestore (có giới hạn số lượng đọc để tối ưu chi phí).
  */
 export async function fetchYouTubeHistoryFromCloud(
-  uid: string
+  uid: string,
+  limitCount: number = MAX_CLOUD_HISTORY
 ): Promise<YouTubeHistoryItem[]> {
   if (!uid || uid === 'guest') return [];
 
   try {
     const colRef = collection(db, 'users', uid, 'youtubeHistory');
-    const snapshot = await getDocs(colRef);
+    let snapshot;
+    try {
+      const q = query(colRef, orderBy('lastStudiedAt', 'desc'), limit(limitCount));
+      snapshot = await getDocs(q);
+    } catch {
+      const q = query(colRef, limit(limitCount));
+      snapshot = await getDocs(q);
+    }
+
     const list: YouTubeHistoryItem[] = [];
 
     snapshot.forEach((d) => {
@@ -95,6 +108,79 @@ export async function fetchYouTubeHistoryFromCloud(
   } catch (error) {
     console.error(`[Firestore] Failed to fetch youtube history for user ${uid}:`, error);
     return [];
+  }
+}
+
+/**
+ * Lấy danh sách video đã học theo từng trang (cursor-based pagination).
+ */
+export async function fetchYouTubeHistoryPageFromCloud(
+  uid: string,
+  limitCount: number = 10,
+  cursorTimestamp?: number
+): Promise<{ items: YouTubeHistoryItem[]; nextCursor: number | null; hasMore: boolean }> {
+  if (!uid || uid === 'guest') return { items: [], nextCursor: null, hasMore: false };
+
+  try {
+    const colRef = collection(db, 'users', uid, 'youtubeHistory');
+    const fetchLimit = limitCount + 1;
+    let snapshot;
+
+    try {
+      if (cursorTimestamp && !isNaN(cursorTimestamp) && cursorTimestamp > 0) {
+        const q = query(
+          colRef,
+          orderBy('lastStudiedAt', 'desc'),
+          startAfter(cursorTimestamp),
+          limit(fetchLimit)
+        );
+        snapshot = await getDocs(q);
+      } else {
+        const q = query(
+          colRef,
+          orderBy('lastStudiedAt', 'desc'),
+          limit(fetchLimit)
+        );
+        snapshot = await getDocs(q);
+      }
+    } catch (err) {
+      console.warn('[Firestore] Fallback query for youtubeHistory page:', err);
+      const q = query(colRef, limit(fetchLimit));
+      snapshot = await getDocs(q);
+    }
+
+    const list: YouTubeHistoryItem[] = [];
+    snapshot.forEach((d) => {
+      const data = d.data();
+      const lastStudied =
+        data.lastStudiedAt ||
+        (data.updatedAt?.toMillis ? data.updatedAt.toMillis() : Date.now());
+
+      list.push({
+        videoId: data.videoId || d.id,
+        videoUrl: data.videoUrl || `https://www.youtube.com/watch?v=${data.videoId || d.id}`,
+        videoTitle: data.videoTitle || 'YouTube Speaking Practice',
+        thumbnailUrl:
+          data.thumbnailUrl || `https://i.ytimg.com/vi/${data.videoId || d.id}/mqdefault.jpg`,
+        totalSentences: data.totalSentences || 0,
+        completedSentencesCount: data.completedSentencesCount || 0,
+        lastStudiedAt: lastStudied,
+      });
+    });
+
+    const hasMore = list.length > limitCount;
+    const pagedItems = hasMore ? list.slice(0, limitCount) : list;
+    const lastItem = pagedItems[pagedItems.length - 1];
+    const nextCursor = hasMore && lastItem?.lastStudiedAt ? lastItem.lastStudiedAt : null;
+
+    return {
+      items: pagedItems,
+      nextCursor,
+      hasMore,
+    };
+  } catch (error) {
+    console.error(`[Firestore] Failed to fetch youtube history page for user ${uid}:`, error);
+    return { items: [], nextCursor: null, hasMore: false };
   }
 }
 

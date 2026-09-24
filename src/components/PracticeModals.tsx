@@ -40,7 +40,7 @@ export const PracticeModals: React.FC = () => {
         onSave={handleSaveChunk}
         onDelete={handleDeleteChunk}
         chunkToEdit={chunkToEdit}
-        existingTopics={dynamicTopics}
+        existingTopics={dynamicTopics.filter((t) => t.topicId !== 'STUDIED' && t.topicId !== 'ALL')}
       />
     </>
   );

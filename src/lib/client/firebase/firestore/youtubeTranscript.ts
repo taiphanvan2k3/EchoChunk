@@ -1,4 +1,16 @@
-import { doc, getDoc, setDoc, serverTimestamp, collection, query, orderBy, limit, getDocs } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  setDoc,
+  serverTimestamp,
+  collection,
+  query,
+  orderBy,
+  limit,
+  getDocs,
+  startAfter,
+  Timestamp,
+} from "firebase/firestore";
 import { db } from "../config";
 import { YouTubeLessonData, YouTubeSentence } from "@/types/youtube";
 
@@ -11,6 +23,12 @@ export interface TranscribedVideoSummary {
   thumbnailUrl: string;
   source: "native" | "ytranscript";
   updatedAt?: number;
+}
+
+export interface TranscribedVideosPage {
+  videos: TranscribedVideoSummary[];
+  nextCursor: number | null;
+  hasMore: boolean;
 }
 
 /**
@@ -108,19 +126,38 @@ export async function saveCachedTranscript(
 }
 
 /**
- * Lấy danh sách tóm tắt các video đã từng được phân tích phụ đề từ Firestore.
- * Trả về danh sách đã sắp xếp theo thời gian cập nhật gần nhất, kết hợp danh sách mẫu.
+ * Lấy danh sách video đã transcript theo từng trang (cursor-based pagination).
+ * Giảm thiểu số lượt đọc Firestore, hỗ trợ tải cuộn vô hạn mượt mà.
  */
-export async function getTranscribedVideosList(limitCount: number = 24): Promise<TranscribedVideoSummary[]> {
+export async function getTranscribedVideosList(
+  limitCount: number = 12,
+  cursor?: number | null
+): Promise<TranscribedVideosPage> {
   try {
     const colRef = collection(db, COLLECTION_NAME);
+    const fetchLimit = limitCount + 1; // Lấy dư 1 doc để biết còn trang tiếp theo hay không
     let snap;
+
     try {
-      const q = query(colRef, orderBy("updatedAt", "desc"), limit(limitCount));
-      snap = await getDocs(q);
-    } catch {
-      // Fallback nếu index chưa sẵn sàng
-      const q = query(colRef, limit(limitCount));
+      if (cursor && !isNaN(cursor) && cursor > 0) {
+        const q = query(
+          colRef,
+          orderBy("updatedAt", "desc"),
+          startAfter(Timestamp.fromMillis(cursor)),
+          limit(fetchLimit)
+        );
+        snap = await getDocs(q);
+      } else {
+        const q = query(
+          colRef,
+          orderBy("updatedAt", "desc"),
+          limit(fetchLimit)
+        );
+        snap = await getDocs(q);
+      }
+    } catch (err) {
+      console.warn("[FirestoreCache] Fallback simple query for explore list:", err);
+      const q = query(colRef, limit(fetchLimit));
       snap = await getDocs(q);
     }
 
@@ -134,19 +171,36 @@ export async function getTranscribedVideosList(limitCount: number = 24): Promise
       seenIds.add(videoId);
 
       const title = data.videoTitle || "YouTube Speaking Practice";
+      const updatedAtMillis =
+        data.updatedAt?.toMillis?.() ||
+        (typeof data.updatedAt === "number" ? data.updatedAt : undefined);
+
       firestoreList.push({
         videoId,
         videoTitle: title,
         totalSentences: data.totalSentences || (Array.isArray(data.sentences) ? data.sentences.length : 0),
         thumbnailUrl: `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`,
         source: (data.source as "native" | "ytranscript") || "native",
-        updatedAt: data.updatedAt?.toMillis?.() || Date.now()
+        updatedAt: updatedAtMillis
       });
     });
 
-    return firestoreList;
+    const hasMore = firestoreList.length > limitCount;
+    const pagedVideos = hasMore ? firestoreList.slice(0, limitCount) : firestoreList;
+    const lastItem = pagedVideos[pagedVideos.length - 1];
+    const nextCursor = hasMore && lastItem?.updatedAt ? lastItem.updatedAt : null;
+
+    return {
+      videos: pagedVideos,
+      nextCursor,
+      hasMore
+    };
   } catch (error) {
     console.warn("[FirestoreCache] Lỗi khi lấy danh sách video explore:", error);
-    return [];
+    return {
+      videos: [],
+      nextCursor: null,
+      hasMore: false
+    };
   }
 }

@@ -9,7 +9,7 @@ import {
 } from "@/lib/client/firebase/firestore/youtubeHistory";
 
 const BASE_HISTORY_KEY = "echo_yt_history_v1";
-const MAX_HISTORY_ITEMS = 20;
+const MAX_HISTORY_ITEMS = 50;
 
 export function getStorageKey(uid?: string | null): string {
   if (!uid || uid === "guest") {

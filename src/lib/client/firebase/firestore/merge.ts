@@ -39,9 +39,6 @@ export async function batchMergeLocalToCloud(
       const cloudItem = mergedProgress[chunkId];
       if (!cloudItem) {
         mergedProgress[chunkId] = localItem;
-        const ref = doc(db, 'users', uid, 'progress', chunkId);
-        batch.set(ref, localItem);
-        batchCount++;
       } else {
         // Nếu cả hai đều có, lấy bestAccuracy cao nhất và repetitions lớn nhất
         const betterAccuracy = Math.max(localItem.bestAccuracy, cloudItem.bestAccuracy);
@@ -52,10 +49,14 @@ export async function batchMergeLocalToCloud(
           repetitions: moreReps,
         };
         mergedProgress[chunkId] = mergedItem;
-        const ref = doc(db, 'users', uid, 'progress', chunkId);
-        batch.set(ref, mergedItem);
-        batchCount++;
       }
+    }
+
+    // Lưu toàn bộ progress vào document tổng hợp (Single Document Pattern - chỉ tốn 1 Write thay vì hàng trăm Write)
+    if (Object.keys(localProgress).length > 0) {
+      const summaryRef = doc(db, 'users', uid, 'progress_summary', 'current');
+      batch.set(summaryRef, mergedProgress, { merge: true });
+      batchCount++;
     }
 
     // 3. Merge Stats: Lấy streakDays cao nhất, gộp số câu hôm nay
@@ -70,7 +71,7 @@ export async function batchMergeLocalToCloud(
     batch.set(statsRef, mergedStats);
     batchCount++;
 
-    // 4. Merge Custom Chunks
+    // 4. Merge Custom Chunks vào Subcollection
     const existingIds = new Set(cloudCustomChunks.map((c) => c.id));
     const mergedCustomChunks = [...cloudCustomChunks];
 

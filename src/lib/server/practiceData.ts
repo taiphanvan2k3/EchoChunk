@@ -12,7 +12,6 @@ import {
   AuthUser,
 } from '@/types';
 import { sortQueue } from '@/lib/shared/srs';
-import { mergeCustomChunksWithBase } from '@/lib/shared/chunksMerge';
 import { getAdminInstances, verifyUserSession } from '@/lib/server/admin';
 
 const data = dataset as unknown as ChunksDataset;
@@ -38,21 +37,23 @@ function getTodayDateStr(): string {
 
 function computeDynamicTopics(
   allChunks: SpeakingChunk[],
-  progressMap: Record<string, ChunkProgress>
+  progressMap: Record<string, ChunkProgress>,
+  customChunksCount: number = 0
 ): TopicMeta[] {
   const counts: Record<string, number> = {};
-  let customCount = 0;
-  let studiedCount = 0;
+  let customCount = customChunksCount;
 
   allChunks.forEach((c) => {
     counts[c.topicId] = (counts[c.topicId] || 0) + 1;
     if (c.isCustom || c.topicId === 'CUSTOM') {
       customCount += 1;
     }
-    if (progressMap[c.id] && progressMap[c.id].repetitions > 0) {
-      studiedCount += 1;
-    }
   });
+
+  // Đếm chính xác số câu đã luyện tập từ progressMap (không phụ thuộc allChunks)
+  const studiedCount = Object.values(progressMap).filter(
+    (p) => p && p.repetitions > 0
+  ).length;
 
   const list = data.topics.map((t) => ({
     ...t,
@@ -126,7 +127,6 @@ export async function getInitialServerData(): Promise<InitialServerResult> {
   const sessionCookie = cookieStore.get('__session')?.value;
 
   let initialUser: AuthUser | null = null;
-  let customChunks: SpeakingChunk[] = [];
   const progressMap: Record<string, ChunkProgress> = {};
   let userStats: UserStats = defaultStats;
 
@@ -145,51 +145,32 @@ export async function getInitialServerData(): Promise<InitialServerResult> {
         try {
           const userDocRef = db.collection('users').doc(decoded.uid);
 
-          const [customSnap, progressSnap, statsDoc, rootUserDoc] = await Promise.all([
-            userDocRef.collection('customChunks').get(),
-            userDocRef.collection('progress').get(),
+          const [progressSummaryDoc, statsDoc, rootUserDoc, customSnap] = await Promise.all([
+            userDocRef.collection('progress_summary').doc('current').get(),
             userDocRef.collection('stats').doc('current').get(),
             userDocRef.get(),
+            userDocRef.collection('customChunks').count().get().catch(() => null),
           ]);
 
-          customChunks = customSnap.docs.map((doc) => {
-            const d = serializeFirestoreData<Record<string, unknown>>(doc.data());
-            return {
-              id: doc.id,
-              topicId: (d.topicId as string) || 'CUSTOM',
-              topicName: (d.topicName as string) || 'Từ vựng của tôi',
-              topicIcon: (d.topicIcon as string) || '⭐',
-              number: Number(d.number) || 1,
-              chunk: (d.chunk as string) || '',
-              meaning: (d.meaning as string) || '',
-              level: (d.level as string) || 'B1',
-              exampleSentence: (d.exampleSentence as string) || '',
-              cleanExample: (d.cleanExample as string) || (d.exampleSentence as string) || '',
-              ipa: (d.ipa as string) || '',
-              chunkIpa: (d.chunkIpa as string) || '',
-              sentenceIpa: (d.sentenceIpa as string) || '',
-              translation: (d.translation as string) || '',
-              context: (d.context as string) || '',
-              tags: Array.isArray(d.tags) ? (d.tags as string[]) : [],
-              isCustom: true,
-              userId: decoded.uid,
-            } as SpeakingChunk;
-          });
-
-          progressSnap.docs.forEach((doc) => {
-            const d = serializeFirestoreData<Record<string, unknown>>(doc.data());
-            progressMap[doc.id] = {
-              chunkId: (d.chunkId as string) || doc.id,
-              repetitions: Number(d.repetitions) || 0,
-              intervalDays: Number(d.intervalDays) || 1,
-              easeFactor: Number(d.easeFactor) || 2.5,
-              dueDate: typeof d.dueDate === 'string' ? d.dueDate : new Date().toISOString(),
-              lastReviewed: typeof d.lastReviewed === 'string' ? d.lastReviewed : new Date().toISOString(),
-              confidenceScore: ((d.confidenceScore as number) || 3) as SRSRating,
-              accuracyHistory: Array.isArray(d.accuracyHistory) ? (d.accuracyHistory as number[]) : [],
-              bestAccuracy: Number(d.bestAccuracy) || 0,
-            };
-          });
+          if (progressSummaryDoc.exists) {
+            const rawSummary = serializeFirestoreData<Record<string, unknown>>(progressSummaryDoc.data() || {});
+            for (const [key, value] of Object.entries(rawSummary)) {
+              if (key !== 'updatedAt' && value && typeof value === 'object') {
+                const d = value as Record<string, unknown>;
+                progressMap[key] = {
+                  chunkId: (d.chunkId as string) || key,
+                  repetitions: Number(d.repetitions) || 0,
+                  intervalDays: Number(d.intervalDays) || 1,
+                  easeFactor: Number(d.easeFactor) || 2.5,
+                  dueDate: typeof d.dueDate === 'string' ? d.dueDate : new Date().toISOString(),
+                  lastReviewed: typeof d.lastReviewed === 'string' ? d.lastReviewed : new Date().toISOString(),
+                  confidenceScore: ((d.confidenceScore as number) || 3) as SRSRating,
+                  accuracyHistory: Array.isArray(d.accuracyHistory) ? (d.accuracyHistory as number[]) : [],
+                  bestAccuracy: Number(d.bestAccuracy) || 0,
+                };
+              }
+            }
+          }
 
           const statsSource = statsDoc.exists ? statsDoc : (rootUserDoc.exists ? rootUserDoc : null);
           if (statsSource && statsSource.data()) {
@@ -214,13 +195,21 @@ export async function getInitialServerData(): Promise<InitialServerResult> {
               todayReviewedCount = 0;
             }
 
+            const countFromSnap = customSnap ? customSnap.data().count : null;
+            const customChunksCount = typeof countFromSnap === 'number'
+              ? countFromSnap
+              : (Number(raw.customChunksCount) || 0);
+
             userStats = {
               streakDays,
               lastActiveDate: today,
               todayReviewedCount,
               totalPracticedCount: Number(raw.totalPracticedCount) || 0,
               dailyGoal: Number(raw.dailyGoal) || 20,
+              customChunksCount,
             };
+          } else if (customSnap) {
+            userStats.customChunksCount = customSnap.data().count;
           }
         } catch (error) {
           console.error('[Server Data] Error pre-fetching user data from Firestore:', error);
@@ -229,17 +218,22 @@ export async function getInitialServerData(): Promise<InitialServerResult> {
     }
   }
 
-  const allChunks = mergeCustomChunksWithBase(data.chunks, customChunks);
-  const dynamicTopics = computeDynamicTopics(allChunks, progressMap);
+  const allChunks = data.chunks;
+  const dynamicTopics = computeDynamicTopics(
+    allChunks,
+    progressMap,
+    userStats.customChunksCount || 0
+  );
   const practiceQueue = sortQueue(allChunks, progressMap);
 
-  const reviewDueCount = allChunks.filter((c) => {
-    const prog = progressMap[c.id];
+  const reviewDueCount = Object.values(progressMap).filter((prog) => {
     if (!prog || prog.repetitions === 0) return false;
     return new Date(prog.dueDate).getTime() <= todayTimestamp;
   }).length;
 
-  const unstudiedCount = allChunks.filter((c) => !progressMap[c.id]).length;
+  const totalChunksCount = allChunks.length + (userStats.customChunksCount || 0);
+  const studiedKeysCount = Object.keys(progressMap).filter((k) => progressMap[k]?.repetitions > 0).length;
+  const unstudiedCount = Math.max(0, totalChunksCount - studiedKeysCount);
 
   return toPlainObject({
     initialUser,

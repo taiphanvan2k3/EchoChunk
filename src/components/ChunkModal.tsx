@@ -150,7 +150,6 @@ export const ChunkModal: React.FC<ChunkModalProps> = ({
                 {/* Topic dropdown */}
                 <TopicDropdown
                   topicId={topicId}
-                  customTopicName={customTopicName}
                   existingTopics={existingTopics}
                   isOpen={isTopicMenuOpen}
                   dropdownRef={topicDropdownRef}
@@ -160,7 +159,6 @@ export const ChunkModal: React.FC<ChunkModalProps> = ({
                     setTopicId(id);
                     setIsTopicMenuOpen(false);
                   }}
-                  onCustomTopicNameChange={setCustomTopicName}
                 />
 
                 {/* Chunk IPA */}
