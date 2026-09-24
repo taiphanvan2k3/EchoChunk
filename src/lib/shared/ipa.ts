@@ -7,14 +7,8 @@
  * - File: src/data/american-ipa.json
  */
 import ipaData from "@/data/american-ipa.json";
-import { getEnrichedIpaSync, prefetchEnrichedIpa } from "@/lib/client/firebase/firestore/ipaEnriched";
 
 const ipaDict: Record<string, string> = ipaData as Record<string, string>;
-
-// Kick off Firestore enrichment cache loading in the background (browser only)
-if (typeof window !== 'undefined') {
-  prefetchEnrichedIpa();
-}
 
 const CONTRACTIONS_DICT: Record<string, string> = {
   "let's": "lɛts",
@@ -201,12 +195,6 @@ export function getAmericanIpa(rawWord: string): string {
 
   if (ipaDict[alpha]) {
     return `/${ipaDict[alpha]}/`;
-  }
-
-  // 4b. Enriched IPA from Firestore in-memory cache (runtime-discovered entries)
-  const enrichedHit = getEnrichedIpaSync(alpha);
-  if (enrichedHit) {
-    return `/${enrichedHit}/`;
   }
 
   // 5. Check localStorage dynamic cache
