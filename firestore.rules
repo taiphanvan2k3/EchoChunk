@@ -37,18 +37,5 @@ service cloud.firestore {
       allow create, update: if true;
       allow delete: if false;
     }
-
-    // 5. Kho IPA được làm giàu tự động (runtime-discovered từ Free Dictionary API)
-    //    - Đọc: công khai (dữ liệu không nhạy cảm)
-    //    - Tạo mới: cho phép nếu data hợp lệ (có ipa là string, không rỗng)
-    //    - Cập nhật/Xóa: tuyệt đối cấm (bảo toàn dữ liệu đã tích lũy)
-    match /ipa_enriched/{word} {
-      allow read: if true;
-      allow create: if request.resource.data.keys().hasAll(['ipa', 'addedAt'])
-                    && request.resource.data.ipa is string
-                    && request.resource.data.ipa.size() > 0
-                    && request.resource.data.ipa.size() < 120;
-      allow update, delete: if false;
-    }
   }
 }
