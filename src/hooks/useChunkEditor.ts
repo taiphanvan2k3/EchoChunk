@@ -15,8 +15,69 @@ export interface ModalExampleItem {
   isIpaEdited?: boolean;
 }
 
+function getInitialChunkState(chunkToEdit?: SpeakingChunk | null) {
+  if (!chunkToEdit) {
+    return {
+      chunkText: "",
+      meaning: "",
+      chunkIpa: "",
+      isChunkIpaEdited: false,
+      level: "B1",
+      topicId: "CUSTOM",
+      customTopicName: "Từ vựng của tôi",
+      tags: ["custom", "speaking"],
+      examples: [
+        { id: "ex_default_1", sentence: "", translation: "", sentenceIpa: "", context: "" }
+      ] as ModalExampleItem[],
+      showAdvanced: false
+    };
+  }
+
+  const resolved = resolveChunkIpas(chunkToEdit);
+  const safeTopicId =
+    !chunkToEdit.topicId || chunkToEdit.topicId === "STUDIED" || chunkToEdit.topicId === "ALL"
+      ? "CUSTOM"
+      : chunkToEdit.topicId;
+
+  let initialExamples: ModalExampleItem[];
+  if (chunkToEdit.examples && chunkToEdit.examples.length > 0) {
+    initialExamples = chunkToEdit.examples.map((ex, idx) => ({
+      id: ex.id || `ex_${idx + 1}`,
+      sentence: ex.sentence || "",
+      translation: ex.translation || "",
+      sentenceIpa: ex.sentenceIpa || (ex.sentence ? getPhraseIpa(ex.sentence) : ""),
+      context: ex.context || "",
+      isIpaEdited: Boolean(ex.sentenceIpa)
+    }));
+  } else {
+    const initialSentence = chunkToEdit.exampleSentence || chunkToEdit.cleanExample || "";
+    initialExamples = [
+      {
+        id: "ex_init_1",
+        sentence: initialSentence,
+        translation: chunkToEdit.translation || "",
+        sentenceIpa: resolved.sentenceIpa,
+        context: chunkToEdit.context || "",
+        isIpaEdited: Boolean(chunkToEdit.sentenceIpa)
+      }
+    ];
+  }
+
+  return {
+    chunkText: chunkToEdit.chunk || "",
+    meaning: chunkToEdit.meaning || "",
+    chunkIpa: resolved.chunkIpa,
+    isChunkIpaEdited: Boolean(chunkToEdit.chunkIpa || chunkToEdit.ipa),
+    level: chunkToEdit.level || "B1",
+    topicId: safeTopicId,
+    customTopicName: chunkToEdit.topicName || "Từ vựng của tôi",
+    tags: chunkToEdit.tags && chunkToEdit.tags.length > 0 ? chunkToEdit.tags : ["custom", "speaking"],
+    examples: initialExamples,
+    showAdvanced: true
+  };
+}
+
 interface UseChunkEditorParams {
-  isOpen: boolean;
   chunkToEdit?: SpeakingChunk | null;
   existingTopics: TopicMeta[];
   onSave: (chunk: SpeakingChunk) => void;
@@ -25,7 +86,6 @@ interface UseChunkEditorParams {
 }
 
 export function useChunkEditor({
-  isOpen,
   chunkToEdit,
   existingTopics,
   onSave,
@@ -33,86 +93,42 @@ export function useChunkEditor({
   onClose
 }: UseChunkEditorParams) {
   const isEditing = Boolean(chunkToEdit);
+  const initial = getInitialChunkState(chunkToEdit);
 
   // ── Core state ────────────────────────────────────────────────────────────
-  const [chunkText, setChunkText] = useState("");
-  const [meaning, setMeaning] = useState("");
-  const [chunkIpa, setChunkIpa] = useState("");
-  const [isChunkIpaEdited, setIsChunkIpaEdited] = useState(false);
-  const [level, setLevel] = useState("B1");
-  const [topicId, setTopicId] = useState("CUSTOM");
-  const [customTopicName, setCustomTopicName] = useState("Từ vựng của tôi");
-  const [tags, setTags] = useState<string[]>(["custom", "speaking"]);
-  const [examples, setExamples] = useState<ModalExampleItem[]>([
-    { id: "ex_init_1", sentence: "", translation: "", sentenceIpa: "", context: "" }
-  ]);
+  const [chunkText, setChunkText] = useState(initial.chunkText);
+  const [meaning, setMeaning] = useState(initial.meaning);
+  const [chunkIpa, setChunkIpa] = useState(initial.chunkIpa);
+  const [isChunkIpaEdited, setIsChunkIpaEdited] = useState(initial.isChunkIpaEdited);
+  const [level, setLevel] = useState(initial.level);
+  const [topicId, setTopicId] = useState(initial.topicId);
+  const [customTopicName, setCustomTopicName] = useState(initial.customTopicName);
+  const [tags, setTags] = useState<string[]>(initial.tags);
+  const [examples, setExamples] = useState<ModalExampleItem[]>(initial.examples);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [showAdvanced, setShowAdvanced] = useState(Boolean(chunkToEdit));
+  const [showAdvanced, setShowAdvanced] = useState(initial.showAdvanced);
 
   // ── UI refs ───────────────────────────────────────────────────────────────
   const [isTopicMenuOpen, setIsTopicMenuOpen] = useState(false);
   const topicDropdownRef = useRef<HTMLDivElement>(null);
   const textareaRefs = useRef<{ [key: number]: HTMLTextAreaElement | null }>({});
 
-  // ── Sync state when chunkToEdit / isOpen changes (during-render pattern) ──
-  const [prevSyncKey, setPrevSyncKey] = useState<{ id?: string; isOpen: boolean }>({
-    id: chunkToEdit?.id,
-    isOpen
-  });
+  // ── Sync state when chunkToEdit changes (during-render pattern) ──
+  const [prevChunkId, setPrevChunkId] = useState<string | undefined>(chunkToEdit?.id);
 
-  if (prevSyncKey.id !== chunkToEdit?.id || prevSyncKey.isOpen !== isOpen) {
-    setPrevSyncKey({ id: chunkToEdit?.id, isOpen });
-    if (chunkToEdit) {
-      const resolved = resolveChunkIpas(chunkToEdit);
-      setChunkText(chunkToEdit.chunk || "");
-      setMeaning(chunkToEdit.meaning || "");
-      setChunkIpa(resolved.chunkIpa);
-      setIsChunkIpaEdited(Boolean(chunkToEdit.chunkIpa || chunkToEdit.ipa));
-      setLevel(chunkToEdit.level || "B1");
-      const safeTopicId = (!chunkToEdit.topicId || chunkToEdit.topicId === "STUDIED" || chunkToEdit.topicId === "ALL")
-        ? "CUSTOM"
-        : chunkToEdit.topicId;
-      setTopicId(safeTopicId);
-      setCustomTopicName(chunkToEdit.topicName || "Từ vựng của tôi");
-      setTags(chunkToEdit.tags && chunkToEdit.tags.length > 0 ? chunkToEdit.tags : ["custom", "speaking"]);
-
-      if (chunkToEdit.examples && chunkToEdit.examples.length > 0) {
-        setExamples(
-          chunkToEdit.examples.map((ex, idx) => ({
-            id: ex.id || `ex_${idx + 1}`,
-            sentence: ex.sentence || "",
-            translation: ex.translation || "",
-            sentenceIpa: ex.sentenceIpa || (ex.sentence ? getPhraseIpa(ex.sentence) : ""),
-            context: ex.context || "",
-            isIpaEdited: Boolean(ex.sentenceIpa)
-          }))
-        );
-      } else {
-        const initialSentence = chunkToEdit.exampleSentence || chunkToEdit.cleanExample || "";
-        setExamples([
-          {
-            id: "ex_init_1",
-            sentence: initialSentence,
-            translation: chunkToEdit.translation || "",
-            sentenceIpa: resolved.sentenceIpa,
-            context: chunkToEdit.context || "",
-            isIpaEdited: Boolean(chunkToEdit.sentenceIpa)
-          }
-        ]);
-      }
-      setShowAdvanced(true);
-    } else {
-      setChunkText("");
-      setMeaning("");
-      setChunkIpa("");
-      setIsChunkIpaEdited(false);
-      setLevel("B1");
-      setTopicId("CUSTOM");
-      setCustomTopicName("Từ vựng của tôi");
-      setTags(["custom", "speaking"]);
-      setExamples([{ id: "ex_default_1", sentence: "", translation: "", sentenceIpa: "", context: "" }]);
-      setShowAdvanced(false);
-    }
+  if (prevChunkId !== chunkToEdit?.id) {
+    setPrevChunkId(chunkToEdit?.id);
+    const nextState = getInitialChunkState(chunkToEdit);
+    setChunkText(nextState.chunkText);
+    setMeaning(nextState.meaning);
+    setChunkIpa(nextState.chunkIpa);
+    setIsChunkIpaEdited(nextState.isChunkIpaEdited);
+    setLevel(nextState.level);
+    setTopicId(nextState.topicId);
+    setCustomTopicName(nextState.customTopicName);
+    setTags(nextState.tags);
+    setExamples(nextState.examples);
+    setShowAdvanced(nextState.showAdvanced);
     setErrorMessage(null);
   }
 

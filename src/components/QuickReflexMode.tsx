@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { SpeakingChunk, SRSRating } from '@/types';
 import { soundManager } from '@/lib/client/sound';
 import { speechService } from '@/lib/client/speech';
-import { getAmericanIpa, getPhraseIpa } from '@/lib/shared/ipa';
+import { getPhraseIpa } from '@/lib/shared/ipa';
 import {
   Volume2,
   Mic,
@@ -266,8 +266,8 @@ export const QuickReflexMode: React.FC<QuickReflexModeProps> = ({
   };
 
   const chunkAmericanIpa = useMemo(() => {
-    return getPhraseIpa(chunk.chunk) || getAmericanIpa(chunk.chunk);
-  }, [chunk.chunk]);
+    return chunk.chunkIpa || chunk.ipa || (chunk.chunk ? getPhraseIpa(chunk.chunk) : '');
+  }, [chunk]);
 
   return (
     <div className="practice-card reflex-card">

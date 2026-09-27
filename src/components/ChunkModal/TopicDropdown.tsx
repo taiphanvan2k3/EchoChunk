@@ -6,14 +6,12 @@ import { TopicMeta } from "@/types";
 
 interface TopicDropdownProps {
   topicId: string;
-  customTopicName?: string;
   existingTopics: TopicMeta[];
   isOpen: boolean;
   dropdownRef: React.RefObject<HTMLDivElement | null>;
   currentSelectedTopic: { topicId: string; topicName: string; icon: string };
   onToggle: () => void;
   onSelectTopic: (id: string) => void;
-  onCustomTopicNameChange?: (val: string) => void;
 }
 
 export const TopicDropdown: React.FC<TopicDropdownProps> = ({

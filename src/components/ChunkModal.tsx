@@ -8,7 +8,6 @@ import { TopicDropdown } from "@/components/ChunkModal/TopicDropdown";
 import { ExampleCard } from "@/components/ChunkModal/ExampleCard";
 
 interface ChunkModalProps {
-  isOpen: boolean;
   onClose: () => void;
   onSave: (chunk: SpeakingChunk) => void;
   onDelete?: (chunkId: string) => void;
@@ -17,16 +16,13 @@ interface ChunkModalProps {
 }
 
 export const ChunkModal: React.FC<ChunkModalProps> = ({
-  isOpen,
   onClose,
   onSave,
   onDelete,
   chunkToEdit,
   existingTopics
 }) => {
-  const editor = useChunkEditor({ isOpen, chunkToEdit, existingTopics, onSave, onDelete, onClose });
-
-  if (!isOpen) return null;
+  const editor = useChunkEditor({ chunkToEdit, existingTopics, onSave, onDelete, onClose });
 
   const {
     isEditing,
@@ -45,8 +41,6 @@ export const ChunkModal: React.FC<ChunkModalProps> = ({
     setIsTopicMenuOpen,
     topicId,
     setTopicId,
-    customTopicName,
-    setCustomTopicName,
     topicDropdownRef,
     textareaRefs,
     currentSelectedTopic,
