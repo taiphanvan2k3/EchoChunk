@@ -6,9 +6,41 @@
  * - Source: https://github.com/menelik3/cmudict-ipa (menelik3/cmudict-ipa)
  * - File: src/data/american-ipa.json
  */
-import ipaData from "@/data/american-ipa.json";
 
-const ipaDict: Record<string, string> = ipaData as Record<string, string>;
+let ipaDict: Record<string, string> | null = null;
+let ipaLoadPromise: Promise<Record<string, string>> | null = null;
+
+/**
+ * Lazy-load bộ từ điển 124,000 từ IPA khi cần thiết
+ * để tránh nhúng file JSON 3.26MB vào critical path của bundle ban đầu.
+ */
+export async function ensureIpaDict(): Promise<Record<string, string>> {
+  if (ipaDict) return ipaDict;
+
+  if (!ipaLoadPromise) {
+    ipaLoadPromise = import("@/data/american-ipa.json").then((m) => {
+      ipaDict = (m.default || m) as Record<string, string>;
+      return ipaDict;
+    });
+  }
+
+  return ipaLoadPromise;
+}
+
+// Prefetch tự động trong background khi trình duyệt rảnh rỗi (idle), hoàn toàn không chặn LCP / FCP
+if (typeof window !== "undefined") {
+  const triggerIdleLoad = () => {
+    ensureIpaDict().catch(() => {});
+  };
+
+  // Safari và một số trình duyệt cũ không hỗ trợ requestIdleCallback
+  // https://caniuse.com/?search=requestIdleCallback
+  if ("requestIdleCallback" in window) {
+    window.requestIdleCallback(triggerIdleLoad);
+  } else {
+    setTimeout(triggerIdleLoad, 2000);
+  }
+}
 
 const CONTRACTIONS_DICT: Record<string, string> = {
   "let's": "lɛts",
@@ -193,7 +225,7 @@ export function getAmericanIpa(rawWord: string): string {
     if (ipas.length > 0) return `/${ipas.join(" ")}/`;
   }
 
-  if (ipaDict[alpha]) {
+  if (ipaDict && ipaDict[alpha]) {
     return `/${ipaDict[alpha]}/`;
   }
 
@@ -228,12 +260,12 @@ export function getAmericanIpa(rawWord: string): string {
   // 8. Plural / inflection fallback (e.g. "deliverables" -> "deliverable" + "z")
   if (alpha.length > 3 && alpha.endsWith("s")) {
     const singular = alpha.slice(0, -1);
-    if (ipaDict[singular]) {
+    if (ipaDict && ipaDict[singular]) {
       return `/${ipaDict[singular]}z/`;
     }
     if (alpha.endsWith("es")) {
       const singularEs = alpha.slice(0, -2);
-      if (ipaDict[singularEs]) {
+      if (ipaDict && ipaDict[singularEs]) {
         return `/${ipaDict[singularEs]}ɪz/`;
       }
     }

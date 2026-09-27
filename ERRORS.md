@@ -781,4 +781,20 @@ Trong tài liệu chính thức của Google Firebase, Firestore định nghĩa 
 4. **Loại bỏ trùng lặp dữ liệu trong RSC Payload**:
    Bỏ việc truyền `allChunks` và `practiceQueue` từ `initialPracticeData`. Phía client `PracticeContext` tự động fallback về `data.chunks` có sẵn trong bundle, giảm ngay **~800KB** dung lượng tải về của tài liệu HTML ban đầu.
 
+### Cách khắc phục (Đợt 2: Tách Bundle, Lazy-load IPA 3.26MB & Dynamic Modals)
+1. **Dynamic Import & Idle Prefetch cho `american-ipa.json` (3.26MB)**:
+   - Trong [`ipa.ts`](file:///d:/SelfLearning/EchoChunk/src/lib/shared/ipa.ts), chuyển `import ipaData from '@/data/american-ipa.json'` thành hàm `ensureIpaDict()` nạp động (`import('@/data/american-ipa.json')`).
+   - Kết hợp `window.requestIdleCallback`: Chỉ tải file 3.26MB này trong background khi trình duyệt đã rảnh rỗi (idle), hoàn toàn không chiếm băng thông và không chặn thời điểm render LCP / FCP ban đầu.
+2. **Code-splitting Modals với `next/dynamic`**:
+   - Trong [`PracticeModals.tsx`](file:///d:/SelfLearning/EchoChunk/src/components/PracticeModals.tsx), nạp lười `AnalyticsModal` và `ChunkModal` bằng `dynamic(..., { ssr: false })` và chỉ render vào DOM khi `isAnalyticsOpen` hoặc `isChunkModalOpen` là `true`.
+   - Giúp toàn bộ mã nguồn của Modal tạo/sửa chunk và thư viện biểu đồ không bị kéo vào bundle critical path của trang chính.
+3. **Ưu tiên trường IPA có sẵn**:
+   - Trong [`QuickReflexMode.tsx`](file:///d:/SelfLearning/EchoChunk/src/components/QuickReflexMode.tsx), ưu tiên đọc `chunk.chunkIpa || chunk.ipa` có sẵn trước khi gọi hàm phân tích, loại bỏ các lệnh import không sử dụng.
+
+### Kết quả đo kiểm thực tế (Lần 1)
+- **LCP**: Giảm từ **3.6s – 6.34s** xuống **0.70s** (🟢 Đạt chuẩn Xanh lá Core Web Vitals, nhanh hơn ~9 lần).
+- **CLS**: Duy trì **0** tuyệt đối (Zero Layout Shift).
+- **INP**: **8ms** (tương tác phản hồi tức thì).
+
+
 

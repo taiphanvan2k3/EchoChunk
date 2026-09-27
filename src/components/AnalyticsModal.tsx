@@ -7,7 +7,6 @@ import { soundManager } from '@/lib/client/sound';
 import { X, Flame, CheckCircle, Download, Upload, BarChart2, ShieldCheck } from 'lucide-react';
 
 interface AnalyticsModalProps {
-  isOpen: boolean;
   onClose: () => void;
   stats: UserStats;
   progressMap: Record<string, ChunkProgress>;
@@ -16,7 +15,6 @@ interface AnalyticsModalProps {
 }
 
 export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({
-  isOpen,
   onClose,
   stats,
   progressMap,
@@ -24,8 +22,6 @@ export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({
   onReload,
 }) => {
   const [importStatus, setImportStatus] = useState<string | null>(null);
-
-  if (!isOpen) return null;
 
   const studiedChunks = Object.keys(progressMap).length;
   const masteredChunks = Object.values(progressMap).filter((p) => p.repetitions >= 3).length;

@@ -1,9 +1,18 @@
 'use client';
 
 import React from 'react';
+import dynamic from 'next/dynamic';
 import { usePractice } from '@/context/PracticeContext';
-import { AnalyticsModal } from '@/components/AnalyticsModal';
-import { ChunkModal } from '@/components/ChunkModal';
+
+const AnalyticsModal = dynamic(
+  () => import('@/components/AnalyticsModal').then((mod) => mod.AnalyticsModal),
+  { ssr: false }
+);
+
+const ChunkModal = dynamic(
+  () => import('@/components/ChunkModal').then((mod) => mod.ChunkModal),
+  { ssr: false }
+);
 
 export const PracticeModals: React.FC = () => {
   const {
@@ -23,25 +32,27 @@ export const PracticeModals: React.FC = () => {
 
   return (
     <>
-      {/* Analytics & Data Management Modal */}
-      <AnalyticsModal
-        isOpen={isAnalyticsOpen}
-        onClose={closeAnalytics}
-        stats={userStats}
-        progressMap={progressMap}
-        totalChunks={allChunks.length}
-        onReload={reloadStore}
-      />
+      {/* Analytics & Data Management Modal - Nạp lười khi người dùng bấm mở */}
+      {isAnalyticsOpen && (
+        <AnalyticsModal
+          onClose={closeAnalytics}
+          stats={userStats}
+          progressMap={progressMap}
+          totalChunks={allChunks.length}
+          onReload={reloadStore}
+        />
+      )}
 
-      {/* Add / Edit Chunk Modal */}
-      <ChunkModal
-        isOpen={isChunkModalOpen}
-        onClose={closeChunkModal}
-        onSave={handleSaveChunk}
-        onDelete={handleDeleteChunk}
-        chunkToEdit={chunkToEdit}
-        existingTopics={dynamicTopics.filter((t) => t.topicId !== 'STUDIED' && t.topicId !== 'ALL')}
-      />
+      {/* Add / Edit Chunk Modal - Nạp lười khi người dùng bấm mở */}
+      {isChunkModalOpen && (
+        <ChunkModal
+          onClose={closeChunkModal}
+          onSave={handleSaveChunk}
+          onDelete={handleDeleteChunk}
+          chunkToEdit={chunkToEdit}
+          existingTopics={dynamicTopics.filter((t) => t.topicId !== 'STUDIED' && t.topicId !== 'ALL')}
+        />
+      )}
     </>
   );
 };
