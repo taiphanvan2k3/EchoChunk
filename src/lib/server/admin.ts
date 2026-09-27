@@ -83,7 +83,8 @@ export async function verifyUserSession(sessionCookie?: string | null) {
   if (!auth) return null;
 
   try {
-    const decodedToken = await auth.verifySessionCookie(sessionCookie, true);
+    // checkRevoked=false: xác thực chữ ký JWT cục bộ trong RAM (<1ms), không gọi HTTP sang Google Auth tránh nghẽn SSR
+    const decodedToken = await auth.verifySessionCookie(sessionCookie, false);
     return decodedToken;
   } catch (error: unknown) {
     const err = error as { code?: string; message?: string };
