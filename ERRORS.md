@@ -22,6 +22,7 @@
 13. [Khắc phục Overfetching danh mục YouTube bằng Cursor-based Pagination & Infinite Scroll](#13-khắc-phục-overfetching-danh-mục-youtube-bằng-cursor-based-pagination--infinite-scroll)
 14. [Lỗi Hydration Mismatch, Cascading Refresh trong `AuthContext` & Chập chờn giao diện SSR vs Client](#14-lỗi-hydration-mismatch-cascading-refresh-trong-authcontext--chập-chờn-giao-diện-ssr-vs-client)
 15. [Lỗi logic gán nhầm `topicId: 'STUDIED'` cho từ vựng mới trong modal thêm chunk](#15-lỗi-logic-gán-nhầm-topicid-studied-cho-từ-vựng-mới-trong-modal-thêm-chunk)
+16. [Thời gian LCP/TTFB quá lâu (3.6s - 6.34s) trên Vercel do Blocking Firestore SSR, Token CheckRevoked & Thiếu Region `sin1`](#16-thời-gian-lcpttfb-quá-lâu-36s---634s-trên-vercel-do-blocking-firestore-ssr-token-checkrevoked--thiếu-region-sin1)
 
 ---
 
@@ -719,4 +720,65 @@ Trong tài liệu chính thức của Google Firebase, Firestore định nghĩa 
    Khi nạp chunk để sửa hoặc khi lưu, nếu phát hiện `topicId === "STUDIED"` hoặc `"ALL"`, hệ thống tự động đưa về `"CUSTOM"`.
 4. **Đơn giản hóa giao diện**:
    Xóa bỏ dòng nhập "Tên chủ đề riêng" dư thừa trong modal theo yêu cầu của người dùng, đặt nhãn thống nhất là **"⭐ Từ vựng của tôi"**.
+
+---
+
+## 16. Thời gian LCP/TTFB quá lâu (3.6s - 6.34s) trên Vercel do Blocking Firestore SSR, Token CheckRevoked & Thiếu Region `sin1`
+
+### Triệu chứng & Cách phát hiện bằng lệnh `curl`
+- Khi truy cập lần đầu trang `/luyen-noi` (`https://speaking-english.taiphanvan.id.vn/luyen-noi`), thời gian phản hồi (TTFB/LCP) lên tới **3.6s – 6.34s**.
+- **Cách phát hiện Vercel điều hướng request sang Mỹ**:
+  Chạy lệnh kiểm tra HTTP Header phản hồi bằng `curl`:
+  ```bash
+  curl -sI https://speaking-english.taiphanvan.id.vn/luyen-noi
+  ```
+- **Kết quả Header thực tế trả về**:
+  ```http
+  HTTP/1.1 200 OK
+  Cache-Control: private, no-cache, no-store, max-age=0, must-revalidate
+  X-Vercel-Cache: MISS
+  X-Vercel-Id: hkg1::iad1::f5qg7-1790483944163-903cf3876698
+  ```
+- **Giải mã Header `X-Vercel-Id` theo chuẩn Vercel**:
+  Theo tài liệu Vercel, định dạng của header này là `[Edge_Region]::[Compute_Region]::[Request_UUID]`:
+  * `hkg1`: Trạm Vercel Edge tiếp nhận request đầu vào tại Hong Kong (gần Việt Nam).
+  * `iad1`: Trạm máy chủ Serverless Function thực thi mã nguồn SSR tại **Washington D.C. (Bờ Đông nước Mỹ)**.
+  * Dấu nối `hkg1::iad1` là bằng chứng rõ ràng cho thấy Edge tại châu Á buộc phải chuyển tiếp (forward) toàn bộ gói tin xuyên Thái Bình Dương sang Washington D.C. để chạy hàm Node.js SSR, khiến người dùng Việt Nam chịu độ trễ mạng vật lý **200ms – 250ms cho mỗi chiều**.
+
+### Dẫn chứng Tài liệu Kỹ thuật (Official Documentation)
+1. 🔗 [Vercel Serverless Functions Regional Configuration](https://vercel.com/docs/functions/configuring-functions/region):
+   > *"By default, Serverless Functions execute in Washington, D.C., USA (iad1)... You can configure the region for your Serverless Functions by defining the `regions` property in `vercel.json`."*
+2. 🔗 [Vercel Edge Network Regions & Codes](https://vercel.com/docs/concepts/edge-network/regions):
+   > Danh mục mã vùng: `sin1` tương ứng với Singapore (`ap-southeast-1`), là khu vực tối ưu nhất cho người dùng khu vực Đông Nam Á / Việt Nam.
+3. 🔗 [Vercel Diagnostic Headers (`x-vercel-id`)](https://vercel.com/docs/concepts/edge-network/headers#x-vercel-id):
+   > Quy ước giải mã trạm Edge tiếp nhận và trạm Compute xử lý.
+
+### Nguyên nhân gốc rễ
+1. **Thiếu cấu hình Serverless Region (`vercel.json`)**: Vercel mặc định chạy Serverless Function ở `iad1` (US East). Khoảng cách địa lý ~12.000 km gây độ trễ mạng vật lý **200ms – 250ms/chiều** cho mỗi round-trip giữa Việt Nam, Vercel và Firebase.
+2. **`verifySessionCookie` bật `checkRevoked: true`**: Phía server SSR gọi `auth.verifySessionCookie(cookie, true)`, bắt buộc Firebase Admin phải thực hiện thêm 1 HTTP call sang máy chủ Google Identity Toolkit để kiểm tra trạng thái thu hồi token (mất thêm 300ms – 600ms).
+3. **Thừa truy vấn Firestore trên chu trình SSR**:
+   - `getInitialServerData()` gọi song song cả 4 tài liệu: `progress_summary`, `stats`, `rootUserDoc` và truy vấn tổng hợp `customChunks.count()`. Trong đó `rootUserDoc` và `count()` là hoàn toàn dư thừa vì `stats` đã lưu sẵn trường đếm `customChunksCount`.
+4. **Bloat RSC Payload (800KB chuỗi JSON thừa)**:
+   - Server gửi mảng `allChunks` (515 chunks) và `practiceQueue` (thêm 515 chunks) qua `initialPracticeData`. Next.js serialize toàn bộ ~1.030 đối tượng JSON vào thẻ `<script>` RSC của HTML, trong khi client `PracticeContext` vốn đã import sẵn `speaking-chunks.json` từ bundle.
+
+### Cách khắc phục (Đợt 1)
+1. **Thêm `vercel.json` ép Region về Singapore (`sin1`)**:
+   Tạo file `vercel.json` tại thư mục gốc:
+   ```json
+   {
+     "$schema": "https://openapi.vercel.sh/vercel.json",
+     "regions": ["sin1"]
+   }
+   ```
+   Hoặc cấu hình trên Vercel Dashboard: **Settings > Functions > Function Region > Singapore (sin1)**.
+   Sau khi đổi, header `X-Vercel-Id` sẽ chuyển từ `hkg1::iad1::...` sang `hkg1::sin1::...`, giảm ping từ Việt Nam sang máy chủ serverless từ **~220ms xuống còn ~30ms** (giảm 7 lần độ trễ mạng).
+2. **Tối ưu xác thực token cục bộ**:
+   Trong [`admin.ts`](file:///d:/SelfLearning/EchoChunk/src/lib/server/admin.ts), đổi `auth.verifySessionCookie(sessionCookie, false)`. Token được xác thực chữ ký số bằng Public Key cache trong bộ nhớ (thời gian thực thi < 1ms, không phát sinh HTTP request).
+3. **Thu gọn truy vấn Firestore & Thêm SSR Fail-safe Timeout**:
+   Trong [`practiceData.ts`](file:///d:/SelfLearning/EchoChunk/src/lib/server/practiceData.ts):
+   - Chỉ đọc 2 tài liệu thiết yếu: `progress_summary` và `stats/current`.
+   - Bọc `Promise.race` với timeout **1.200ms**. Nếu kết nối Firestore từ máy chủ vượt quá 1.2s, hệ thống tự động trả về dữ liệu mặc định để gửi HTML Shell ngay lập tức; client sẽ hydrate tiến độ thực tế qua LocalStorage (0ms) và background sync.
+4. **Loại bỏ trùng lặp dữ liệu trong RSC Payload**:
+   Bỏ việc truyền `allChunks` và `practiceQueue` từ `initialPracticeData`. Phía client `PracticeContext` tự động fallback về `data.chunks` có sẵn trong bundle, giảm ngay **~800KB** dung lượng tải về của tài liệu HTML ban đầu.
+
 

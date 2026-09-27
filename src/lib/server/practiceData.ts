@@ -17,11 +17,11 @@ import { getAdminInstances, verifyUserSession } from '@/lib/server/admin';
 const data = dataset as unknown as ChunksDataset;
 
 export interface InitialPracticeData {
-  allChunks: SpeakingChunk[];
+  allChunks?: SpeakingChunk[];
   progressMap: Record<string, ChunkProgress>;
   userStats: UserStats;
   dynamicTopics: TopicMeta[];
-  practiceQueue: SpeakingChunk[];
+  practiceQueue?: SpeakingChunk[];
   reviewDueCount: number;
   unstudiedCount: number;
   totalChunksCount: number;
@@ -147,11 +147,23 @@ export async function getInitialServerData(): Promise<InitialServerResult> {
         try {
           const userDocRef = db.collection('users').doc(decoded.uid);
 
-          const [progressSummaryDoc, statsDoc, rootUserDoc, customSnap] = await Promise.all([
+          // Tối ưu hóa: Chỉ đọc 2 document cần thiết (progress_summary và stats/current)
+          // Không đọc rootUserDoc hay gọi aggregation count() trên customChunks để giảm thiểu network round-trips
+          const fetchPromise = Promise.all([
             userDocRef.collection('progress_summary').doc('current').get(),
             userDocRef.collection('stats').doc('current').get(),
-            userDocRef.get(),
-            userDocRef.collection('customChunks').count().get().catch(() => null),
+          ]);
+
+          // SSR Fail-safe timeout: Nếu mạng Firestore vượt quá 1200ms thì ngắt sớm,
+          // trả về dữ liệu mặc định để gửi HTML ngay lập tức, client sẽ hydrate qua LocalStorage/Background Sync
+          const timeoutPromise = new Promise<never>((_, reject) => {
+            const timer = setTimeout(() => reject(new Error('Firestore SSR timeout')), 1200);
+            if (typeof timer.unref === 'function') timer.unref();
+          });
+
+          const [progressSummaryDoc, statsDoc] = await Promise.race([
+            fetchPromise,
+            timeoutPromise,
           ]);
 
           if (progressSummaryDoc.exists) {
@@ -174,9 +186,8 @@ export async function getInitialServerData(): Promise<InitialServerResult> {
             }
           }
 
-          const statsSource = statsDoc.exists ? statsDoc : (rootUserDoc.exists ? rootUserDoc : null);
-          if (statsSource && statsSource.data()) {
-            const raw = serializeFirestoreData<Record<string, unknown>>(statsSource.data() || {});
+          if (statsDoc.exists && statsDoc.data()) {
+            const raw = serializeFirestoreData<Record<string, unknown>>(statsDoc.data() || {});
             const today = getTodayDateStr();
             let streakDays = Number(raw.streakDays) || 1;
             let todayReviewedCount = Number(raw.todayReviewedCount) || 0;
@@ -197,11 +208,7 @@ export async function getInitialServerData(): Promise<InitialServerResult> {
               todayReviewedCount = 0;
             }
 
-            const countFromSnap = customSnap ? customSnap.data().count : null;
-            const customChunksCount = typeof countFromSnap === 'number'
-              ? countFromSnap
-              : (Number(raw.customChunksCount) || 0);
-
+            const customChunksCount = Number(raw.customChunksCount) || 0;
             const savedTotalChunksCount = typeof raw.totalChunksCount === 'number'
               ? Number(raw.totalChunksCount)
               : undefined;
@@ -215,11 +222,9 @@ export async function getInitialServerData(): Promise<InitialServerResult> {
               customChunksCount,
               totalChunksCount: savedTotalChunksCount,
             };
-          } else if (customSnap) {
-            userStats.customChunksCount = customSnap.data().count;
           }
         } catch (error) {
-          console.error('[Server Data] Error pre-fetching user data from Firestore:', error);
+          console.warn('[Server Data] Warning: Pre-fetching user data skipped or timed out, relying on client cache:', error);
         }
       }
     }
@@ -231,7 +236,6 @@ export async function getInitialServerData(): Promise<InitialServerResult> {
     progressMap,
     userStats.customChunksCount || 0
   );
-  const practiceQueue = sortQueue(allChunks, progressMap);
 
   const reviewDueCount = Object.values(progressMap).filter((prog) => {
     if (!prog || prog.repetitions === 0) return false;
@@ -242,14 +246,14 @@ export async function getInitialServerData(): Promise<InitialServerResult> {
   const studiedKeysCount = Object.keys(progressMap).filter((k) => progressMap[k]?.repetitions > 0).length;
   const unstudiedCount = Math.max(0, totalChunksCount - studiedKeysCount);
 
+  // Tối ưu hóa: Không truyền mảng allChunks và practiceQueue trùng lặp qua RSC Payload
+  // để giảm bớt ~800KB chuỗi JSON khỏi tài liệu HTML ban đầu
   return toPlainObject({
     initialUser,
     initialPracticeData: {
-      allChunks,
       progressMap,
       userStats,
       dynamicTopics,
-      practiceQueue,
       reviewDueCount,
       unstudiedCount,
       totalChunksCount,
