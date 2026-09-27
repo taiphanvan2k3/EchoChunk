@@ -5,6 +5,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { PracticeProvider } from "@/context/PracticeContext";
 import { Navbar } from "@/components/Navbar";
 import { PracticeModals } from "@/components/PracticeModals";
+import { getBaseUrl } from "@/lib/shared/site";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin", "vietnamese"],
@@ -28,17 +29,105 @@ const lora = Lora({
   display: "swap"
 });
 
+const BASE_URL = getBaseUrl();
+
 export const metadata: Metadata = {
-  title: "EchoChunk - Contextual Speaking Chunks Fluency Engine",
+  metadataBase: new URL(BASE_URL),
+  title: {
+    default: "EchoChunk - Học Nói Tiếng Anh Theo Cụm (Speaking Chunks Fluency Engine)",
+    template: "%s | EchoChunk"
+  },
   description:
-    "Master spoken English with context-driven speaking chunks, interactive voice shadowing, 5-second reflex drills, and smart spaced repetition.",
+    "Nền tảng luyện nói tiếng Anh giao tiếp phản xạ tự nhiên theo phương pháp Speaking Chunks, Shadowing nhại giọng chuẩn Mỹ, phản xạ 5 giây và Spaced Repetition thông minh.",
+  keywords: [
+    "EchoChunk",
+    "học tiếng anh giao tiếp",
+    "speaking chunks",
+    "luyện nói tiếng anh",
+    "shadowing tiếng anh",
+    "phản xạ tiếng anh 5 giây",
+    "spaced repetition tiếng anh",
+    "cụm từ tiếng anh giao tiếp",
+    "phát âm tiếng anh chuẩn mỹ",
+    "từ điển ipa"
+  ],
+  authors: [{ name: "EchoChunk Team", url: BASE_URL }],
+  creator: "EchoChunk",
+  publisher: "EchoChunk",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false
+  },
+  alternates: {
+    canonical: "/luyen-noi"
+  },
+  openGraph: {
+    type: "website",
+    locale: "vi_VN",
+    url: BASE_URL,
+    siteName: "EchoChunk",
+    title: "EchoChunk - Luyện Nói Tiếng Anh Giao Tiếp Theo Cụm Đột Phá",
+    description:
+      "Luyện nói tiếng Anh phản xạ tự nhiên với phương pháp Speaking Chunks, Voice Shadowing AI và Spaced Repetition.",
+    images: [
+      {
+        url: "/demo-shadowing.png",
+        width: 1200,
+        height: 630,
+        alt: "EchoChunk - Speaking Chunks Fluency Engine"
+      }
+    ]
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "EchoChunk - Luyện Nói Tiếng Anh Theo Cụm (Speaking Chunks)",
+    description: "Tự tin giao tiếp tiếng Anh trôi chảy với phương pháp Shadowing và Flashcard phản xạ 5s thông minh.",
+    images: ["/demo-shadowing.png"]
+  },
   icons: {
     icon: [
       { url: "/icon.svg", type: "image/svg+xml" },
       { url: "/favicon.ico", sizes: "32x32" }
     ],
     apple: "/icon.svg"
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1
+    }
   }
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  name: "EchoChunk",
+  alternateName: "EchoChunk Speaking Engine",
+  url: BASE_URL,
+  applicationCategory: "EducationalApplication",
+  operatingSystem: "All",
+  inLanguage: ["vi", "en"],
+  description:
+    "Ứng dụng luyện nói tiếng Anh giao tiếp thông minh theo phương pháp Speaking Chunks, Voice Shadowing, Phản xạ 5 giây và Spaced Repetition.",
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "VND"
+  },
+  featureList: [
+    "Luyện nói Shadowing nhại giọng bản ngữ",
+    "Luyện phản xạ nói 5 giây",
+    "Luyện nghe & điền từ vào chỗ trống",
+    "Kho 500+ Speaking Chunks phân cấp độ",
+    "Học tiếng Anh qua video YouTube với phụ đề Karaoke"
+  ]
 };
 
 import { getInitialServerData } from "@/lib/server/practiceData";
@@ -57,6 +146,7 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <body suppressHydrationWarning>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <AuthProvider initialUser={initialUser}>
           <PracticeProvider initialData={initialPracticeData}>
             <div className="app-layout">
