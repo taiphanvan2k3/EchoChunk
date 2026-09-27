@@ -36,6 +36,10 @@ const nextConfig: NextConfig = {
         source: "/kham-pha",
         destination: "/explorer",
       },
+      {
+        source: "/gioi-thieu",
+        destination: "/about",
+      },
     ];
   },
 };
