@@ -7,10 +7,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   return [
     {
-      url: `${baseUrl}/luyen-noi`,
+      url: `${baseUrl}`,
       lastModified,
       changeFrequency: 'daily',
       priority: 1.0,
+    },
+    {
+      url: `${baseUrl}/luyen-noi`,
+      lastModified,
+      changeFrequency: 'daily',
+      priority: 0.9,
     },
     {
       url: `${baseUrl}/phan-xa`,
