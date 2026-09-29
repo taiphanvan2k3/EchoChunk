@@ -101,7 +101,7 @@ export const Navbar: React.FC<NavbarProps> = (props) => {
     <header className="navbar-container">
       <div className="navbar-content">
         {/* Brand Logo */}
-        <Link href="/luyen-noi" className="brand-badge">
+        <Link href="/" className="brand-badge">
           <div className="logo-icon-wrap">
             <svg
               className="logo-audio-wave"

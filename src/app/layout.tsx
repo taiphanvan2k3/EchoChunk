@@ -60,7 +60,7 @@ export const metadata: Metadata = {
     telephone: false
   },
   alternates: {
-    canonical: "/luyen-noi"
+    canonical: "/"
   },
   openGraph: {
     type: "website",

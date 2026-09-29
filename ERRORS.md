@@ -23,6 +23,7 @@
 14. [Lỗi Hydration Mismatch, Cascading Refresh trong `AuthContext` & Chập chờn giao diện SSR vs Client](#14-lỗi-hydration-mismatch-cascading-refresh-trong-authcontext--chập-chờn-giao-diện-ssr-vs-client)
 15. [Lỗi logic gán nhầm `topicId: 'STUDIED'` cho từ vựng mới trong modal thêm chunk](#15-lỗi-logic-gán-nhầm-topicid-studied-cho-từ-vựng-mới-trong-modal-thêm-chunk)
 16. [Thời gian LCP/TTFB quá lâu (3.6s - 6.34s) trên Vercel do Blocking Firestore SSR, Token CheckRevoked & Thiếu Region `sin1`](#16-thời-gian-lcpttfb-quá-lâu-36s---634s-trên-vercel-do-blocking-firestore-ssr-token-checkrevoked--thiếu-region-sin1)
+17. [Google Search Console báo 'URL không xác định' do Trang chủ thiếu trong Sitemap & bị Redirect 307](#17-google-search-console-báo-url-không-xác-định-do-trang-chủ-thiếu-trong-sitemap--bị-redirect-307)
 
 ---
 
@@ -795,6 +796,45 @@ Trong tài liệu chính thức của Google Firebase, Firestore định nghĩa 
 - **LCP**: Giảm từ **3.6s – 6.34s** xuống **0.70s** (🟢 Đạt chuẩn Xanh lá Core Web Vitals, nhanh hơn ~9 lần).
 - **CLS**: Duy trì **0** tuyệt đối (Zero Layout Shift).
 - **INP**: **8ms** (tương tác phản hồi tức thì).
+
+---
+
+## 17. Google Search Console báo 'URL không xác định' do Trang chủ thiếu trong Sitemap & bị Redirect 307
+
+### Triệu chứng
+- Khi dán URL trang chủ `https://speaking-english.taiphanvan.id.vn/` vào thanh kiểm tra URL (URL Inspection) của Google Search Console, nhận được thông báo:
+  * *"Google không xác định được URL"* (URL is unknown to Google).
+  * *"Không phát hiện sơ đồ trang web giới thiệu nào"*.
+  * *"Không phát hiện được trang nào"*.
+  * *"Không áp dụng"*.
+
+### Nguyên nhân gốc rễ
+1. **Thiếu khai báo URL gốc trong [`sitemap.ts`](file:///d:/SelfLearning/EchoChunk/src/app/sitemap.ts)**:
+   - File `sitemap.ts` chỉ khai báo 6 URL con (`/luyen-noi`, `/phan-xa`, `/dien-tu`, `/kho-tu-vung`, `/youtube`, `/gioi-thieu`).
+   - URL trang chủ `https://speaking-english.taiphanvan.id.vn` hoàn toàn bị bỏ sót, khiến Googlebot khi đọc sitemap không phát hiện được trang chủ.
+2. **Trang chủ bị chuyển hướng tạm thời (HTTP 307 Temporary Redirect)**:
+   - Trong file [`src/app/(main)/page.tsx`](file:///d:/SelfLearning/EchoChunk/src/app/%28main%29/page.tsx), code cũ thực hiện:
+     ```ts
+     export default function RootPage() {
+       redirect('/luyen-noi'); // ❌ Trả về HTTP 307
+     }
+     ```
+   - Khi Googlebot crawl `https://speaking-english.taiphanvan.id.vn/`, server không trả về mã `200 OK` chứa nội dung mà trả về `307 Temporary Redirect` sang `/luyen-noi`.
+   - Google **không bao giờ lập chỉ mục (index)** một URL chuyển hướng tạm thời 307.
+3. **Thẻ Canonical trong [`layout.tsx`](file:///d:/SelfLearning/EchoChunk/src/app/layout.tsx) trỏ nhầm**:
+   - `alternates.canonical` ở layout gốc khai báo `canonical: "/luyen-noi"`, vô tình thông báo cho Google biết trang chủ `/` không phải là bản gốc.
+
+### Cách khắc phục
+1. **Biến trang chủ `/` thành trang 200 OK thực thụ (Server Component)**:
+   - Trong [`src/app/(main)/page.tsx`](file:///d:/SelfLearning/EchoChunk/src/app/%28main%29/page.tsx), render trực tiếp component `<ShadowingPage />` để người dùng và bot truy cập `https://speaking-english.taiphanvan.id.vn/` sẽ nhận ngay mã `HTTP 200 OK` kèm đầy đủ nội dung bài học và thẻ meta SEO.
+2. **Khai báo Canonical chuẩn cho trang chủ**:
+   - Trong `src/app/layout.tsx`, đổi `canonical: "/"` (trỏ về chính domain gốc `https://speaking-english.taiphanvan.id.vn/`).
+   - Trong `src/app/(main)/page.tsx`, bổ sung metadata với `alternates: { canonical: '/' }`.
+3. **Bổ sung trang chủ vào Sitemap**:
+   - Trong [`src/app/sitemap.ts`](file:///d:/SelfLearning/EchoChunk/src/app/sitemap.ts), thêm `${baseUrl}` vào vị trí đầu tiên với `priority: 1.0`, `changeFrequency: 'daily'`. Nâng tổng số URL trong sitemap lên **7 URL**.
+4. **Cập nhật link Brand Logo trên Navbar**:
+   - Trong [`Navbar.tsx`](file:///d:/SelfLearning/EchoChunk/src/components/Navbar.tsx), đổi link logo EchoChunk trỏ về `/` (`<Link href="/">`), giữ liên kết nội bộ hướng về trang chủ mạnh mẽ.
+
 
 
 

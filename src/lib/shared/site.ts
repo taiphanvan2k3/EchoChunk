@@ -6,13 +6,6 @@
  * 4. Fallback: localhost khi phát triển hoặc domain mặc định khi chạy production
  */
 export function getBaseUrl(): string {
-  console.log({
-    NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
-    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
-    VERCEL_PROJECT_PRODUCTION_URL: process.env.VERCEL_PROJECT_PRODUCTION_URL,
-    VERCEL_URL: process.env.VERCEL_URL,
-    NODE_ENV: process.env.NODE_ENV
-  });
 
   if (process.env.NEXT_PUBLIC_SITE_URL) {
     return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");
