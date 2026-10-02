@@ -387,6 +387,7 @@ export function ChunkBlanksMode({
                 width={19}
                 height={11}
                 className="w-[19px] h-auto object-contain pointer-events-none select-none"
+                style={{ height: "auto" }}
                 priority
               />
             </button>
@@ -462,7 +463,7 @@ export function ChunkBlanksMode({
                     <span className="text-[0.7rem] font-bold bg-notion-hover text-notion-secondary px-1.5 py-0.5 rounded shrink-0 whitespace-nowrap">
                       Hint 2
                     </span>
-                    <span className="flex-1">
+                    <span className="flex-1 whitespace-pre-line">
                       <strong>Ngữ cảnh:</strong> {chunk.context}
                     </span>
                   </div>

@@ -109,10 +109,10 @@ export function ExampleCard({
 
       {/* Sentence Editor or Preview */}
       {activeTab === "edit" ? (
-        <div className="space-y-1.5">
+        <div className="bg-white border border-gray-200 focus-within:border-blue-500 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-blue-500/10 transition-all">
           <textarea
             ref={textareaRef}
-            className="w-full bg-white border border-gray-200 focus:border-blue-500 rounded-lg p-3 text-sm text-gray-900 leading-relaxed placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500/10 outline-none transition-all resize-y min-h-[72px]"
+            className="w-full bg-transparent border-0 p-3 text-sm text-gray-900 leading-relaxed placeholder:text-gray-400 outline-none resize-none min-h-[72px]"
             rows={2}
             placeholder={`Ví dụ #${index + 1}: Nhập câu ví dụ tiếng Anh... (bấm Enter để xuống dòng nếu hội thoại)`}
             value={ex.sentence}
@@ -126,42 +126,47 @@ export function ExampleCard({
           />
 
           {/* Highlight Toolbar */}
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <button
-              type="button"
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200/80 transition-colors cursor-pointer"
-              onClick={() => onToggleHighlight(index)}
-              title="Bôi đen chữ rồi bấm (hoặc Ctrl+B) để highlight cụm từ"
-            >
-              <Highlighter size={12} />
-              <span>Highlight cụm</span>
-              <kbd className="hidden sm:inline font-mono text-[0.65rem] opacity-70 ml-0.5">Ctrl+B</kbd>
-            </button>
+          <div className="flex items-center justify-between border-t border-gray-100 bg-gray-50/70 px-2.5 py-1.5 gap-2">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <button
+                type="button"
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[0.75rem] font-medium bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200/80 transition-colors cursor-pointer"
+                onClick={() => onToggleHighlight(index)}
+                title="Bôi đen chữ rồi bấm (hoặc Ctrl+B) để highlight cụm từ"
+              >
+                <Highlighter size={12} />
+                <span>Highlight cụm</span>
+                <kbd className="hidden sm:inline font-mono text-[0.62rem] opacity-70 ml-0.5">Ctrl+B</kbd>
+              </button>
 
-            <button
-              type="button"
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium bg-white hover:bg-purple-50 text-purple-700 border border-purple-200 transition-colors cursor-pointer disabled:opacity-40"
-              onClick={() => onAutoHighlight(index)}
-              disabled={!chunkText.trim()}
-              title={
-                chunkText.trim()
-                  ? `Tự động tìm và bôi đậm cụm "${chunkText}" trong câu`
-                  : "Cần nhập cụm từ trước"
-              }
-            >
-              <Sparkles size={12} />
-              <span>Tự tìm cụm</span>
-            </button>
+              <button
+                type="button"
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[0.75rem] font-medium bg-white hover:bg-purple-50 text-purple-700 border border-purple-200 transition-colors cursor-pointer disabled:opacity-40"
+                onClick={() => onAutoHighlight(index)}
+                disabled={!chunkText.trim()}
+                title={
+                  chunkText.trim()
+                    ? `Tự động tìm và bôi đậm cụm "${chunkText}" trong câu`
+                    : "Cần nhập cụm từ trước"
+                }
+              >
+                <Sparkles size={12} />
+                <span>Tự tìm cụm</span>
+              </button>
 
-            <button
-              type="button"
-              className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-white hover:bg-red-50 text-gray-500 hover:text-red-600 border border-gray-200 hover:border-red-200 transition-colors cursor-pointer"
-              onClick={() => onClearHighlight(index)}
-              title="Xóa toàn bộ ký tự highlight"
-            >
-              <Eraser size={12} />
-              <span className="hidden sm:inline">Bỏ highlight</span>
-            </button>
+              <button
+                type="button"
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[0.75rem] font-medium bg-white hover:bg-red-50 text-gray-500 hover:text-red-600 border border-gray-200 hover:border-red-200 transition-colors cursor-pointer"
+                onClick={() => onClearHighlight(index)}
+                title="Xóa toàn bộ ký tự highlight"
+              >
+                <Eraser size={12} />
+                <span className="hidden sm:inline">Bỏ highlight</span>
+              </button>
+            </div>
+            <span className="text-[0.7rem] text-gray-400 hidden sm:inline select-none">
+              Enter để xuống dòng
+            </span>
           </div>
         </div>
       ) : (
@@ -176,13 +181,13 @@ export function ExampleCard({
 
       {/* Sentence IPA */}
       <div className="flex flex-col gap-1">
-        <label className="text-[0.72rem] font-bold text-gray-500 uppercase tracking-wider">
+        <label className="text-xs font-semibold text-gray-600">
           Phiên âm IPA câu ví dụ:
         </label>
         <div className="flex items-center gap-2">
           <input
             type="text"
-            className="flex-1 bg-white border border-gray-200 focus:border-blue-500 rounded-lg py-1.5 px-3 font-mono text-xs sm:text-sm text-gray-800 outline-none focus:ring-2 focus:ring-blue-500/10 placeholder:text-gray-400 transition-all"
+            className="flex-1 bg-white border border-gray-200 focus:border-blue-500 rounded-lg h-9 px-3 font-ipa text-sm text-gray-900 outline-none focus:ring-2 focus:ring-blue-500/10 placeholder:text-gray-400 transition-all"
             placeholder="Tự động sinh khi gõ câu... (hoặc tự chỉnh sửa)"
             value={ex.sentenceIpa}
             onChange={(e) => onIpaChange(index, e.target.value)}
@@ -191,11 +196,11 @@ export function ExampleCard({
             <button
               type="button"
               onClick={() => onForceIpa(index)}
-              className="inline-flex items-center gap-1 py-1.5 px-2.5 rounded-lg border border-blue-200 bg-blue-50 text-blue-700 text-xs font-semibold hover:bg-blue-100 transition-colors cursor-pointer shrink-0"
+              className="inline-flex items-center gap-1 h-9 px-3 rounded-lg border border-blue-200 bg-blue-50 text-blue-700 text-xs font-semibold hover:bg-blue-100 transition-colors cursor-pointer shrink-0"
               title="Tự động đồng bộ lại phiên âm IPA cho câu ví dụ này"
             >
-              <Wand2 size={12} />
-              <span className="hidden sm:inline">Tạo lại IPA</span>
+              <Wand2 size={13} />
+              <span>Tạo lại IPA</span>
             </button>
           )}
         </div>
@@ -203,13 +208,13 @@ export function ExampleCard({
 
       {/* Translation */}
       <div className="flex flex-col gap-1">
-        <label className="text-[0.72rem] font-bold text-gray-500 uppercase tracking-wider">
+        <label className="text-xs font-semibold text-gray-600">
           Dịch nghĩa tiếng Việt:
         </label>
-        <input
-          type="text"
-          className="w-full bg-white border border-gray-200 focus:border-blue-500 rounded-lg py-1.5 px-3 text-xs sm:text-sm text-gray-800 outline-none focus:ring-2 focus:ring-blue-500/10 placeholder:text-gray-400 transition-all"
-          placeholder="Dịch nghĩa câu ví dụ..."
+        <textarea
+          rows={2}
+          className="w-full bg-white border border-gray-200 focus:border-blue-500 rounded-lg p-2.5 text-sm text-gray-900 leading-relaxed outline-none focus:ring-2 focus:ring-blue-500/10 placeholder:text-gray-400 transition-all resize-y min-h-[52px]"
+          placeholder="Dịch nghĩa câu ví dụ (hỗ trợ bấm Enter xuống dòng)..."
           value={ex.translation}
           onChange={(e) => onTranslationChange(index, e.target.value)}
         />
@@ -217,13 +222,13 @@ export function ExampleCard({
 
       {/* Context Note */}
       <div className="flex flex-col gap-1">
-        <label className="text-[0.72rem] font-bold text-gray-400 uppercase tracking-wider">
+        <label className="text-xs font-medium text-gray-500">
           Ghi chú ngữ cảnh (tùy chọn):
         </label>
-        <input
-          type="text"
-          className="w-full bg-white border border-gray-200 focus:border-blue-500 rounded-lg py-1.5 px-3 text-xs sm:text-sm text-gray-800 outline-none focus:ring-2 focus:ring-blue-500/10 placeholder:text-gray-400 transition-all"
-          placeholder="VD: Dùng trong email công việc hoặc khi trao đổi ngắn..."
+        <textarea
+          rows={2}
+          className="w-full bg-white border border-gray-200 focus:border-blue-500 rounded-lg p-2.5 text-sm text-gray-900 leading-relaxed outline-none focus:ring-2 focus:ring-blue-500/10 placeholder:text-gray-400 transition-all resize-y min-h-[52px]"
+          placeholder="VD: Dùng trong email công việc hoặc khi trao đổi ngắn... (hỗ trợ bấm Enter xuống dòng)"
           value={ex.context}
           onChange={(e) => onContextChange(index, e.target.value)}
         />

@@ -24,23 +24,23 @@ export function TopicDropdown({
   onSelectTopic
 }: TopicDropdownProps) {
   return (
-    <div className="flex flex-col sm:grid sm:grid-cols-[130px_1fr] sm:items-center gap-1 sm:gap-3">
-      <div className="text-[0.78rem] sm:text-[0.82rem] text-notion-secondary flex items-center gap-1.5 font-semibold select-none">
+    <div className="flex flex-col sm:grid sm:grid-cols-[170px_1fr] sm:items-center gap-1 sm:gap-3">
+      <div className="text-[0.78rem] sm:text-[0.82rem] text-notion-secondary flex items-center gap-1.5 font-semibold select-none whitespace-nowrap shrink-0">
         <span>📁</span>
         <span>Chủ đề</span>
       </div>
-      <div className="flex items-center" ref={dropdownRef}>
-        <div className="relative inline-block w-full">
+      <div className="flex items-center w-full" ref={dropdownRef}>
+        <div className="relative w-full">
           <button
             type="button"
-            className="w-full sm:w-auto inline-flex items-center justify-between sm:justify-start gap-2 py-2 px-3 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-800 cursor-pointer transition-all select-none"
+            className="w-full inline-flex items-center justify-between gap-2 py-2 px-3 bg-gray-50/80 hover:bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-800 cursor-pointer transition-all select-none"
             onClick={onToggle}
           >
-            <span className="flex items-center gap-2">
+            <span className="flex items-center gap-2 truncate">
               <span>{currentSelectedTopic.icon}</span>
-              <span className="font-medium">{currentSelectedTopic.topicName}</span>
+              <span className="font-medium text-gray-900 truncate">{currentSelectedTopic.topicName}</span>
             </span>
-            <ChevronDown size={14} className="text-gray-400 ml-1" />
+            <ChevronDown size={14} className="text-gray-400 shrink-0 ml-1" />
           </button>
 
           {isOpen && (

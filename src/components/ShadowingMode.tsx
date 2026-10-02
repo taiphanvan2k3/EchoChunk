@@ -440,6 +440,7 @@ export function ShadowingMode({
                 width={20}
                 height={12}
                 className="w-[17px] sm:w-[22px] h-auto object-contain pointer-events-none select-none"
+                style={{ height: "auto" }}
                 priority
               />
             </button>

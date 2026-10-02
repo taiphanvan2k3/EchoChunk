@@ -1,8 +1,8 @@
 # ERRORS.md — Nhật ký Lỗi, Nguyên nhân Gốc rễ & Giải pháp (EchoChunk)
 
 > **Dự án:** EchoChunk  
-> **Cập nhật lần cuối:** 2026-09-25  
-> **Phạm vi:** YouTube Transcript, Player, React 19 Lifecycle, SSR Hydration, ESLint Rules, TTS Audio Engine, Phonetics IPA, Webshare Rotating Proxy, Firestore Quota Optimization, NoSQL Data Modeling, Next.js 16 Auth & Jose Overrides
+> **Cập nhật lần cuối:** 2026-10-02  
+> **Phạm vi:** YouTube Transcript, Player, React 19 Lifecycle, SSR Hydration, ESLint Rules, TTS Audio Engine, Phonetics IPA, Webshare Rotating Proxy, Firestore Quota Optimization, NoSQL Data Modeling, Next.js 16 Auth & Jose Overrides, Modal UX & Body Scroll Lock, Next.js Image Optimization, Form Typography & Line Wrap
 
 ---
 
@@ -24,6 +24,8 @@
 15. [Lỗi logic gán nhầm `topicId: 'STUDIED'` cho từ vựng mới trong modal thêm chunk](#15-lỗi-logic-gán-nhầm-topicid-studied-cho-từ-vựng-mới-trong-modal-thêm-chunk)
 16. [Thời gian LCP/TTFB quá lâu (3.6s - 6.34s) trên Vercel do Blocking Firestore SSR, Token CheckRevoked & Thiếu Region `sin1`](#16-thời-gian-lcpttfb-quá-lâu-36s---634s-trên-vercel-do-blocking-firestore-ssr-token-checkrevoked--thiếu-region-sin1)
 17. [Google Search Console báo 'URL không xác định' do Trang chủ thiếu trong Sitemap & bị Redirect 307](#17-google-search-console-báo-url-không-xác-định-do-trang-chủ-thiếu-trong-sitemap--bị-redirect-307)
+18. [Lỗi cuộn ngầm (Scroll Leaking) & Thanh cuộn xấu khi Modal mở trên Desktop/Mobile](#18-lỗi-cuộn-ngầm-scroll-leaking--thanh-cuộn-xấu-khi-modal-mở-trên-desktopmobile)
+19. [Cảnh báo Next.js `next/image` về Aspect Ratio khi dùng Tailwind resize ảnh (`/icons/duo-turtle.png`)](#19-cảnh-báo-nextjs-nextimage-về-aspect-ratio-khi-dùng-tailwind-resize-ảnh-iconsduo-turtlepng)
 
 ---
 
@@ -835,6 +837,104 @@ Trong tài liệu chính thức của Google Firebase, Firestore định nghĩa 
 4. **Cập nhật link Brand Logo trên Navbar**:
    - Trong [`Navbar.tsx`](file:///d:/SelfLearning/EchoChunk/src/components/Navbar.tsx), đổi link logo EchoChunk trỏ về `/` (`<Link href="/">`), giữ liên kết nội bộ hướng về trang chủ mạnh mẽ.
 
+---
 
+## 18. Lỗi cuộn ngầm (Scroll Leaking) & Thanh cuộn xấu khi Modal mở trên Desktop/Mobile
 
+### Triệu chứng
+1. Khi mở modal (`ChunkModal`, `AnalyticsModal`), người dùng cuộn chuột bên trong modal nhưng khi cuộn tới đỉnh/đáy thì sự kiện cuộn tiếp tục bị truyền sang trang nền (`<body>`), làm trang chính phía sau giật nảy và dịch chuyển vị trí học.
+2. Trên hệ điều hành Windows, thanh cuộn dọc mặc định của trình duyệt rất to dày (`17px`), có nút mũi tên lên/xuống màu xám thô cứng, làm hỏng ngôn ngữ thiết kế tối giản tinh tế (Notion/Linear aesthetic).
+3. Đóng mở nhiều modal lồng nhau (ví dụ: mở `ChunkModal` rồi mở thêm dialog xác nhận) có thể gây mất trạng thái khoá cuộn khi một modal con đóng trước.
 
+### Nguyên nhân gốc rễ
+1. **Thiếu cơ chế khoá cuộn nền toàn diện**: Không đặt `overflow: hidden !important` và `overscroll-behavior: contain` trên cả `document.body` và `document.documentElement` khi modal active.
+2. **Xung đột State giữa các Modal (No Reference Counting)**: Nếu dùng logic thô sơ `useEffect(() => { document.body.style.overflow = 'hidden'; return () => document.body.style.overflow = ''; })` trong từng modal riêng lẻ, khi có 2 modal cùng mở và 1 modal đóng trước, nó sẽ mở khoá `overflow` của `body` ngay lập tức dù modal thứ hai vẫn đang hiển thị.
+3. **Thanh cuộn mặc định của trình duyệt**: Thiếu cấu hình CSS rules cho `scrollbar-width: thin`, `scrollbar-color`, và `::-webkit-scrollbar` tùy biến mỏng nhẹ, bo tròn, track trong suốt.
+
+### Cách khắc phục
+1. **Xây dựng Custom Hook `useBodyScrollLock` có Reference Counting**:
+   - Trong [`src/hooks/useBodyScrollLock.ts`](file:///d:/SelfLearning/EchoChunk/src/hooks/useBodyScrollLock.ts), duy trì biến toàn cục `activeLocksCount`:
+     ```ts
+     let activeLocksCount = 0;
+     export function useBodyScrollLock(isLocked: boolean = true) {
+       useEffect(() => {
+         if (!isLocked) return;
+         activeLocksCount++;
+         document.body.classList.add("modal-open");
+         document.documentElement.classList.add("modal-open");
+         return () => {
+           activeLocksCount = Math.max(0, activeLocksCount - 1);
+           if (activeLocksCount === 0) {
+             document.body.classList.remove("modal-open");
+             document.documentElement.classList.remove("modal-open");
+           }
+         };
+       }, [isLocked]);
+     }
+     ```
+2. **Cấu hình chặn cuộn triệt để trong `globals.css`**:
+   ```css
+   body.modal-open, html.modal-open {
+     overflow: hidden !important;
+     overscroll-behavior: contain;
+   }
+   ```
+3. **Xây dựng Utility Class `.scrollbar-thin` chuẩn Notion**:
+   - Thiết lập thanh cuộn siêu mảnh (`6px`), bo góc tròn `9999px`, nền track trong suốt, màu thumb xám nhẹ tinh tế (`#cbd5e1`) và hover tối dần (`#94a3b8`):
+   ```css
+   .scrollbar-thin {
+     scrollbar-width: thin;
+     scrollbar-color: #cbd5e1 transparent;
+   }
+   .scrollbar-thin::-webkit-scrollbar {
+     width: 6px;
+     height: 6px;
+   }
+   .scrollbar-thin::-webkit-scrollbar-thumb {
+     background-color: #cbd5e1;
+     border-radius: 9999px;
+   }
+   ```
+
+---
+
+## 19. Cảnh báo Next.js `next/image` về Aspect Ratio khi dùng Tailwind resize ảnh (`/icons/duo-turtle.png`)
+
+### Triệu chứng
+Console trình duyệt hiển thị cảnh báo từ Next.js Image component khi truy cập các trang luyện tập (`/luyen-noi`, `/dien-tu`):
+```text
+[browser] Image with src "/icons/duo-turtle.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+```
+
+### Nguyên nhân gốc rễ
+1. Component `next/image` có các thuộc tính kích thước tĩnh (`width={20} height={12}`).
+2. Khi can thiệp kích thước bằng class Tailwind `w-[17px] sm:w-[22px] h-auto`, runtime validator của Next.js trong môi trường Client/Dev chỉ phân tích inline style hoặc thuộc tính DOM trực tiếp. Do `h-auto` nằm trong CSS class ngoại vi, Next.js hiểu lầm rằng chỉ có chiều ngang (`width`) bị thay đổi bằng CSS trong khi chiều dọc (`height`) giữ nguyên giá trị tĩnh, có nguy cơ gây méo tỷ lệ ảnh hoặc nhảy layout (CLS).
+
+### Cách khắc phục
+Bổ sung tường minh thuộc tính inline `style={{ height: "auto" }}` trực tiếp vào component `<Image>` theo đúng khuyến cáo kỹ thuật của Next.js:
+- Trong [`ShadowingMode.tsx`](file:///d:/SelfLearning/EchoChunk/src/components/ShadowingMode.tsx#L443):
+  ```tsx
+  <Image
+    src="/icons/duo-turtle.png"
+    alt="Phát âm chậm"
+    width={20}
+    height={12}
+    className="w-[17px] sm:w-[22px] h-auto object-contain pointer-events-none select-none"
+    style={{ height: "auto" }}
+    priority
+  />
+  ```
+- Trong [`ChunkBlanksMode.tsx`](file:///d:/SelfLearning/EchoChunk/src/components/ChunkBlanksMode.tsx#L390):
+  ```tsx
+  <Image
+    src="/icons/duo-turtle.png"
+    alt="Phát âm chậm"
+    width={19}
+    height={11}
+    className="w-[19px] h-auto object-contain pointer-events-none select-none"
+    style={{ height: "auto" }}
+    priority
+  />
+  ```
+
+---

@@ -460,7 +460,7 @@ export function QuickReflexMode({
         {/* Optional Context & Chunk Hint */}
         <div className="flex items-center gap-2.5 flex-wrap">
           {targetContext && (
-            <span className="text-xs bg-notion-surface border border-notion-border px-2 py-1 rounded text-notion-secondary">
+            <span className="text-xs bg-notion-surface border border-notion-border px-2 py-1 rounded text-notion-secondary whitespace-pre-line">
               💡 <strong>Ngữ cảnh:</strong> {targetContext}
             </span>
           )}
