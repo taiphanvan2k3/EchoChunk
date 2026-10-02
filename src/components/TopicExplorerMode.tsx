@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { SpeakingChunk, TopicMeta, ChunkProgress } from "@/types";
 import { soundManager } from "@/lib/client/sound";
 import { Play, Plus, Search, X, Menu } from "lucide-react";
 import { SidebarSection } from "./explorer/ExplorerNavItem";
-import { ExplorerSidebarShell } from "./explorer/ExplorerSidebar";
+import { ExplorerSidebarShell } from "./explorer/ExplorerSidebarShell";
 import { ExplorerChunkTable } from "./explorer/ExplorerChunkTable";
 
 export type SRSFilter = "ALL" | "DUE" | "LEARNING" | "MASTERED";
@@ -21,7 +21,7 @@ interface TopicExplorerModeProps {
   onDeleteChunk: (chunkId: string) => void;
 }
 
-export const TopicExplorerMode: React.FC<TopicExplorerModeProps> = ({
+export function TopicExplorerMode({
   topics,
   chunks,
   progressMap,
@@ -30,7 +30,7 @@ export const TopicExplorerMode: React.FC<TopicExplorerModeProps> = ({
   onOpenAddChunk,
   onEditChunk,
   onDeleteChunk
-}) => {
+}: TopicExplorerModeProps) {
   const [now] = useState(() => Date.now());
   const [activeSection, setActiveSection] = useState<SidebarSection>("ALL");
   const [srsFilter, setSrsFilter] = useState<SRSFilter>("ALL");
@@ -138,12 +138,12 @@ export const TopicExplorerMode: React.FC<TopicExplorerModeProps> = ({
 
   return (
     <div className="explorer-fullwidth-wrapper">
-      <div className="flex flex-col h-full min-h-screen bg-gray-50">
+      <div className="flex flex-col h-full min-h-screen bg-notion-surface-subtle">
         {/* ── Top header bar ── */}
-        <div className="sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between gap-3">
+        <div className="sticky top-0 z-20 bg-notion-surface border-b border-notion-border px-4 py-3 flex items-center justify-between gap-3">
           <button
             type="button"
-            className="mobile-menu-toggle lg:hidden p-2 rounded-lg hover:bg-gray-100 text-gray-500"
+            className="mobile-menu-toggle lg:hidden p-2 rounded-lg hover:bg-notion-hover text-notion-secondary"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
@@ -152,8 +152,8 @@ export const TopicExplorerMode: React.FC<TopicExplorerModeProps> = ({
           <div className="flex items-center gap-2 flex-1 min-w-0">
             <span className="text-xl leading-none">{sectionIcon}</span>
             <div className="min-w-0">
-              <h2 className="font-bold text-gray-900 text-base truncate">{sectionLabel}</h2>
-              <p className="text-xs text-gray-400">
+              <h2 className="font-bold text-notion-text text-base truncate">{sectionLabel}</h2>
+              <p className="text-xs text-notion-muted">
                 {displayChunks.length} cụm từ
                 {search && " · kết quả tìm kiếm"}
               </p>
@@ -164,14 +164,14 @@ export const TopicExplorerMode: React.FC<TopicExplorerModeProps> = ({
             <button
               type="button"
               onClick={() => onStartPracticeTopic(activeSection)}
-              className="hidden sm:inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-3 py-2 rounded-lg transition-colors"
+              className="hidden sm:inline-flex items-center gap-1.5 bg-notion-primary hover:bg-notion-primary-hover text-white text-sm font-semibold px-3 py-2 rounded-lg transition-colors shadow-sm"
             >
               <Play size={14} /> Luyện tập
             </button>
             <button
               type="button"
               onClick={onOpenAddChunk}
-              className="inline-flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold px-3 py-2 rounded-lg transition-colors"
+              className="inline-flex items-center gap-1.5 bg-notion-btn-secondary hover:bg-notion-btn-secondary-hover border border-notion-btn-secondary-border text-notion-text text-sm font-semibold px-3 py-2 rounded-lg transition-colors"
             >
               <Plus size={14} />
               <span className="hidden sm:inline">Thêm Chunk</span>
@@ -197,21 +197,21 @@ export const TopicExplorerMode: React.FC<TopicExplorerModeProps> = ({
           {/* ── Main content ── */}
           <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
             {/* Search & filter bar */}
-            <div className="bg-white border-b border-gray-100 px-4 py-3 flex flex-wrap items-center gap-3">
+            <div className="bg-notion-surface border-b border-notion-border px-4 py-3 flex flex-wrap items-center gap-3">
               <div className="relative flex-1 min-w-48">
-                <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-notion-muted" />
                 <input
                   ref={searchRef}
                   type="text"
                   placeholder="Tìm cụm từ, nghĩa, ví dụ..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-9 pr-9 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400"
+                  className="w-full pl-9 pr-9 py-2 text-sm bg-notion-surface-subtle border border-notion-border rounded-lg text-notion-text focus:outline-none focus:ring-2 focus:ring-notion-primary/20 focus:border-notion-primary placeholder-notion-muted"
                 />
                 {search && (
                   <button
                     onClick={() => setSearch("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-notion-muted hover:text-notion-text"
                   >
                     <X size={14} />
                   </button>
@@ -220,7 +220,7 @@ export const TopicExplorerMode: React.FC<TopicExplorerModeProps> = ({
 
               {/* SRS filter tabs — only for "Từ đã học" section */}
               {activeSection === "ALL" && (
-                <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1 flex-shrink-0">
+                <div className="flex items-center gap-1 bg-notion-hover rounded-lg p-1 flex-shrink-0">
                   {(["ALL", "DUE", "LEARNING", "MASTERED"] as SRSFilter[]).map((f) => (
                     <button
                       key={f}
@@ -230,7 +230,7 @@ export const TopicExplorerMode: React.FC<TopicExplorerModeProps> = ({
                         setSrsFilter(f);
                       }}
                       className={`text-xs font-semibold px-3 py-1.5 rounded-md transition-all ${
-                        srsFilter === f ? "bg-white text-blue-700 shadow-sm" : "text-gray-500 hover:text-gray-700"
+                        srsFilter === f ? "bg-notion-surface text-notion-primary shadow-sm" : "text-notion-secondary hover:text-notion-text"
                       }`}
                     >
                       {SRS_FILTER_LABELS[f]}
@@ -242,7 +242,7 @@ export const TopicExplorerMode: React.FC<TopicExplorerModeProps> = ({
               <button
                 type="button"
                 onClick={() => onStartPracticeTopic(activeSection)}
-                className="sm:hidden inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-3 py-2 rounded-lg"
+                className="sm:hidden inline-flex items-center gap-1.5 bg-notion-primary hover:bg-notion-primary-hover text-white text-sm font-semibold px-3 py-2 rounded-lg"
               >
                 <Play size={14} /> Luyện
               </button>
@@ -268,4 +268,5 @@ export const TopicExplorerMode: React.FC<TopicExplorerModeProps> = ({
       </div>
     </div>
   );
-};
+}
+

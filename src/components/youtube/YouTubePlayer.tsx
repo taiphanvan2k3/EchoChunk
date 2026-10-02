@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 // Khai báo kiểu dữ liệu chuẩn cho YouTube IFrame API (Tránh dùng any)
 interface YTPlayerInstance {
@@ -46,13 +46,13 @@ interface YouTubePlayerProps {
   onSeekHandled?: () => void;
 }
 
-export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({
+export function YouTubePlayer({
   videoId,
   onTimeUpdate,
   onReady,
   seekToTime,
   onSeekHandled,
-}) => {
+}: YouTubePlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const playerElementRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<YTPlayerInstance | null>(null);
@@ -181,8 +181,8 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({
   }, [seekToTime]);
 
   return (
-    <div className="yt-video-wrapper" ref={containerRef}>
-      <div ref={playerElementRef} className="yt-iframe-element" />
+    <div className="w-full aspect-video rounded-xl overflow-hidden bg-black shadow-[0_4px_20px_-2px_rgba(0,0,0,0.12)]" ref={containerRef}>
+      <div ref={playerElementRef} className="w-full h-full border-0" />
     </div>
   );
-};
+}

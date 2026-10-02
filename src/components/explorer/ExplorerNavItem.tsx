@@ -1,20 +1,20 @@
 "use client";
 
-import React from "react";
+import type { ReactNode } from "react";
 
 export type SidebarSection = "ALL" | "DUE" | "CUSTOM" | string;
 
 interface ExplorerNavItemProps {
   id: SidebarSection;
-  icon: React.ReactNode;
+  icon: ReactNode;
   label: string;
   count?: number;
-  badge?: React.ReactNode;
+  badge?: ReactNode;
   activeSection: SidebarSection;
   onSelect: (id: SidebarSection) => void;
 }
 
-export const ExplorerNavItem: React.FC<ExplorerNavItemProps> = ({
+export function ExplorerNavItem({
   id,
   icon,
   label,
@@ -22,17 +22,17 @@ export const ExplorerNavItem: React.FC<ExplorerNavItemProps> = ({
   badge,
   activeSection,
   onSelect
-}) => {
+}: ExplorerNavItemProps) {
   const isActive = activeSection === id;
   return (
     <button
       type="button"
       onClick={() => onSelect(id)}
-      className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 text-left group ${
-        isActive ? "bg-blue-600 text-white shadow-sm" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+      className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 text-left group cursor-pointer ${
+        isActive ? "bg-notion-primary text-white shadow-sm" : "text-notion-secondary hover:bg-notion-hover hover:text-notion-text"
       }`}
     >
-      <span className={`flex-shrink-0 ${isActive ? "text-white" : "text-gray-400 group-hover:text-gray-600"}`}>
+      <span className={`flex-shrink-0 ${isActive ? "text-white" : "text-notion-muted group-hover:text-notion-secondary"}`}>
         {icon}
       </span>
       <span className="flex-1 truncate">{label}</span>
@@ -40,7 +40,7 @@ export const ExplorerNavItem: React.FC<ExplorerNavItemProps> = ({
       {count !== undefined && (
         <span
           className={`text-xs font-semibold px-1.5 py-0.5 rounded-full flex-shrink-0 ${
-            isActive ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-500"
+            isActive ? "bg-white/20 text-white" : "bg-notion-hover text-notion-secondary"
           }`}
         >
           {count}
@@ -48,4 +48,5 @@ export const ExplorerNavItem: React.FC<ExplorerNavItemProps> = ({
       )}
     </button>
   );
-};
+}
+

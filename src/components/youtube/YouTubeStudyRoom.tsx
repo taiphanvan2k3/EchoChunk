@@ -21,7 +21,7 @@ import { useYouTubeHistory } from "@/hooks/useYouTubeHistory";
 import { extractVideoId } from "@/lib/shared/youtube";
 import { ChevronRight, AlertCircle, Clock, Sparkles } from "lucide-react";
 
-export const YouTubeStudyRoom: React.FC = () => {
+export function YouTubeStudyRoom() {
   const { user } = useAuth();
   const historyItems = useYouTubeHistory(user?.uid);
   const [selectedTab, setSelectedTab] = useState<'recent' | 'explore' | null>(null);
@@ -165,17 +165,21 @@ export const YouTubeStudyRoom: React.FC = () => {
     : [];
 
   return (
-    <div className="yt-study-room-container">
+    <div className="yt-study-room-container w-full max-w-[1400px] mx-auto pt-2 pb-14">
       {/* 1. Breadcrumbs Navigation (Khi đang tải hoặc đã có bài học) */}
       {activeVideoId && (
-        <nav className="yt-breadcrumbs" aria-label="Breadcrumb">
-          <Link href="/" className="yt-breadcrumb-link" title="Về trang chủ">
+        <nav className="flex items-center gap-1.5 text-[0.84rem] text-gray-500 mb-2.5" aria-label="Breadcrumb">
+          <Link
+            href="/"
+            className="text-gray-500 hover:text-blue-600 hover:underline transition-colors cursor-pointer bg-transparent border-none p-0 inline-flex items-center text-inherit font-inherit"
+            title="Về trang chủ"
+          >
             Trang chủ
           </Link>
-          <ChevronRight size={14} className="yt-breadcrumb-sep" />
+          <ChevronRight size={14} className="opacity-45 text-gray-400 shrink-0" />
           <button
             type="button"
-            className="yt-breadcrumb-link"
+            className="text-gray-500 hover:text-blue-600 hover:underline transition-colors cursor-pointer bg-transparent border-none p-0 inline-flex items-center text-inherit font-inherit"
             onClick={() => {
               setLessonData(null);
               setLoadingVideoId(null);
@@ -186,26 +190,26 @@ export const YouTubeStudyRoom: React.FC = () => {
           >
             Luyện tập YouTube
           </button>
-          <ChevronRight size={14} className="yt-breadcrumb-sep" />
+          <ChevronRight size={14} className="opacity-45 text-gray-400 shrink-0" />
           {displayTitle ? (
-            <span className="yt-breadcrumb-current" title={displayTitle}>
+            <span className="text-gray-900 font-medium max-w-[540px] truncate" title={displayTitle}>
               {displayTitle}
             </span>
           ) : (
-            <span className="yt-skeleton-shimmer inline-block w-48 h-3.5 rounded align-middle" />
+            <span className="animate-pulse bg-gray-200 inline-block w-48 h-3.5 rounded align-middle" />
           )}
         </nav>
       )}
 
       {/* 2. Tiêu đề bài học */}
       {activeVideoId && (
-        <div className="yt-lesson-header">
-          <h1 className="yt-lesson-title">
+        <div className="mb-5">
+          <h1 className="text-2xl font-extrabold text-gray-900 leading-[1.35] tracking-tight m-0">
             Shadowing Practice:{" "}
             {displayTitle ? (
               <span>{displayTitle}</span>
             ) : (
-              <span className="yt-skeleton-shimmer inline-block w-72 h-6 rounded-md align-middle" />
+              <span className="animate-pulse bg-gray-200 inline-block w-72 h-6 rounded-md align-middle" />
             )}
           </h1>
         </div>
@@ -231,29 +235,44 @@ export const YouTubeStudyRoom: React.FC = () => {
 
       {/* Thông báo lỗi nếu có */}
       {errorMessage && (
-        <div className="yt-error-banner">
-          <AlertCircle size={16} className="error-icon" />
+        <div className="flex items-center gap-2.5 bg-red-50 border border-red-200 text-red-700 py-3 px-[1.15rem] rounded-lg text-[0.88rem] mb-6">
+          <AlertCircle size={16} className="shrink-0" />
           <span>{errorMessage}</span>
         </div>
       )}
 
       {/* 4. Trạng thái khám phá & video đã học khi chưa nạp video */}
       {!activeVideoId && !isLoading && (
-        <div className="yt-empty-container">
+        <div className="w-full">
           {/* Segmented Pill Tabs */}
-          <div className="yt-study-tabs-bar">
-            <div className="yt-study-tabs-group" role="tablist">
+          <div className="flex justify-center mb-6 w-full">
+            <div
+              className="w-full sm:w-auto max-w-md sm:max-w-none grid grid-cols-2 sm:inline-flex items-center gap-1 sm:gap-[0.35rem] bg-notion-surface-subtle p-1 sm:p-[0.3rem] rounded-xl sm:rounded-full border border-notion-border shadow-inner"
+              role="tablist"
+            >
               <button
                 type="button"
                 role="tab"
                 aria-selected={activeTab === "recent"}
-                className={`yt-study-tab-btn ${activeTab === "recent" ? "is-active" : ""}`}
+                className={`inline-flex items-center justify-center gap-1.5 sm:gap-2 py-2 sm:py-[0.55rem] px-2.5 sm:px-[1.15rem] rounded-lg sm:rounded-full text-xs sm:text-[0.88rem] font-semibold cursor-pointer transition-all duration-200 select-none border-none text-center ${
+                  activeTab === "recent"
+                    ? "bg-white text-notion-primary shadow-sm"
+                    : "bg-transparent text-notion-secondary hover:text-notion-text hover:bg-white/60"
+                }`}
                 onClick={() => setSelectedTab("recent")}
               >
-                <Clock size={16} />
-                <span>Video đã học gần đây</span>
+                <Clock size={15} className="shrink-0" />
+                <span>Video đã học</span>
                 {historyItems.length > 0 && (
-                  <span className="yt-study-tab-badge">{historyItems.length}</span>
+                  <span
+                    className={`text-[0.7rem] sm:text-[0.72rem] font-bold px-1.5 sm:px-2 py-0.5 rounded-full leading-tight ml-0.5 shrink-0 ${
+                      activeTab === "recent"
+                        ? "bg-notion-primary text-white"
+                        : "bg-notion-blue-bg text-notion-blue-text border border-notion-blue-border"
+                    }`}
+                  >
+                    {historyItems.length}
+                  </span>
                 )}
               </button>
 
@@ -261,17 +280,21 @@ export const YouTubeStudyRoom: React.FC = () => {
                 type="button"
                 role="tab"
                 aria-selected={activeTab === "explore"}
-                className={`yt-study-tab-btn ${activeTab === "explore" ? "is-active" : ""}`}
+                className={`inline-flex items-center justify-center gap-1.5 sm:gap-2 py-2 sm:py-[0.55rem] px-2.5 sm:px-[1.15rem] rounded-lg sm:rounded-full text-xs sm:text-[0.88rem] font-semibold cursor-pointer transition-all duration-200 select-none border-none text-center ${
+                  activeTab === "explore"
+                    ? "bg-white text-notion-primary shadow-sm"
+                    : "bg-transparent text-notion-secondary hover:text-notion-text hover:bg-white/60"
+                }`}
                 onClick={() => setSelectedTab("explore")}
               >
-                <Sparkles size={16} />
-                <span>Thư viện bài học gợi ý</span>
+                <Sparkles size={15} className="shrink-0" />
+                <span>Bài học gợi ý</span>
               </button>
             </div>
           </div>
 
           {/* Tab Content Panel */}
-          <div className="yt-study-tab-content" key={activeTab}>
+          <div className="animate-[fadeIn_0.22s_ease-out]" key={activeTab}>
             {activeTab === "recent" && (
               <YouTubeRecentVideos
                 onSelectVideo={(url) => {
@@ -299,9 +322,9 @@ export const YouTubeStudyRoom: React.FC = () => {
 
       {/* 5. Khối bài học 2 cột khi có video (kể cả đang tải transcript hay đã tải xong) */}
       {activeVideoId && (
-        <div className="yt-study-workspace-grid">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.28fr)_minmax(0,1fr)] gap-7 items-start">
           {/* CỘT TRÁI: Video Player + Chế Độ Luyện Tập + Reviews + Tags */}
-          <div className="yt-workspace-left-col">
+          <div className="flex flex-col gap-5">
             <YouTubePlayer
               videoId={activeVideoId}
               onTimeUpdate={setCurrentTime}
@@ -322,7 +345,7 @@ export const YouTubeStudyRoom: React.FC = () => {
           </div>
 
           {/* CỘT PHẢI: Danh Sách Câu (hoặc Skeleton khi đang load transcript) */}
-          <div className="yt-workspace-right-col">
+          <div className="w-full">
             {lessonData ? (
               <SentenceList
                 sentences={augmentedSentences}
@@ -340,4 +363,4 @@ export const YouTubeStudyRoom: React.FC = () => {
       )}
     </div>
   );
-};
+}

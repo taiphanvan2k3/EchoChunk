@@ -1,69 +1,9 @@
 "use client";
 
-import React, { useEffect, useRef, forwardRef } from "react";
-import { YouTubeSentence, YouTubeWord } from "@/types/youtube";
-import { Check, Lightbulb, Edit2 } from "lucide-react";
-
-// ─────────────────────────────────────────────────────────────────────────────
-// SentenceRow — memoized để tránh re-render không cần thiết.
-// Chỉ re-render khi props thực sự thay đổi.
-// Với non-active row: nhận currentTime=0 → không bao giờ re-render vì time tick.
-// Với active row   : nhận currentTime thật → re-render mỗi 50ms (chỉ 1 dòng duy nhất).
-// ─────────────────────────────────────────────────────────────────────────────
-interface SentenceRowProps {
-  sentence: YouTubeSentence;
-  isActive: boolean;
-  isCompleted: boolean;
-  currentTime: number;
-  isKaraokeEnabled: boolean;
-  onSelectSentence: (sentence: YouTubeSentence) => void;
-  onToggleComplete?: (sentenceId: string) => void;
-}
-
-const SentenceRow = React.memo(
-  forwardRef<HTMLDivElement, SentenceRowProps>(function SentenceRow(
-    { sentence, isActive, isCompleted, currentTime, isKaraokeEnabled, onSelectSentence, onToggleComplete },
-    ref
-  ) {
-    return (
-      <div
-        ref={ref}
-        className={`yt-sentence-row${isActive ? " is-active" : ""}${isCompleted ? " is-completed" : ""}`}
-        onClick={() => onSelectSentence(sentence)}
-      >
-        {/* Badge số thứ tự hoặc Tích xanh hoàn thành */}
-        <div
-          className={`yt-sentence-index-badge${isCompleted ? " completed" : isActive ? " active" : ""}`}
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggleComplete?.(sentence.id);
-          }}
-          title={isCompleted ? "Đã hoàn thành" : "Đánh dấu hoàn thành"}
-        >
-          {isCompleted ? <Check size={12} strokeWidth={3} /> : sentence.index}
-        </div>
-
-        {/* Nội dung câu: Karaoke Word Highlighting (chỉ khi có word-timing chuẩn native) */}
-        <div className="yt-sentence-content">
-          {isKaraokeEnabled && sentence.words && sentence.words.length > 0 ? (
-            <div className="yt-words-wrap">
-              {sentence.words.map((w: YouTubeWord, wIdx: number) => {
-                const isWordActive = isActive && currentTime >= w.start && currentTime < w.end;
-                return (
-                  <span key={wIdx} className={`yt-word-token${isWordActive ? " is-singing" : ""}`}>
-                    {w.word}{" "}
-                  </span>
-                );
-              })}
-            </div>
-          ) : (
-            <span className="yt-plain-text">{sentence.text}</span>
-          )}
-        </div>
-      </div>
-    );
-  })
-);
+import { useEffect, useRef, useMemo } from "react";
+import { YouTubeSentence } from "@/types/youtube";
+import { Lightbulb, Edit2 } from "lucide-react";
+import { SentenceRow } from "./SentenceRow";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SentenceList
@@ -78,7 +18,7 @@ interface SentenceListProps {
   onEditClick?: () => void;
 }
 
-export const SentenceList: React.FC<SentenceListProps> = ({
+export function SentenceList({
   sentences,
   currentTime,
   activeSentenceId,
@@ -86,7 +26,7 @@ export const SentenceList: React.FC<SentenceListProps> = ({
   onSelectSentence,
   onToggleComplete,
   onEditClick
-}) => {
+}: SentenceListProps) {
   const listContainerRef = useRef<HTMLDivElement>(null);
   const activeItemRef = useRef<HTMLDivElement>(null);
 
@@ -96,7 +36,7 @@ export const SentenceList: React.FC<SentenceListProps> = ({
 
   // Tìm câu đang phát từ CUỐI mảng → câu được bắt đầu gần nhất thắng
   // (YouTube srv3 sinh các đoạn chồng thời gian, tìm từ đầu trả về câu cũ)
-  const currentPlayingSentence = React.useMemo(() => {
+  const currentPlayingSentence = useMemo(() => {
     if (!sentences || sentences.length === 0) return null;
 
     // Exact match — ưu tiên câu mới nhất đang chứa currentTime
@@ -139,37 +79,42 @@ export const SentenceList: React.FC<SentenceListProps> = ({
   }, [effectiveActiveId]);
 
   return (
-    <div className="yt-sentence-list-card">
+    <div className="bg-notion-surface border border-notion-border rounded-xl flex flex-col h-[720px] max-h-[calc(100vh-160px)] min-h-[600px] overflow-hidden shadow-sm">
       {/* Header */}
-      <div className="yt-sentence-list-header">
-        <div className="yt-sentence-count-badge">
-          <span className="count-number">{sentences.length}</span>
-          <span className="count-label">sentences</span>
+      <div className="py-[0.85rem] px-5 border-b border-notion-border flex items-center justify-between bg-notion-surface">
+        <div className="flex items-baseline gap-1.5">
+          <span className="text-base font-bold text-notion-text">{sentences.length}</span>
+          <span className="text-[0.82rem] text-notion-secondary font-medium">sentences</span>
           {source === "native" && (
             <span
-              className="ml-2 inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full"
+              className="ml-2 inline-flex items-center gap-1 text-[11px] font-medium text-notion-green-text bg-notion-green-bg border border-notion-green-border px-2 py-0.5 rounded-full"
               title="Phụ đề lấy trực tiếp từ YouTube (có mốc thời gian từng từ)"
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              <span className="w-1.5 h-1.5 rounded-full bg-notion-green" />
               Phụ đề lấy trực tiếp từ YouTube
             </span>
           )}
         </div>
 
-        <button type="button" className="yt-edit-sentences-btn" onClick={onEditClick} title="Chỉnh sửa danh sách câu">
+        <button
+          type="button"
+          className="inline-flex items-center gap-1.5 bg-notion-surface border border-notion-border text-notion-secondary rounded-md py-[0.3rem] px-[0.65rem] text-[0.78rem] font-medium cursor-pointer transition-all hover:bg-notion-hover hover:border-notion-border-medium hover:text-notion-text"
+          onClick={onEditClick}
+          title="Chỉnh sửa danh sách câu"
+        >
           <Edit2 size={13} />
           <span>Edit</span>
         </button>
       </div>
 
       {/* Tip */}
-      <div className="yt-sentence-tip-banner">
-        <Lightbulb size={14} className="tip-icon" />
+      <div className="bg-notion-blue-bg text-notion-blue-text py-[0.55rem] px-5 text-[0.8rem] flex items-center gap-2 border-b border-notion-blue-border font-medium">
+        <Lightbulb size={14} className="shrink-0 text-notion-primary" />
         <span>Click any sentence to start shadowing that line.</span>
       </div>
 
       {/* Scrollable list */}
-      <div className="yt-sentences-scroll-area" ref={listContainerRef}>
+      <div className="flex-1 overflow-y-auto py-1 scrollbar-thin" ref={listContainerRef}>
         {sentences.map((sentence) => {
           const isActive = sentence.id === effectiveActiveId;
           return (
@@ -191,4 +136,4 @@ export const SentenceList: React.FC<SentenceListProps> = ({
       </div>
     </div>
   );
-};
+}
