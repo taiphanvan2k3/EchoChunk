@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Lightbulb, Edit2, Loader2 } from "lucide-react";
 

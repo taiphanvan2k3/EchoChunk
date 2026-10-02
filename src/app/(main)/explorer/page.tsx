@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { usePractice } from '@/context/PracticeContext';
 import { TopicExplorerMode } from '@/components/TopicExplorerMode';

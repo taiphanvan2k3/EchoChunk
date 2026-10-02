@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import ShadowingPage from "./shadowing/page";
 
 export const metadata: Metadata = {

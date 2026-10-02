@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useRef } from "react";
 import { SpeakingChunk, TopicMeta, ChunkExample } from "@/types";
@@ -63,6 +63,11 @@ function getInitialChunkState(chunkToEdit?: SpeakingChunk | null) {
     ];
   }
 
+  const safeTopicName =
+    !chunkToEdit.topicName || chunkToEdit.topicName === "Đã luyện tập" || chunkToEdit.topicName === "STUDIED" || safeTopicId === "CUSTOM"
+      ? "Từ vựng của tôi"
+      : chunkToEdit.topicName;
+
   return {
     chunkText: chunkToEdit.chunk || "",
     meaning: chunkToEdit.meaning || "",
@@ -70,7 +75,7 @@ function getInitialChunkState(chunkToEdit?: SpeakingChunk | null) {
     isChunkIpaEdited: Boolean(chunkToEdit.chunkIpa || chunkToEdit.ipa),
     level: chunkToEdit.level || "B1",
     topicId: safeTopicId,
-    customTopicName: chunkToEdit.topicName || "Từ vựng của tôi",
+    customTopicName: safeTopicName,
     tags: chunkToEdit.tags && chunkToEdit.tags.length > 0 ? chunkToEdit.tags : ["custom", "speaking"],
     examples: initialExamples,
     showAdvanced: true
@@ -328,10 +333,12 @@ export function useChunkEditor({
       return;
     }
 
-    const selectedTopic = existingTopics.find((t) => t.topicId === topicId);
+    const cleanTopicId = (!topicId || topicId === "STUDIED" || topicId === "ALL") ? "CUSTOM" : topicId;
+
+    const selectedTopic = existingTopics.find((t) => t.topicId === cleanTopicId);
     const resolvedTopicName =
-      topicId === "CUSTOM" ? customTopicName.trim() || "Từ vựng của tôi" : selectedTopic?.topicName || "Tổng hợp";
-    const resolvedTopicIcon = topicId === "CUSTOM" ? "⭐" : selectedTopic?.icon || "📁";
+      cleanTopicId === "CUSTOM" ? "Từ vựng của tôi" : selectedTopic?.topicName || "Tổng hợp";
+    const resolvedTopicIcon = cleanTopicId === "CUSTOM" ? "⭐" : selectedTopic?.icon || "📁";
 
     let finalChunkIpa = chunkIpa.trim();
     if (!finalChunkIpa && trimmedChunk) finalChunkIpa = getPhraseIpa(trimmedChunk);
@@ -361,14 +368,12 @@ export function useChunkEditor({
       context: ""
     };
 
-    const cleanTopicId = (!topicId || topicId === "STUDIED" || topicId === "ALL") ? "CUSTOM" : topicId;
-
     const updatedChunk: SpeakingChunk = {
       id: chunkToEdit?.id || `custom_chunk_${Date.now()}`,
       topicId: cleanTopicId,
       topicName: resolvedTopicName,
       topicIcon: resolvedTopicIcon,
-      sectionTitle: chunkToEdit?.sectionTitle || resolvedTopicName,
+      sectionTitle: cleanTopicId === "CUSTOM" ? "Từ vựng của tôi" : (chunkToEdit?.sectionTitle && chunkToEdit.sectionTitle !== "Đã luyện tập" ? chunkToEdit.sectionTitle : resolvedTopicName),
       number: chunkToEdit?.number || 999,
       chunk: trimmedChunk,
       meaning: trimmedMeaning,
@@ -402,10 +407,10 @@ export function useChunkEditor({
   // ── Derived values ────────────────────────────────────────────────────────
   const currentSelectedTopic =
     topicId === "CUSTOM" || topicId === "STUDIED" || topicId === "ALL"
-      ? { topicId: "CUSTOM", topicName: customTopicName || "Từ vựng tự tạo / Khác", icon: "⭐" }
+      ? { topicId: "CUSTOM", topicName: "Từ vựng của tôi", icon: "⭐" }
       : existingTopics.find((t) => t.topicId === topicId && t.topicId !== "STUDIED" && t.topicId !== "ALL") || {
           topicId: "CUSTOM",
-          topicName: "Từ vựng tự tạo",
+          topicName: "Từ vựng của tôi",
           icon: "⭐"
         };
 

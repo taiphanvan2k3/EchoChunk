@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+﻿import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Kho 500+ Cụm Từ Giao Tiếp Tiếng Anh (Speaking Chunks)',

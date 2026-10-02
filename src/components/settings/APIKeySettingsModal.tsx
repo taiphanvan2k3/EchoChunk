@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useRef, ChangeEvent } from "react";
 import {
@@ -13,8 +13,7 @@ import {
   Loader2,
   CheckCircle2,
   Download,
-  Upload,
-  ArrowLeft
+  Upload
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useEscapeKey } from "@/hooks/useEscapeKey";

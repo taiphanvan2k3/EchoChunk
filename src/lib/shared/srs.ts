@@ -1,4 +1,4 @@
-// Spaced Repetition System (SuperMemo SM-2 & FSRS principles)
+﻿// Spaced Repetition System (SuperMemo SM-2 & FSRS principles)
 import { ChunkProgress, SRSRating, SpeakingChunk } from '@/types';
 
 export const DEFAULT_EASE_FACTOR = 2.5;

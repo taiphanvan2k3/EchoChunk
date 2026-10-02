@@ -98,7 +98,9 @@
         "Client",
         "Communication",
         "Interview"
-      ]
+      ],
+      "chunkIpa": "/ˈwɔk ˈsʌmˌwən ˈθruː ˈsʌmθɪŋ/",
+      "sentenceIpa": "/let miː wɔːk juː θruː maɪ ˈriːsnt ˈprɑːdʒekt ˈɑːrkɪtektʃər ənd ðə kiː ˈtʃælɪndʒɪz aɪ sɑːlvd/"
     },
     {
       "id": "interviews-002",
@@ -121,7 +123,9 @@
         "Client",
         "Communication",
         "Interview"
-      ]
+      ],
+      "chunkIpa": "/hændz ɑːn ɪkˈspɪriəns wɪð/",
+      "sentenceIpa": "/aɪ hæv ˈoʊvər θriː jɪrz əv hændz ɑːn ɪkˈspɪriəns wɪð dɪˈzaɪnɪŋ ˈrestfl eɪ piː aɪz ənd ˌpoʊstɡres kjuː ˈel ˈdeɪtəbeɪsɪz/"
     },
     {
       "id": "interviews-003",
@@ -144,7 +148,9 @@
         "Client",
         "Communication",
         "Interview"
-      ]
+      ],
+      "chunkIpa": "/maɪ ˈɡreɪtɪst streŋkθ ɪz/",
+      "sentenceIpa": "/maɪ ˈɡreɪtɪst streŋkθ ɪz maɪ əˈbɪləti tə lɜːrn nuː tekˈnɑːlədʒiz ˈkwɪkli ənd əˈdæpt tə fæst peɪst ɪnˈvaɪrənmənts/"
     },
     {
       "id": "interviews-004",
@@ -167,7 +173,9 @@
         "Client",
         "Communication",
         "Interview"
-      ]
+      ],
+      "chunkIpa": "/ˈprɑːbləm ˈsɑːlvɪŋ skɪlz/",
+      "sentenceIpa": "/aɪ ˈlevrɪdʒd maɪ ˈprɑːbləm ˈsɑːlvɪŋ skɪlz tə aɪˈdentɪfaɪ ðə ˈmeməri liːk ənd buːst æp pərˈfɔːrməns baɪ ˈθɜːrti pərˈsent/"
     },
     {
       "id": "interviews-005",
@@ -190,7 +198,9 @@
         "Client",
         "Communication",
         "Interview"
-      ]
+      ],
+      "chunkIpa": "/tiːm ˈpleɪər/",
+      "sentenceIpa": "/aɪ kənˈsɪdər maɪˈself ə strɔːŋ tiːm ˈpleɪər huː ˈɔːlweɪz kəˈmjuːnɪkeɪts trænsˈpærəntli ənd səˈpɔːrts ˈkɑːliːɡz/"
     },
     {
       "id": "interviews-006",
@@ -213,7 +223,9 @@
         "Client",
         "Communication",
         "Interview"
-      ]
+      ],
+      "chunkIpa": "/ˈlʊkɪŋ fər nuː ˌɑːpərˈtuːnətiz/",
+      "sentenceIpa": "/aɪm ˈlʊkɪŋ fər nuː ˌɑːpərˈtuːnətiz wer aɪ kæn kənˈtrɪbjuːt tə lɑːrdʒ skeɪl ˈprɑːdʌkts ənd ɡroʊ ˈɪntə ə ˈsiːniər roʊl/"
     },
     {
       "id": "interviews-007",
@@ -236,7 +248,9 @@
         "Client",
         "Communication",
         "Interview"
-      ]
+      ],
+      "chunkIpa": "/ˈwʌt ˈdʌz ə ˈtɪpəkəl ˈdeɪ ˈlʊk ˈlaɪk/",
+      "sentenceIpa": "/kəd juː ʃer wɑːt ə ˈtɪpɪkl deɪ lʊks laɪk fər ə dɪˈveləpər ɪn ðɪs tiːm?/"
     },
     {
       "id": "interviews-008",
@@ -259,7 +273,9 @@
         "B1-B2",
         "Communication",
         "Interview"
-      ]
+      ],
+      "chunkIpa": "/dɪˈzaɪnd ði ˈɑːrkɪtektʃər maɪˈself/",
+      "sentenceIpa": "/aɪ dɪˈzaɪnd ði ˈɑːrkɪtektʃər maɪˈself frəm ðə ɡraʊnd ʌp tə ɪnˈʃʊr haɪ ˌskeɪləˈbɪləti/"
     },
     {
       "id": "interviews-009",
@@ -282,7 +298,9 @@
         "Client",
         "Communication",
         "Interview"
-      ]
+      ],
+      "chunkIpa": "/riːˈfreɪz ˈɪntuː ˈæn ˈɪntɜːrvˌjuː ˈænsɜːr/",
+      "sentenceIpa": "/kəd juː help miː ˌriːˈfreɪz ðɪs ˈteknɪkl ˌekspləˈneɪʃn ˈɪntə ən ˈɪntərvjuː ˈænsər?/"
     },
     {
       "id": "interviews-010",
@@ -305,7 +323,9 @@
         "Client",
         "Communication",
         "Interview"
-      ]
+      ],
+      "chunkIpa": "/ˈɪf ðə ˈɪntɜːrvˌjuːɜːrz ˈæsk ˈmiː əˈbaʊt ˈðɪs ˈhaʊ ˈʃʊd ˈaɪ ˈænsɜːr/",
+      "sentenceIpa": "/ɪf ði ˈɪntərvjuːərz æsk miː əˈbaʊt ðiːz ˈkwestʃənz, haʊ ʃʊd aɪ ˈænsər?/"
     },
     {
       "id": "interviews-011",
@@ -328,7 +348,9 @@
         "Client",
         "Communication",
         "Interview"
-      ]
+      ],
+      "chunkIpa": "/wen wəz ðə læst taɪm juː juːzd/",
+      "sentenceIpa": "/wen wəz ðə læst taɪm juː juːzd riˈækt dʒeɪ es ɪn ə kəˈmɜːrʃl prəˈdʌkʃn ˈprɑːdʒekt?/"
     },
     {
       "id": "interviews-012",
@@ -351,7 +373,9 @@
         "Client",
         "Communication",
         "Interview"
-      ]
+      ],
+      "chunkIpa": "/ɑːn ðə seɪm peɪdʒ/",
+      "sentenceIpa": "/dʒʌst tə meɪk ʃʊr wɪr ɑːn ðə seɪm peɪdʒ, ðə ˈfaɪnl rɪˈliːs deɪt ɪz nekst ˈfraɪdeɪ, kəˈrekt?/"
     },
     {
       "id": "interviews-013",
@@ -374,7 +398,9 @@
         "B1-B2",
         "Communication",
         "Interview"
-      ]
+      ],
+      "chunkIpa": "/ˈmænɪdʒ ˈklaɪənt ˌekspekˈteɪʃnz/",
+      "sentenceIpa": "/ɪt ɪz ɪˈsenʃl tə ˈmænɪdʒ ˈklaɪənt ˌekspekˈteɪʃnz ˈɜːrli rɪˈɡɑːrdɪŋ ˈfiːtʃər dɪˈlɪvəri deɪts/"
     },
     {
       "id": "interviews-014",
@@ -397,7 +423,9 @@
         "Client",
         "Communication",
         "Interview"
-      ]
+      ],
+      "chunkIpa": "/kiːp juː ɪn ðə luːp/",
+      "sentenceIpa": "/doʊnt ˈwɜːri, ˈaʊər tiːm wɪl kiːp juː ɪn ðə luːp əz suːn əz wi ˈfɪnɪʃ ðə ˈtestɪŋ feɪz/"
     },
     {
       "id": "interviews-015",
@@ -420,7 +448,9 @@
         "Client",
         "Communication",
         "Interview"
-      ]
+      ],
+      "chunkIpa": "/dɪˈlɪvɜːr ˈɑːn ˈtaɪm/",
+      "sentenceIpa": "/wi ɑːr ˈfʊli kəˈmɪtɪd tə dɪˈlɪvərɪŋ ɑːn taɪm wɪˈðaʊt ˈkɑːmprəmaɪzɪŋ ɑːn koʊd ˈkwɑːləti/"
     },
     {
       "id": "interviews-016",
@@ -443,7 +473,9 @@
         "Client",
         "Communication",
         "Interview"
-      ]
+      ],
+      "chunkIpa": "/fiːl friː tə riːtʃ aʊt/",
+      "sentenceIpa": "/pliːz fiːl friː tə riːtʃ aʊt tə miː ɪf juː niːd ˈeni ˈfɜːrðər ˌklærəfɪˈkeɪʃn ɑːn ðə rɪˈpɔːrt/"
     },
     {
       "id": "interviews-017",
@@ -466,7 +498,9 @@
         "Client",
         "Communication",
         "Interview"
-      ]
+      ],
+      "chunkIpa": "/ˈfɑːloʊ ˈʌp ˈɑːn ˈsʌmθɪŋ/",
+      "sentenceIpa": "/aɪ æm ˈraɪtɪŋ tə ˈfɑːloʊ ʌp ɑːn ˈaʊər dɪˈskʌʃn frəm ˈjestərdeɪ rɪˈɡɑːrdɪŋ ðə ˈkɑːntrækt tɜːrmz/"
     },
     {
       "id": "interviews-018",
@@ -489,7 +523,9 @@
         "Client",
         "Communication",
         "Interview"
-      ]
+      ],
+      "chunkIpa": "/rəˈfɜːr ˈtuː ˈðæt ˈtuː ˈprɛzənt ˈɪt ˈdʊrɪŋ ðə ˈmiːtɪŋ/",
+      "sentenceIpa": "/aɪ kæn rɪˈfɜːr tə ðæt ˈɑːrkɪtektʃər ˈdaɪəɡræm tə prɪˈzent ɪt ˈdʊrɪŋ ðə ˈmiːtɪŋ/"
     },
     {
       "id": "interviews-019",
@@ -512,7 +548,9 @@
         "B1-B2",
         "Communication",
         "Interview"
-      ]
+      ],
+      "chunkIpa": "/ˈpɪk ˈsʌmˌwənz ˈbreɪn/",
+      "sentenceIpa": "/heɪ ˈdeɪvɪd, duː juː hæv faɪv ˈmɪnɪts? aɪd lʌv tə pɪk jɔːr breɪn ɑːn ðɪs ˈdeɪtəbeɪs ˈkwɪri ˌɑːptɪməˈzeɪʃn/"
     },
     {
       "id": "interviews-020",
@@ -535,7 +573,9 @@
         "A2-B1",
         "Communication",
         "Interview"
-      ]
+      ],
+      "chunkIpa": "/ˈgɪv ˈsʌmˌwən ə ˈhænd/",
+      "sentenceIpa": "/ɪf juː niːd ˈeni help wɪð ðæt dɪˈplɔɪmənt skrɪpt, aɪ kæn ɡɪv juː ə hænd ðɪs ˌæftərˈnuːn/"
     },
     {
       "id": "interviews-021",
@@ -558,7 +598,9 @@
         "A2-B1",
         "Communication",
         "Interview"
-      ]
+      ],
+      "chunkIpa": "/aɪ ˈriːəli əˈpriːʃieɪt jɔːr help/",
+      "sentenceIpa": "/aɪ ˈriːəli əˈpriːʃieɪt jɔːr help wɪð ˈsɑːlvɪŋ ðæt ˈtrɪki reɪs kənˈdɪʃn bʌɡ/"
     },
     {
       "id": "interviews-022",
@@ -581,7 +623,9 @@
         "Client",
         "Communication",
         "Interview"
-      ]
+      ],
+      "chunkIpa": "/kwɪk sɪŋk ʌp/",
+      "sentenceIpa": "/lets hæv ə kwɪk sɪŋk ʌp ət tuː piː em tə rɪˈvjuː ðə pʊl rɪˈkwest təˈɡeðər/"
     },
     {
       "id": "interviews-023",
@@ -604,7 +648,9 @@
         "B1-B2",
         "Communication",
         "Interview"
-      ]
+      ],
+      "chunkIpa": "/ˈpʊt ɪn ə ˈgʊd ˈwɜːrd ˈfɔr ˈsʌmˌwən/",
+      "sentenceIpa": "/θæŋk juː soʊ mʌtʃ fər ˈpʊtɪŋ ɪn ə ɡʊd wɜːrd fər miː wɪð ðə ˈprɑːdʒekt ˈmænɪdʒər!/"
     },
     {
       "id": "interviews-024",
@@ -627,7 +673,9 @@
         "Client",
         "Communication",
         "Interview"
-      ]
+      ],
+      "chunkIpa": "/noʊ niːd fər ɪɡˈzæmplz əz aɪ ɔːlˈredi ˌʌndərˈstænd ðə ˈkɑːnsepts/",
+      "sentenceIpa": "/pliːz prəˈvaɪd ɪkˈstriːmli dɪˈteɪld ˈænsərz; ðer ɪz noʊ niːd fər ɪɡˈzæmplz, əz aɪ ɔːlˈredi ˌʌndərˈstænd ðə ˈkɑːnsepts/"
     },
     {
       "id": "interviews-025",
@@ -650,7 +698,9 @@
         "Client",
         "Communication",
         "Interview"
-      ]
+      ],
+      "chunkIpa": "/ə kəˈrɪr əz ə ˈbækend/",
+      "sentenceIpa": "/waɪ ˈdɪdnt juː pərˈsuː ə kəˈrɪr əz ə ˈbækend ˌendʒɪˈnɪr ˈɜːrliər ɪn ˌjuːnɪˈvɜːrsəti?/"
     },
     {
       "id": "interviews-026",
@@ -673,7 +723,9 @@
         "Client",
         "Communication",
         "Interview"
-      ]
+      ],
+      "chunkIpa": "/kəd hæv bɪn ə ɡreɪt/",
+      "sentenceIpa": "/aɪ kəd hæv bɪn ə ɡreɪt ˈfrʌntend dɪˈzaɪnər, bʌt aɪ faʊnd maɪ truː ˈpæʃn ɪn ˈsɪstəm ˈɑːrkɪtektʃər/"
     },
     {
       "id": "interviews-027",
@@ -696,7 +748,9 @@
         "Client",
         "Communication",
         "Interview"
-      ]
+      ],
+      "chunkIpa": "/dɪsˈkɜːrɪdʒd miː frəm/",
+      "sentenceIpa": "/maɪ ˈfæməli dɪsˈkɜːrɪdʒd miː frəm pərˈsuːɪŋ ˈfriːlænsɪŋ bɪˈkɔːz ðeɪ prɪˈfɜːrd stəˈbɪləti/"
     },
     {
       "id": "interviews-028",
@@ -719,7 +773,9 @@
         "Client",
         "Communication",
         "Interview"
-      ]
+      ],
+      "chunkIpa": "/ˈplæn ˈðæt ˈwʊd/",
+      "sentenceIpa": "/ˈaʊər tiːm plænd ðæt wi wʊd kəmˈpliːt ðə kɔːr eɪ piː aɪ maɪˈɡreɪʃn baɪ ði end əv ðɪs ˈkwɔːrtər/"
     },
     {
       "id": "interviews-029",
@@ -742,7 +798,9 @@
         "Client",
         "Communication",
         "Interview"
-      ]
+      ],
+      "chunkIpa": "/ˈmɛnʃənd ˈðæt ˈwʊd/",
+      "sentenceIpa": "/ˈdʊrɪŋ ðə ˌretrəˈspektɪv, ðə tiːm liːd ˈmenʃnd ðæt wi wʊd əˈdɑːpt kliːn ˈɑːrkɪtektʃər fər ðə nuː ˈsɜːrvɪsɪz/"
     },
     {
       "id": "interviews-030",
@@ -765,7 +823,9 @@
         "Client",
         "Communication",
         "Interview"
-      ]
+      ],
+      "chunkIpa": "/ˈtʃeɪndʒd ˈwʌnz ˈmaɪnd/",
+      "sentenceIpa": "/wi wər ˈplænɪŋ tə dɪˈplɔɪ ɑːn ˈfraɪdeɪ, bʌt wi tʃeɪndʒd ˈaʊər maɪnd tə əˈvɔɪd ˈwiːkend ˈɪnsɪdənts/"
     },
     {
       "id": "interviews-031",
@@ -788,7 +848,9 @@
         "A2-B1",
         "Communication",
         "Interview"
-      ]
+      ],
+      "chunkIpa": "/you'll ˈnɛvɜːr ˈgɛs ˈwʌt/",
+      "sentenceIpa": "/juːl ˈnevər ɡes wʌt ˈtʃælɪndʒɪŋ bʌɡ wi rɪˈzɑːlvd ɪn prəˈdʌkʃn ˈjestərdeɪ!/"
     },
     {
       "id": "interviews-032",
@@ -811,7 +873,9 @@
         "Client",
         "Communication",
         "Interview"
-      ]
+      ],
+      "chunkIpa": "/mʌst hæv bɪn θrɪld/",
+      "sentenceIpa": "/ðə ˈsteɪkhoʊldərz mʌst hæv bɪn θrɪld wen ði ˈɔːtəmeɪtɪd ˈpaɪplaɪn went laɪv səkˈsesfəli/"
     },
     {
       "id": "interviews-033",
@@ -834,7 +898,9 @@
         "Client",
         "Communication",
         "Interview"
-      ]
+      ],
+      "chunkIpa": "/maɪ rɪˌspɑːnsəˈbɪlətiz ɪnˈkluːd/",
+      "sentenceIpa": "/maɪ rɪˌspɑːnsəˈbɪlətiz ɪnˈkluːd ˈriːdɪŋ ˈliːɡl ˈdɑːkjumənts, ɪkˈstræktɪŋ rɪˈkwaɪərmənts, ənd trænzˈleɪtɪŋ ðem ˈɪntə ˈsɪstəm ˈfiːtʃərz/"
     },
     {
       "id": "interviews-034",
@@ -857,7 +923,9 @@
         "Client",
         "Communication",
         "Interview"
-      ]
+      ],
+      "chunkIpa": "/dɪˈzaɪn ðə ˈdeɪtəbeɪs ənd ˈɪmpləment ðə ˈbækend/",
+      "sentenceIpa": "/frəm dɪˈfaɪnd rɪˈkwaɪərmənts, aɪ dɪˈzaɪn ðə ˈdeɪtəbeɪs ənd ˈɪmpləment ðə ˈbækend ˈjuːzɪŋ ˈmɑːdərn ˈfreɪmwɜːrks/"
     },
     {
       "id": "interviews-035",
@@ -880,7 +948,9 @@
         "B1-B2",
         "Communication",
         "Interview"
-      ]
+      ],
+      "chunkIpa": "/ˈɑːptɪˌmaɪz ˈdeɪtəˌbeɪs ˈkwɪriːz ˈbaɪ ˈædɪŋ ˈɪndɛksɪz/",
+      "sentenceIpa": "/aɪ ˈɑːptɪmaɪzd ˈdeɪtəbeɪs ˈkwɪriz baɪ ˈædɪŋ ˈɪndeknsɪz ənd ɪmˈpruːvɪŋ ˈkwɪri ˈstrʌktʃərz, wɪtʃ sɪɡˈnɪfɪkəntli rɪˈduːst rɪˈspɑːns taɪmz/"
     },
     {
       "id": "interviews-036",
@@ -903,7 +973,9 @@
         "Client",
         "Communication",
         "Interview"
-      ]
+      ],
+      "chunkIpa": "/əˈdæpt ˈtuː ˈwɜːrkɪŋ ˌɪndɪˈpɛndəntli/",
+      "sentenceIpa": "/wen tiːm ˈmembərz trænsˈfɜːrd, aɪ ˈkwɪkli əˈdæptɪd tə ˈwɜːrkɪŋ ˌɪndɪˈpendəntli ənd ˈhændlɪŋ kɔːr rɪˌspɑːnsəˈbɪlətiz/"
     },
     {
       "id": "interviews-037",
@@ -926,7 +998,9 @@
         "Client",
         "Communication",
         "Interview"
-      ]
+      ],
+      "chunkIpa": "/əˈspaɪər tə dʒɔɪn ə ˈlɑːrdʒər ˈkʌmpəni/",
+      "sentenceIpa": "/ˈæftər ˌɡrædʒuˈeɪʃn, aɪ əˈspaɪər tə dʒɔɪn ə ˈlɑːrdʒər ˈkʌmpəni wer aɪ kæn kənˈtrɪbjuːt tə haɪ skeɪl ˈprɑːdʌkts/"
     },
     {
       "id": "interviews-038",
@@ -949,7 +1023,9 @@
         "Client",
         "Communication",
         "Interview"
-      ]
+      ],
+      "chunkIpa": "/ɡoʊ θruː ə ˈprɑːpər ˈɪntərvjuː ˈprɑːses/",
+      "sentenceIpa": "/aɪ wɑːnt tə ɡoʊ θruː ə ˈprɑːpər ˈɪntərvjuː ˈprɑːses tə ˈtʃælɪndʒ maɪˈself ənd lɜːrn frəm ˈɪndəstri ˈliːdərz/"
     },
     {
       "id": "work-001",
@@ -972,7 +1048,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/kɪk θɪŋz ɔːf/",
+      "sentenceIpa": "/tə kɪk θɪŋz ɔːf, lets ɡoʊ ˈoʊvər təˈdeɪz əˈdʒendə/"
     },
     {
       "id": "work-002",
@@ -995,7 +1073,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/ˈteɪk ˈsʌmθɪŋ ˈɔˌflaɪn/",
+      "sentenceIpa": "/kæn wi teɪk ðɪs ˌɔːfˈlaɪn ənd dɪˈskʌs ɪt ˈæftər ðə kɔːl?/"
     },
     {
       "id": "work-003",
@@ -1018,7 +1098,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/kæn aɪ dʒʌmp ɪn hɪr/",
+      "sentenceIpa": "/kæn aɪ dʒʌmp ɪn hɪr fər ə ˈsekənd tə ˈklærəfaɪ ðæt rɪˈkwaɪərmənt?/"
     },
     {
       "id": "work-004",
@@ -1041,7 +1123,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/ræp θɪŋz ʌp/",
+      "sentenceIpa": "/wi ˈoʊnli hæv faɪv ˈmɪnɪts left, soʊ lets ræp θɪŋz ʌp/"
     },
     {
       "id": "work-005",
@@ -1064,7 +1148,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/ˈgoʊ ˈoʊvɜːr ˈsʌmθɪŋ/",
+      "sentenceIpa": "/lets ɡoʊ ˈoʊvər ði ˈækʃn ˈaɪtəmz wʌn mɔːr taɪm bɪˈfɔːr wi liːv ðə ruːm/"
     },
     {
       "id": "work-006",
@@ -1087,7 +1173,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/kɔːl ɪt ə deɪ!/",
+      "sentenceIpa": "/wiːv meɪd ɡreɪt ˈprɑːɡres ɑːn ðɪs ˈfiːtʃər, lets kɔːl ɪt ə deɪ!/"
     },
     {
       "id": "work-007",
@@ -1110,7 +1198,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/ˈbrɪŋ ˈsʌmθɪŋ ˈtuː ðə ˈteɪbəl/",
+      "sentenceIpa": "/iːtʃ ˌendʒɪˈnɪr ɪn ˈaʊər skwɑːd brɪŋz ˈsʌmθɪŋ juːˈniːk tə ðə ˈteɪbl/"
     },
     {
       "id": "work-008",
@@ -1133,7 +1223,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/tʌtʃ beɪs/",
+      "sentenceIpa": "/lets tʌtʃ beɪs əˈɡen təˈmɔːroʊ ˈmɔːrnɪŋ tə tʃek ˈprɑːɡres/"
     },
     {
       "id": "work-009",
@@ -1156,7 +1248,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/ˈbiː ˈɑːn ˈtræk/",
+      "sentenceIpa": "/wɪr ɑːn træk tə ˈfɪnɪʃ ðə ˈdeɪtəbeɪs maɪˈɡreɪʃn baɪ ˈfraɪdeɪ/"
     },
     {
       "id": "work-010",
@@ -1179,7 +1273,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/bɪˈhaɪnd ˈskedʒuːl/",
+      "sentenceIpa": "/wɪr ə bɪt bɪˈhaɪnd ˈskedʒuːl duː tə sʌm ˌʌnɪkˈspektɪd bʌɡz ɪn ˈsteɪdʒɪŋ/"
     },
     {
       "id": "work-011",
@@ -1202,7 +1298,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/pʊʃ ðə ˈdedlaɪn/",
+      "sentenceIpa": "/kæn wi pʊʃ ðə ˈdedlaɪn tə nekst ˈmʌndeɪ soʊ wi kæn raɪt ˈprɑːpər tests?/"
     },
     {
       "id": "work-012",
@@ -1225,7 +1323,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/ˈmiːt ə ˈdɛdˌlaɪn/",
+      "sentenceIpa": "/ˈevriwʌn ɪz ˈwɜːrkɪŋ ˈekstrə hɑːrd tə miːt ðə ˈdedlaɪn/"
     },
     {
       "id": "work-013",
@@ -1248,7 +1348,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/swɑːmpt wɪð wɜːrk/",
+      "sentenceIpa": "/aɪm kəmˈpliːtli swɑːmpt wɪð wɜːrk ðɪs wiːk, soʊ aɪ maɪt rɪˈplaɪ ˈsloʊli/"
     },
     {
       "id": "work-014",
@@ -1271,7 +1373,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/praɪˈɔːrətaɪz tæsks/",
+      "sentenceIpa": "/wen ˈevriθɪŋ siːmz ˈɜːrdʒənt, wi mʌst praɪˈɔːrətaɪz tæsks ɪˈfektɪvli/"
     },
     {
       "id": "work-015",
@@ -1294,7 +1398,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/teɪk ɑːn mɔːr rɪˌspɑːnsəˈbɪləti/",
+      "sentenceIpa": "/ʃiː ɪz ˈiːɡər tə teɪk ɑːn mɔːr rɪˌspɑːnsəˈbɪləti ɪn ðɪs nuː ˈprɑːdʒekt/"
     },
     {
       "id": "work-016",
@@ -1317,7 +1423,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/fɔːl bɪˈhaɪnd/",
+      "sentenceIpa": "/ɪf wi doʊnt rɪˈzɑːlv ðɪs ˈblɑːkər naʊ, ˈaʊər tiːm wɪl fɔːl bɪˈhaɪnd/"
     },
     {
       "id": "work-017",
@@ -1340,7 +1448,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/kʌt ˈkɔːrnərz/",
+      "sentenceIpa": "/wi ʃʊd ˈnevər kʌt ˈkɔːrnərz ɑːn sɪˈkjʊrəti ənd koʊd rɪˈvjuː/"
     },
     {
       "id": "work-018",
@@ -1363,7 +1473,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/dʒʌst ə hedz ʌp/",
+      "sentenceIpa": "/dʒʌst ə hedz ʌp, ðə ˈsteɪdʒɪŋ ɪnˈvaɪrənmənt wɪl bi daʊn fər ˈθɜːrti ˈmɪnɪts/"
     },
     {
       "id": "work-019",
@@ -1386,7 +1498,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/ˈluːp ˈsʌmˌwən ɪn/",
+      "sentenceIpa": "/ˈsɑːri, aɪ mɪst ðɪs ˈmesɪdʒ, kəd juː luːp miː ɪn ɑːn ðə θred?/"
     },
     {
       "id": "work-020",
@@ -1409,7 +1523,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/ˈkiːp ˈsʌmˌwən ˈpoʊstɪd/",
+      "sentenceIpa": "/pliːz kiːp miː ˈpoʊstɪd əz suːn əz ðə ˈklaɪənt rɪˈspɑːndz tə ˈaʊər ˈiːmeɪl/"
     },
     {
       "id": "work-021",
@@ -1432,7 +1548,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/ˈgɛt ˈbæk ˈtuː ˈsʌmˌwən/",
+      "sentenceIpa": "/aɪ niːd tə tʃek wɪð ðə ˈteknɪkl liːd fɜːrst, ðen aɪl ɡet bæk tə juː/"
     },
     {
       "id": "work-022",
@@ -1455,7 +1573,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/ˈpɪŋ ˈsʌmˌwən/",
+      "sentenceIpa": "/fiːl friː tə pɪŋ miː ɑːn slæk wenˈevər ðə dɪˈplɔɪmənt ˈfɪnɪʃɪz/"
     },
     {
       "id": "work-023",
@@ -1478,7 +1598,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/ɑːn ðə flaɪ/",
+      "sentenceIpa": "/ˈdʊrɪŋ ðə laɪv ˈdemoʊ, ˈaʊər ˈsɪstəm əˈdʒʌstɪd ðə ˈdeɪtə ɑːn ðə flaɪ/"
     },
     {
       "id": "work-024",
@@ -1501,7 +1623,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/ˈgɪv ˈfiːdˌbæk ˈɑːn ˈsʌmθɪŋ/",
+      "sentenceIpa": "/kæn aɪ ɡɪv juː sʌm ˈfiːdbæk ɑːn jɔːr pʊl rɪˈkwest?/"
     },
     {
       "id": "work-025",
@@ -1524,7 +1648,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/kənˈstrʌktɪv ˈkrɪtɪsɪzəm/",
+      "sentenceIpa": "/aɪ ˈɔːlweɪz əˈpriːʃieɪt kənˈstrʌktɪv ˈkrɪtɪsɪzəm bɪˈkɔːz ɪt helps miː bɪˈkʌm ə ˈbetər ˌendʒɪˈnɪr/"
     },
     {
       "id": "work-026",
@@ -1547,7 +1673,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/ˈgɛt ˈjuːzd ˈtuː ˈsʌmθɪŋ/",
+      "sentenceIpa": "/ɪt tʊk miː ə ˈkʌpl əv wiːks tə ɡet juːzd tə ðə nuː siː aɪ siː diː ˈpaɪplaɪn/"
     },
     {
       "id": "work-027",
@@ -1570,7 +1698,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/ˈstɛp ˈʌp ˈtuː ðə ˈpleɪt/",
+      "sentenceIpa": "/wen ðə liːd dɪˈveləpər wəz sɪk, ˈælɪks stept ʌp tə ðə pleɪt ənd ræn ðə sprɪnt/"
     },
     {
       "id": "work-028",
@@ -1593,7 +1723,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/ˈbɜːrn ðə ˈkændəl ˈæt ˈboʊθ ˈɛndz/",
+      "sentenceIpa": "/jʊr ˈbɜːrnɪŋ ðə ˈkændl ət boʊθ endz! juː ʃʊd teɪk ə deɪ ɔːf tə rest/"
     },
     {
       "id": "work-029",
@@ -1616,7 +1748,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/θɪŋk ˌaʊtˈsaɪd ðə bɑːks/",
+      "sentenceIpa": "/tə rɪˈduːs klaʊd kɔːsts baɪ hæf, ˈaʊər tiːm hæd tə θɪŋk ˌaʊtˈsaɪd ðə bɑːks/"
     },
     {
       "id": "work-030",
@@ -1639,7 +1773,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/lɜːrn ðə roʊps/",
+      "sentenceIpa": "/doʊnt ˈwɜːri ɪf juː fiːl ˌoʊvərˈwelmd ət fɜːrst, ɪt teɪks taɪm tə lɜːrn ðə roʊps/"
     },
     {
       "id": "work-031",
@@ -1662,7 +1798,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/fərˈɡɑːt tə tel juː tə kriˈeɪt ə nuː bræntʃ/",
+      "sentenceIpa": "/aɪ fərˈɡɑːt tə tel juː tə kriˈeɪt ə nuː bræntʃ bɪˈfɔːr ˈmeɪkɪŋ ðoʊz koʊd ˈtʃeɪndʒɪz/"
     },
     {
       "id": "work-032",
@@ -1685,7 +1823,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/ˈkiːps ˈrʌnɪŋ ˈɪntuː ˈɛrɜːrz ˈsɜːrvɜːr ˈkræʃɪz ə ˈlɑːt/",
+      "sentenceIpa": "/ðɪs ˈsɜːrvər kiːps ˈrʌnɪŋ ˈɪntə ˈerərz ənd ˈkræʃɪz ˈfriːkwəntli ˈdʊrɪŋ piːk ˈaʊərz/"
     },
     {
       "id": "work-033",
@@ -1708,7 +1848,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/ˈkɑːntrækt ɪz rɪˈkwaɪərd fər rɪˈmoʊt wɜːrk/",
+      "sentenceIpa": "/aɪm ˈwʌndərɪŋ ɪf ə ˈfɔːrml ˈkɑːntrækt ɪz rɪˈkwaɪərd fər rɪˈmoʊt wɜːrk ɪn ðɪs ˈkʌmpəni/"
     },
     {
       "id": "work-034",
@@ -1731,7 +1873,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/ˈwɜːrkɪŋ ˈoʊvɜːrˌtaɪm ˈtuː ˈmeɪk ˈʌp ˈfɔr ˈmɪst ˈtaɪm/",
+      "sentenceIpa": "/aɪ æm ˈwɜːrkɪŋ ˈoʊvərtaɪm tə meɪk ʌp fər ðə taɪm aɪ mɪst ˈɜːrliər təˈdeɪ/"
     },
     {
       "id": "work-035",
@@ -1754,7 +1898,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/kwaɪt ˈtaɪm kənˈsuːmɪŋ tə ˈkæri aʊt/",
+      "sentenceIpa": "/ðiːz ˈmænjuəl ˈdeɪtəbeɪs ˈsiːdɪŋz ɑːr kwaɪt ˈtaɪm kənˈsuːmɪŋ tə ˈkæri aʊt/"
     },
     {
       "id": "work-036",
@@ -1777,7 +1923,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/ˈɪt ˈpeɪz ˈɔf/",
+      "sentenceIpa": "/ˌriːˈfæktərɪŋ ˈaʊər kɔːr ˈsɜːrvɪsɪz tʊk tuː wiːks, bʌt ɪn ði end ɪt ˈriːəli peɪz ɔːf/"
     },
     {
       "id": "work-037",
@@ -1800,7 +1948,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/ˈfaɪnd ˈðɪs ˈfoʊldɜːr ˈkwaɪt ˈmɛsi/",
+      "sentenceIpa": "/aɪ faɪnd ðɪs ˈprɑːdʒekt ˈfoʊldər kwaɪt ˈmesi; wi ʃʊd ˌriːˈɔːrɡənaɪz ðə kəmˈpoʊnənts/"
     },
     {
       "id": "work-038",
@@ -1823,7 +1973,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/ˈvɛrəˌfaɪ ˈwɛðɜːr ˈɛni ˈruːtɜːrz ˈvaɪəleɪt ðə ˈruːlz/",
+      "sentenceIpa": "/pliːz tʃek ði ˈʌðər ˈruːtərz ənd ˈverɪfaɪ ˈweðər ˈeni əv ðem ˈvaɪəleɪt ðə ruːlz/"
     },
     {
       "id": "work-039",
@@ -1846,7 +1998,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/duː ðə seɪm fər ðə kənˈfɪɡ ˈmɑːdʒuːl/",
+      "sentenceIpa": "/duː ðə seɪm fər ðə kənˈfɪɡ ˈmɑːdʒuːl tə ɪnˈʃʊr ˈaʊər ˈɑːrkɪtektʃər rɪˈmeɪnz kənˈsɪstənt/"
     },
     {
       "id": "work-040",
@@ -1869,7 +2023,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/wen ðerz ɪˈnʌf ˈriːzn tə maɪˈɡreɪt/",
+      "sentenceIpa": "/wen ðerz ɪˈnʌf ˈriːzn tə maɪˈɡreɪt tə ˈmaɪkroʊˌsɜːrvɪsɪz, aɪ wɪl duː ɪt/"
     },
     {
       "id": "work-041",
@@ -1892,7 +2048,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/wen ɑːr juː ˈɡoʊɪŋ tə ˈfɪnɪʃ ðə ˈprɑːdʒekt/",
+      "sentenceIpa": "/wen ɑːr juː ˈɡoʊɪŋ tə ˈfɪnɪʃ ðə ˈprɑːdʒekt soʊ wi kæn ˈskedʒuːl ðə ˈklaɪənt ˈdemoʊ?/"
     },
     {
       "id": "work-042",
@@ -1915,7 +2073,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/ˈteɪk ə ˈbɪznəs ˈpɑːrtnɜːr ˈaʊt ˈfɔr ˈkɑːfi/",
+      "sentenceIpa": "/aɪm ˈteɪkɪŋ ə ˈbɪznəs ˈpɑːrtnər aʊt fər ˈkɔːfi tə dɪˈskʌs ðə nuː ˈkɑːntrækt/"
     },
     {
       "id": "work-043",
@@ -1938,7 +2098,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/ˈgoʊ ˈɑːn ə ˈbɪznəs ˈtrɪp ənˈtɪl/",
+      "sentenceIpa": "/aɪm ˈɡoʊɪŋ ɑːn ə ˈbɪznəs trɪp ənˈtɪl ðə nekst deɪ, soʊ aɪ wɪl bi rɪˈspɑːndɪŋ tə ˈiːmeɪlz eɪˈsɪŋkrənəsli/"
     },
     {
       "id": "work-044",
@@ -1961,7 +2123,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/ˈgoʊ ˈɑːn ə ˈtreɪnɪŋ ˈsɛʃən/",
+      "sentenceIpa": "/aɪm ˈɡoʊɪŋ ɑːn ə ˈtreɪnɪŋ ˈseʃn ɔːl ˌæftərˈnuːn tə lɜːrn əˈbaʊt ðə nuː klaʊd ˈɑːrkɪtektʃər/"
     },
     {
       "id": "work-045",
@@ -1984,7 +2148,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/ˈmiːt ˈwʌnz ˈbɑːs ˈæt ðə ˈɔfəs/",
+      "sentenceIpa": "/aɪm ˈmiːtɪŋ maɪ bɔːs ət ði ˈɔːfɪs ət ten eɪ em tə rɪˈvjuː ˈaʊər sprɪnt ɡoʊlz/"
     },
     {
       "id": "work-046",
@@ -2007,7 +2173,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/ˈhæv ə ˌprɛzənˈteɪʃən ˈfrʌm ˈtuː ˈnuːn/",
+      "sentenceIpa": "/ðen aɪ wɪl hæv ə ˌpreznˈteɪʃn frəm ten tə nuːn, soʊ lets tɔːk ˈæftər ðæt/"
     },
     {
       "id": "work-047",
@@ -2030,7 +2198,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/haʊ wəz ðə ˈbɪznəs trɪp/",
+      "sentenceIpa": "/ˈwelkəm bæk! haʊ wəz ðə ˈbɪznəs trɪp tə ˈsɪŋəpɔːr? dɪd ðə ˈklaɪənt saɪn ðə ˈkɑːntrækt?/"
     },
     {
       "id": "work-048",
@@ -2053,7 +2223,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/ˈnɜːrv ˈrækɪŋ ˈtɜːrbjələnt/",
+      "sentenceIpa": "/ðə flaɪt θruː ðə stɔːrm wəz ˈtɜːrbjələnt, ənd ðə ˈfaɪnl ˈklaɪənt ˌpreznˈteɪʃn wəz kəmˈpliːtli ˈnɜːrv rækɪŋ/"
     },
     {
       "id": "work-049",
@@ -2076,7 +2248,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/ˈjɔr ˈsiːkrət ˈɪz ˈseɪf ˈwɪð ˈmiː/",
+      "sentenceIpa": "/doʊnt ˈwɜːri əˈbaʊt ˈmenʃənɪŋ jʊr ˈʌpkʌmɪŋ ˈɪntərvjuː; jʊr ˈsiːkrət ɪz seɪf wɪð miː/"
     },
     {
       "id": "work-050",
@@ -2099,7 +2273,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/ˈbɑːrgən ˈwɪð ˈsʌmˌwən ˈhæv ə ˈdiːl/",
+      "sentenceIpa": "/ˈæftər ˈbɑːrɡənɪŋ ˈoʊvər ðə ˈprɑːdʒekt skoʊp ənd ˈtaɪmlaɪn, wiː ˈfaɪnəli hæv ə diːl/"
     },
     {
       "id": "work-051",
@@ -2122,7 +2298,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/ðæts ɔːl aɪ kən duː raɪt/",
+      "sentenceIpa": "/aɪ kən kəˈmɪt tuː dɪˈveləpərz tuː əˈsɪst jʊr tiːm ənˈtɪl ˈfraɪdeɪ, bʌt ðæts ɔːl aɪ kən duː raɪt naʊ/"
     },
     {
       "id": "work-052",
@@ -2145,7 +2323,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/ˈdɛkɜːrˌeɪt ðə ˈɔfəs ˈwɪð sɜːrˈiːn vˈjuː/",
+      "sentenceIpa": "/wiː dɪˈsaɪdɪd tuː ˈdekəreɪt ˈaʊər ˈɔːfɪs wɪð ˈlændskeɪp ˈpɔːrtrəts ˈfiːtʃərɪŋ ə səˈriːn siː vjuː/"
     },
     {
       "id": "work-053",
@@ -2168,7 +2348,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/hæv ˈveri ɡʊd teɪst/",
+      "sentenceIpa": "/juː tʃoʊz sʌtʃ ən ˈelɪɡənt ˈleɪaʊt fər ˈaʊər ˈkʌmpəni ˌpreznˈteɪʃn; juː ˈriːəli hæv ˈveri ɡʊd teɪst/"
     },
     {
       "id": "work-054",
@@ -2191,7 +2373,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/doʊnt rʌʃ miː waɪl/",
+      "sentenceIpa": "/aɪ noʊ ðə ˈpɑːrtnərz ɑːr əˈraɪvɪŋ ɪn tuː ˈmɪnɪts, bʌt doʊnt rʌʃ miː waɪl aɪm prɪˈperɪŋ ðə ˈdɑːkjumənts/"
     },
     {
       "id": "work-055",
@@ -2214,7 +2398,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/ˈkæn ˈtiː ˈkɑːnsənˌtreɪt ˈɑːn ˈwʌnz ˈwɜːrk/",
+      "sentenceIpa": "/wɪð ˈevriwʌn ˈtɔːkɪŋ ˈlaʊdli nɪr maɪ desk, aɪ kænt ˈkɑːnsntreɪt ɑːn maɪ wɜːrk/"
     },
     {
       "id": "work-056",
@@ -2237,7 +2423,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/ðə ˈskriːn ˈkiːps ˈflɪkɜːrɪŋ/",
+      "sentenceIpa": "/maɪ skriːn kiːps ˈflɪkərɪŋ ˈevri taɪm aɪ muːv ðə dɪˈspleɪ ˈkeɪbl; kæn juː teɪk ə lʊk?/"
     },
     {
       "id": "work-057",
@@ -2260,7 +2448,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/ˈgɪv ˈɪt ə ˈgoʊ/",
+      "sentenceIpa": "/aɪm nɑːt ɪnˈtaɪərli ʃʊr ɪf ˌriːˈbuːtɪŋ ðə ˈsɜːrvɪs wɪl rɪˈzɑːlv ðə læɡ, bʌt lets ɡɪv ɪt ə ɡoʊ/"
     },
     {
       "id": "work-058",
@@ -2283,7 +2473,9 @@
         "Collaboration",
         "Office",
         "Business"
-      ]
+      ],
+      "chunkIpa": "/ˈkʊd ˈaɪ ˈjuːs ˈjɔr əˈsɪstəns ˈfɔr ˈsʌmθɪŋ/",
+      "sentenceIpa": "/wen juː hæv ə sper ˈmoʊmənt, kʊd aɪ juːz jʊr əˈsɪstəns fər ðɪs dɪˈplɔɪmənt ˈtʃeklɪst?/"
     },
     {
       "id": "health-001",
@@ -2306,7 +2498,9 @@
         "Wellness",
         "A2-B1",
         "Health"
-      ]
+      ],
+      "chunkIpa": "/kɔːl ɪn sɪk/",
+      "sentenceIpa": "/aɪ woʊk ʌp wɪð ə haɪ ˈfiːvər, soʊ aɪ niːd tə kɔːl ɪn sɪk təˈdeɪ/"
     },
     {
       "id": "health-002",
@@ -2329,7 +2523,9 @@
         "Wellness",
         "A2-B1",
         "Health"
-      ]
+      ],
+      "chunkIpa": "/teɪk ə sɪk deɪ/",
+      "sentenceIpa": "/aɪm ˈfiːlɪŋ ˈterəbl təˈdeɪ, aɪ θɪŋk aɪl teɪk ə sɪk deɪ tə rest/"
     },
     {
       "id": "health-003",
@@ -2352,7 +2548,9 @@
         "B1",
         "Wellness",
         "Health"
-      ]
+      ],
+      "chunkIpa": "/teɪk ə hæf deɪ ɔːf/",
+      "sentenceIpa": "/kəd aɪ teɪk ə hæf deɪ ɔːf təˈmɔːroʊ ˌæftərˈnuːn fər ə ˈmedɪkl ˈtʃekʌp?/"
     },
     {
       "id": "health-004",
@@ -2375,7 +2573,9 @@
         "Wellness",
         "A2-B1",
         "Health"
-      ]
+      ],
+      "chunkIpa": "/hæv ə ˈdɑːktərz əˈpɔɪntmənt/",
+      "sentenceIpa": "/aɪ hæv ə ˈdɑːktərz əˈpɔɪntmənt ət θriː piː em, soʊ aɪl bi ˈliːvɪŋ ði ˈɔːfɪs ˈɜːrli/"
     },
     {
       "id": "health-005",
@@ -2398,7 +2598,9 @@
         "B1",
         "Wellness",
         "Health"
-      ]
+      ],
+      "chunkIpa": "/ˈkʌvɜːr ˈfɔr ˈsʌmˌwən/",
+      "sentenceIpa": "/kəd juː ˈkʌvər fər miː ˈdʊrɪŋ ðə tiːm ˈmiːtɪŋ waɪl aɪm ət ðə ˈklɪnɪk?/"
     },
     {
       "id": "health-006",
@@ -2421,7 +2623,9 @@
         "B1",
         "Wellness",
         "Health"
-      ]
+      ],
+      "chunkIpa": "/ˈdɑːktɜːrz ˈnoʊt ˈmɛdəkəl sɜːrˈtɪfɪkət/",
+      "sentenceIpa": "/eɪtʃ ɑːr æskt miː tə prəˈvaɪd ə ˈdɑːktərz noʊt fər maɪ tuː deɪ sɪk liːv/"
     },
     {
       "id": "health-007",
@@ -2444,7 +2648,9 @@
         "A2",
         "Wellness",
         "Health"
-      ]
+      ],
+      "chunkIpa": "/meɪk ən əˈpɔɪntmənt wɪð/",
+      "sentenceIpa": "/həˈloʊ, aɪd laɪk tə meɪk ən əˈpɔɪntmənt wɪð ˈdɑːktər smɪθ fər ə ˈdʒenrəl ˈtʃekʌp/"
     },
     {
       "id": "health-008",
@@ -2467,7 +2673,9 @@
         "B1",
         "Wellness",
         "Health"
-      ]
+      ],
+      "chunkIpa": "/ˈɜːrliɪst əˈveɪləbl slɑːt/",
+      "sentenceIpa": "/wɑːt ɪz ði ˈɜːrliɪst əˈveɪləbl slɑːt juː hæv fər təˈdeɪ?/"
     },
     {
       "id": "health-009",
@@ -2490,7 +2698,9 @@
         "B1",
         "Wellness",
         "Health"
-      ]
+      ],
+      "chunkIpa": "/riːˈskɛdʒuːl ˈæn əˈpɔɪntmənt/",
+      "sentenceIpa": "/aɪ hæv ən ˈɜːrdʒənt ˈmiːtɪŋ, kæn aɪ ˌriːˈskedʒuːl maɪ ˈdentl əˈpɔɪntmənt tə ˈfraɪdeɪ?/"
     },
     {
       "id": "health-010",
@@ -2513,7 +2723,9 @@
         "B1",
         "Wellness",
         "Health"
-      ]
+      ],
+      "chunkIpa": "/ˈθrɑːbɪŋ ˈhedeɪk/",
+      "sentenceIpa": "/aɪv hæd ə sɪˈvɪr ˈθrɑːbɪŋ ˈhedeɪk sɪns ˈjestərdeɪ ˈmɔːrnɪŋ/"
     },
     {
       "id": "health-011",
@@ -2536,7 +2748,9 @@
         "B1",
         "Wellness",
         "Health"
-      ]
+      ],
+      "chunkIpa": "/ə ʃɑːrp peɪn ɪn/",
+      "sentenceIpa": "/ˈdɑːktər, aɪ fiːl ə ʃɑːrp peɪn ɪn maɪ ˈloʊər bæk wenˈevər aɪ bend ˈoʊvər/"
     },
     {
       "id": "health-012",
@@ -2559,7 +2773,9 @@
         "A2",
         "Wellness",
         "Health"
-      ]
+      ],
+      "chunkIpa": "/ˈsɔr ˈθroʊt ˈrʌni ˈnoʊz/",
+      "sentenceIpa": "/aɪ hæv ə sɔːr θroʊt ənd ə ˈrʌni noʊz, ənd aɪ kæn ˈberli ˈswɑːloʊ/"
     },
     {
       "id": "health-013",
@@ -2582,7 +2798,9 @@
         "B1",
         "Wellness",
         "Health"
-      ]
+      ],
+      "chunkIpa": "/ˈfiːl ˈdɪzi ˌlaɪtˈhɛdəd/",
+      "sentenceIpa": "/ˈevri taɪm aɪ stænd ʌp tuː ˈkwɪkli, aɪ fiːl ˈdɪzi ənd ˌlaɪtˈhedɪd/"
     },
     {
       "id": "health-014",
@@ -2605,7 +2823,9 @@
         "B1",
         "Wellness",
         "Health"
-      ]
+      ],
+      "chunkIpa": "/maɪ ˈstʌmək ɪz ˈæktɪŋ ʌp/",
+      "sentenceIpa": "/maɪ ˈstʌmək ɪz ˈæktɪŋ ʌp əˈɡen ˈæftər ˈiːtɪŋ ðæt ˈspaɪsi striːt fuːd/"
     },
     {
       "id": "health-015",
@@ -2628,7 +2848,9 @@
         "B1",
         "Wellness",
         "Health"
-      ]
+      ],
+      "chunkIpa": "/fiːl ˈnɔːziəs/",
+      "sentenceIpa": "/aɪ fiːl ˈnɔːziəs ənd kænt iːt ˈeniθɪŋ raɪt naʊ/"
     },
     {
       "id": "health-016",
@@ -2651,7 +2873,9 @@
         "B1",
         "Wellness",
         "Health"
-      ]
+      ],
+      "chunkIpa": "/ˈtwɪst ˈæn ˈæŋkəl/",
+      "sentenceIpa": "/aɪ ˈtwɪstɪd maɪ ˈæŋkl waɪl ˈpleɪɪŋ ˈfʊtbɔːl ˈjestərdeɪ ənd ɪt ɪz ˈswoʊlən/"
     },
     {
       "id": "health-017",
@@ -2674,7 +2898,9 @@
         "B1",
         "Wellness",
         "Health"
-      ]
+      ],
+      "chunkIpa": "/ˌoʊvər ðə ˈkaʊntər ˈmedsn/",
+      "sentenceIpa": "/kæn juː ˌrekəˈmend ən ˌoʊvər ðə ˈkaʊntər ˈmedsn fər ə maɪld kɔːf?/"
     },
     {
       "id": "health-018",
@@ -2697,7 +2923,9 @@
         "A2",
         "Wellness",
         "Health"
-      ]
+      ],
+      "chunkIpa": "/teɪk ðɪs ˈmedsn ˈæftər miːlz/",
+      "sentenceIpa": "/ˈfɑːrməsɪst: teɪk ðɪs ˈmedsn ˈæftər miːlz, twaɪs ə deɪ/"
     },
     {
       "id": "health-019",
@@ -2720,7 +2948,9 @@
         "B1",
         "Wellness",
         "Health"
-      ]
+      ],
+      "chunkIpa": "/ɑːr ðer ˈeni saɪd ɪˈfekts/",
+      "sentenceIpa": "/ɑːr ðer ˈeni saɪd ɪˈfekts, laɪk ˈdraʊzinəs, wɪð ðɪs ˈælərdʒi pɪl?/"
     },
     {
       "id": "health-020",
@@ -2743,7 +2973,9 @@
         "Wellness",
         "A2-B1",
         "Health"
-      ]
+      ],
+      "chunkIpa": "/ˈpeɪnkɪlər/",
+      "sentenceIpa": "/aɪ tʊk ə ˈpeɪnkɪlər ən ˈaʊər əˈɡoʊ, ənd ðə ˈfiːvər ɪz ˈfaɪnəli ˈɡoʊɪŋ daʊn/"
     },
     {
       "id": "health-021",
@@ -2766,7 +2998,9 @@
         "B1",
         "Wellness",
         "Health"
-      ]
+      ],
+      "chunkIpa": "/ˈʌndər ðə ˈweðər/",
+      "sentenceIpa": "/aɪm ˈfiːlɪŋ ə bɪt ˈʌndər ðə ˈweðər təˈdeɪ, soʊ aɪ maɪt hed hoʊm ˈɜːrli/"
     },
     {
       "id": "health-022",
@@ -2789,7 +3023,9 @@
         "B1",
         "Wellness",
         "Health"
-      ]
+      ],
+      "chunkIpa": "/ˈkʌm ˈdaʊn ˈwɪð ˈsʌmθɪŋ/",
+      "sentenceIpa": "/aɪ θɪŋk aɪm ˈkʌmɪŋ daʊn wɪð ðə fluː bɪˈkɔːz maɪ hoʊl ˈbɑːdi eɪks/"
     },
     {
       "id": "health-023",
@@ -2812,7 +3048,9 @@
         "B1",
         "Wellness",
         "Health"
-      ]
+      ],
+      "chunkIpa": "/steɪ ɪn ʃeɪp/",
+      "sentenceIpa": "/ˈiːtɪŋ kliːn ənd ˈeksərsaɪzɪŋ ˈdeɪli helps miː steɪ ɪn ʃeɪp/"
     },
     {
       "id": "health-024",
@@ -2835,7 +3073,9 @@
         "B1",
         "Wellness",
         "Health"
-      ]
+      ],
+      "chunkIpa": "/riːˈtʃɑːrdʒ ˈwʌnz ˈbætɜːriːz/",
+      "sentenceIpa": "/ə ɡʊd naɪts sliːp ɪz ðə best ˈmedsn tə ˌriːˈtʃɑːrdʒ jɔːr ˈbætəriz/"
     },
     {
       "id": "health-025",
@@ -2858,7 +3098,9 @@
         "A2",
         "Wellness",
         "Health"
-      ]
+      ],
+      "chunkIpa": "/wɜːrk aʊt/",
+      "sentenceIpa": "/maɪ ˈdɑːktər ˌrekəˈmendɪd ðæt aɪ wɜːrk aʊt ət liːst ˈθɜːrti ˈmɪnɪts ə deɪ/"
     },
     {
       "id": "health-026",
@@ -2881,7 +3123,9 @@
         "Wellness",
         "A2-B1",
         "Health"
-      ]
+      ],
+      "chunkIpa": "/ˈhæv ə ˈvɛri ˈhaɪ ˈfiːvɜːr ˈɪm ˈgoʊɪŋ ˈtuː ˈkɔl ðə ˈdɑːktɜːr/",
+      "sentenceIpa": "/aɪ hæv ə ˈveri haɪ ˈfiːvər, soʊ aɪm ˈɡoʊɪŋ tə kɔːl ðə ˈdɑːktər raɪt əˈweɪ/"
     },
     {
       "id": "health-027",
@@ -2904,7 +3148,9 @@
         "B1",
         "Wellness",
         "Health"
-      ]
+      ],
+      "chunkIpa": "/ˈdʒenrəl helθ ˈtʃekʌp/",
+      "sentenceIpa": "/ˈaʊər ˈkʌmpəni prəˈvaɪdz ən ˈænjuəl ˈdʒenrəl helθ ˈtʃekʌp fər ɔːl fʊl taɪm ɪmˈplɔɪiːz/"
     },
     {
       "id": "health-028",
@@ -2927,7 +3173,9 @@
         "B1",
         "Wellness",
         "Health"
-      ]
+      ],
+      "chunkIpa": "/ˈhæv ˈwʌnz ˈaɪz ɪgˈzæmənd daɪˈɑːptərz/",
+      "sentenceIpa": "/aɪ hæd maɪ aɪz ɪɡˈzæmɪnd ənd faʊnd aʊt ðæt maɪ raɪt aɪ ɪz ət wʌn pɔɪnt ˈsevən faɪv daɪˈɑːptərz/"
     },
     {
       "id": "health-029",
@@ -2950,7 +3198,9 @@
         "Wellness",
         "B1-B2",
         "Health"
-      ]
+      ],
+      "chunkIpa": "/rɪˈduːs ˈaɪ ˈstreɪn ˈwɪð ə ˈbluː ˈlaɪt ˈfɪltɜːr/",
+      "sentenceIpa": "/ˈwerɪŋ ˈɡlæsɪz wɪð ə bluː laɪt ˈfɪltər helps rɪˈduːs aɪ streɪn ˈdʊrɪŋ lɔːŋ ˈproʊɡræmɪŋ ˈseʃnz/"
     },
     {
       "id": "health-030",
@@ -2973,7 +3223,9 @@
         "Wellness",
         "B2",
         "Health"
-      ]
+      ],
+      "chunkIpa": "/ˈstʌmək enˈdɑːskəpi/",
+      "sentenceIpa": "/ðə ˌɡæstroʊˌentəˈrɑːlədʒɪst pərˈfɔːrmd ə ˈstʌmək enˈdɑːskəpi ˈjuːzɪŋ ə θɪn, ˈfleksəbl tuːb/"
     },
     {
       "id": "health-031",
@@ -2996,7 +3248,9 @@
         "B1",
         "Wellness",
         "Health"
-      ]
+      ],
+      "chunkIpa": "/ɪn ˈkloʊs ˈkɑːnˌtækt ˈwɪð ˈsʌmˌwən ˈɪl/",
+      "sentenceIpa": "/hæv juː bɪn ɪn kloʊs ˈkɑːntækt wɪð ˈeniwʌn els huː hæz bɪn ˈkɑːfɪŋ ɔːr ˈrʌnɪŋ ə ˈfiːvər?/"
     },
     {
       "id": "health-032",
@@ -3019,7 +3273,9 @@
         "B1",
         "Wellness",
         "Health"
-      ]
+      ],
+      "chunkIpa": "/ˈneɪzəl rɪˈliːf ˌmɛdəˈkeɪʃən ˈkɑːf ˈsɜːrəp/",
+      "sentenceIpa": "/ðə ˈfɑːrməsɪst ˌrekəˈmendɪd ˈneɪzl rɪˈliːf ˌmedɪˈkeɪʃn ənd kɑːf ˈsɪrəp tuː iːz maɪ kənˈdʒestʃən/"
     },
     {
       "id": "health-033",
@@ -3042,7 +3298,9 @@
         "Wellness",
         "B1-B2",
         "Health"
-      ]
+      ],
+      "chunkIpa": "/ˌproʊbaɪˈɑːtɪks ˈfɔr ˈhɛlθi daɪˈdʒɛstʃən/",
+      "sentenceIpa": "/ˈteɪkɪŋ ˌproʊbaɪˈɑːtɪks ɪz ˈhaɪli ˌbenɪˈfɪʃl fər daɪˈdʒestʃən, əˈspeʃəli ˈæftər ə kɔːrs əv ˌæntibaɪˈɑːtɪks/"
     },
     {
       "id": "health-034",
@@ -3065,7 +3323,9 @@
         "Wellness",
         "B2",
         "Health"
-      ]
+      ],
+      "chunkIpa": "/ɪkˈsɛsɪv ˈvɜːrsəz səbˈstænʃəl əˈmaʊnt ˈʌv ˌmɛdəˈkeɪʃən/",
+      "sentenceIpa": "/juː ˈʃʊdnt kənˈsuːm ən ɪkˈsesɪv əˈmaʊnt əv ˈpeɪnkɪlərz; stɪk ˈstrɪktli tuː ðə ˈdɑːktərz prɪˈskrɪpʃn/"
     },
     {
       "id": "health-035",
@@ -3088,7 +3348,9 @@
         "Wellness",
         "B1-B2",
         "Health"
-      ]
+      ],
+      "chunkIpa": "/ˈsʌfɜːr ˈfrʌm ˈɛni ˈsaɪd ɪˈfɛkts/",
+      "sentenceIpa": "/dʌz ðɪs ˈælərdʒi pɪl kɔːz ˈdraʊzinəs ɔːr hæv ˈeni ˈʌðər ʌnˈpleznt saɪd ɪˈfekts?/"
     },
     {
       "id": "health-036",
@@ -3111,7 +3373,9 @@
         "Wellness",
         "B1-B2",
         "Health"
-      ]
+      ],
+      "chunkIpa": "/ˈfɔrs ˌwənˈsɛlf ˈtuː ˈwɜːrk ˈθruː ˈɪlnəs/",
+      "sentenceIpa": "/doʊnt fɔːrs jʊrˈself tuː wɜːrk wen juː hæv ə ˈfiːvər; ˈteɪkɪŋ ə deɪ ɔːf helps juː rɪˈkʌvər mʌtʃ ˈfæstər/"
     },
     {
       "id": "travel-001",
@@ -3134,7 +3398,9 @@
         "Travel",
         "Vacation",
         "Transport"
-      ]
+      ],
+      "chunkIpa": "/ˈwɪndoʊ siːt ɔːr aɪl siːt?/",
+      "sentenceIpa": "/stæf: wʊd juː prɪˈfɜːr ə ˈwɪndoʊ siːt ɔːr aɪl siːt? - ˈtrævələr: ən aɪl siːt, pliːz/"
     },
     {
       "id": "travel-002",
@@ -3157,7 +3423,9 @@
         "Travel",
         "Vacation",
         "Transport"
-      ]
+      ],
+      "chunkIpa": "/ˈkæri ˈɑːn ˈlʌgədʒ ˈtʃɛkt ˈbægɪdʒ/",
+      "sentenceIpa": "/duː juː hæv ˈeni tʃekt ˈbæɡɪdʒ, ɔːr dʒʌst ðɪs ˈkæri ɑːn ˈlʌɡɪdʒ?/"
     },
     {
       "id": "travel-003",
@@ -3180,7 +3448,9 @@
         "A2-B1",
         "Vacation",
         "Transport"
-      ]
+      ],
+      "chunkIpa": "/wɪtʃ ɡeɪt ɪz maɪ flaɪt ˈbɔːrdɪŋ æt?/",
+      "sentenceIpa": "/ɪkˈskjuːz miː, wɪtʃ ɡeɪt ɪz maɪ flaɪt ˈbɔːrdɪŋ æt?/"
     },
     {
       "id": "travel-004",
@@ -3203,7 +3473,9 @@
         "Travel",
         "Vacation",
         "Transport"
-      ]
+      ],
+      "chunkIpa": "/ˈmaɪ ˈflaɪt ˈhæz ˈbɪn dɪˈleɪd/",
+      "sentenceIpa": "/duː tə ˈhevi ˈθʌndərstɔːrmz, ˈaʊər flaɪt həz bɪn dɪˈleɪd baɪ tuː ˈaʊərz/"
     },
     {
       "id": "travel-005",
@@ -3226,7 +3498,9 @@
         "Travel",
         "Vacation",
         "Transport"
-      ]
+      ],
+      "chunkIpa": "/ˈtrævələr: aɪm hɪr fər/",
+      "sentenceIpa": "/ˈɔːfɪsər: wɑːt ɪz ðə ˈpɜːrpəs əv jɔːr ˈvɪzɪt? - ˈtrævələr: aɪm hɪr fər veɪˈkeɪʃn fər tuː wiːks/"
     },
     {
       "id": "travel-006",
@@ -3249,7 +3523,9 @@
         "Travel",
         "Vacation",
         "Transport"
-      ]
+      ],
+      "chunkIpa": "/ˈbæɡɪdʒ kleɪm/",
+      "sentenceIpa": "/ˈfɑːloʊ ðə ɡriːn saɪnz tə ɡet tə ðə ˈbæɡɪdʒ kleɪm ˈeriə/"
     },
     {
       "id": "travel-007",
@@ -3272,7 +3548,9 @@
         "Travel",
         "Vacation",
         "Transport"
-      ]
+      ],
+      "chunkIpa": "/ˈnʌθɪŋ tə dɪˈkler/",
+      "sentenceIpa": "/aɪ hæv ˈnʌθɪŋ tə dɪˈkler, soʊ aɪ kæn dʒʌst wɔːk θruː ðə ɡriːn ˈeɡzɪt/"
     },
     {
       "id": "travel-008",
@@ -3295,7 +3573,9 @@
         "Travel",
         "Vacation",
         "Transport"
-      ]
+      ],
+      "chunkIpa": "/aɪ hæv ə ˌrezərˈveɪʃn ˈʌndər ðə neɪm/",
+      "sentenceIpa": "/ɡʊd ˌæftərˈnuːn, aɪ hæv ə ˌrezərˈveɪʃn ˈʌndər ðə neɪm fan van taɪ/"
     },
     {
       "id": "travel-009",
@@ -3318,7 +3598,9 @@
         "Travel",
         "Vacation",
         "Transport"
-      ]
+      ],
+      "chunkIpa": "/wɑːt taɪm ɪz ˈtʃekaʊt təˈmɔːroʊ/",
+      "sentenceIpa": "/kəd juː let miː noʊ wɑːt taɪm ɪz ˈtʃekaʊt təˈmɔːroʊ ˈmɔːrnɪŋ?/"
     },
     {
       "id": "travel-010",
@@ -3341,7 +3623,9 @@
         "Travel",
         "Vacation",
         "Transport"
-      ]
+      ],
+      "chunkIpa": "/ɪz ˈbrekfəst ɪnˈkluːdɪd/",
+      "sentenceIpa": "/ɪz ˈbrekfəst ɪnˈkluːdɪd ɪn ˈaʊər ruːm reɪt, ɔːr duː wi peɪ ˈekstrə?/"
     },
     {
       "id": "travel-011",
@@ -3364,7 +3648,9 @@
         "Travel",
         "Vacation",
         "Transport"
-      ]
+      ],
+      "chunkIpa": "/kəd aɪ liːv maɪ ˈlʌɡɪdʒ hɪr/",
+      "sentenceIpa": "/kəd aɪ liːv maɪ ˈlʌɡɪdʒ hɪr ənˈtɪl ˈaʊər flaɪt dɪˈpɑːrts ðɪs ˈiːvnɪŋ?/"
     },
     {
       "id": "travel-012",
@@ -3387,7 +3673,9 @@
         "Travel",
         "Vacation",
         "Transport"
-      ]
+      ],
+      "chunkIpa": "/kəd juː teɪk miː tə/",
+      "sentenceIpa": "/haɪ, kəd juː teɪk miː tə ði ˈerpɔːrt, ˈtɜːrmɪnl tuː, pliːz?/"
     },
     {
       "id": "travel-013",
@@ -3410,7 +3698,9 @@
         "A2-B1",
         "Vacation",
         "Transport"
-      ]
+      ],
+      "chunkIpa": "/ˈkʊd ˈjuː ˈdrɑːp ˈmiː ˈɔf ˈhiːr/",
+      "sentenceIpa": "/kəd juː drɑːp miː ɔːf raɪt nekst tə ðæt ˈkɔːfi ʃɑːp, pliːz?/"
     },
     {
       "id": "travel-014",
@@ -3433,7 +3723,9 @@
         "Travel",
         "Vacation",
         "Transport"
-      ]
+      ],
+      "chunkIpa": "/haʊ duː aɪ ɡet tə/",
+      "sentenceIpa": "/ɪkˈskjuːz miː, haʊ duː aɪ ɡet tə ðə ˈnɪrɪst ˈmetroʊ ˈsteɪʃn frəm hɪr?/"
     },
     {
       "id": "travel-015",
@@ -3456,7 +3748,9 @@
         "Travel",
         "Vacation",
         "Transport"
-      ]
+      ],
+      "chunkIpa": "/wɪˈðɪn ˈwɔːkɪŋ ˈdɪstəns/",
+      "sentenceIpa": "/ðə biːtʃ ɪz wɪˈðɪn ˈwɔːkɪŋ ˈdɪstəns əv ˈaʊər hoʊˈtel, dʒʌst faɪv ˈmɪnɪts əˈweɪ/"
     },
     {
       "id": "travel-016",
@@ -3479,7 +3773,9 @@
         "Travel",
         "Vacation",
         "Transport"
-      ]
+      ],
+      "chunkIpa": "/ɔːf ðə ˈbiːtn træk/",
+      "sentenceIpa": "/wi dɪˈsaɪdɪd tə steɪ ɪn ə ˈkwaɪət ˈmaʊntn ˈvɪlɪdʒ kəmˈpliːtli ɔːf ðə ˈbiːtn træk/"
     },
     {
       "id": "travel-017",
@@ -3502,7 +3798,9 @@
         "Travel",
         "Vacation",
         "Transport"
-      ]
+      ],
+      "chunkIpa": "/hɪt ðə roʊd/",
+      "sentenceIpa": "/pæk jɔːr bæɡz ˈkwɪkli, wi niːd tə hɪt ðə roʊd bɪˈfɔːr ˈsʌnraɪz!/"
     },
     {
       "id": "travel-018",
@@ -3525,7 +3823,9 @@
         "Travel",
         "Vacation",
         "Transport"
-      ]
+      ],
+      "chunkIpa": "/ˈtrævl laɪt/",
+      "sentenceIpa": "/aɪ ˈɔːlweɪz prɪˈfɜːr tə ˈtrævl laɪt soʊ aɪ doʊnt hæv tə weɪt fər ˈlʌɡɪdʒ/"
     },
     {
       "id": "travel-019",
@@ -3548,7 +3848,9 @@
         "A2-B1",
         "Vacation",
         "Transport"
-      ]
+      ],
+      "chunkIpa": "/bʊk ɪn ədˈvæns/",
+      "sentenceIpa": "/ɪt ɪz mʌtʃ ˈtʃiːpər ɪf juː bʊk ɪn ədˈvæns ˌɑːnˈlaɪn/"
     },
     {
       "id": "travel-020",
@@ -3571,7 +3873,9 @@
         "Travel",
         "Vacation",
         "Transport"
-      ]
+      ],
+      "chunkIpa": "/ɪn ðə ˈmɪdl əv ˈnoʊwer!/",
+      "sentenceIpa": "/ˈaʊər kɑːr ræn aʊt əv ɡæs raɪt ɪn ðə ˈmɪdl əv ˈnoʊwer!/"
     },
     {
       "id": "travel-021",
@@ -3594,7 +3898,9 @@
         "Travel",
         "Vacation",
         "Transport"
-      ]
+      ],
+      "chunkIpa": "/ˈwɔk ˈstreɪt ˈfɔr ˈblɑːks/",
+      "sentenceIpa": "/dʒʌst wɑːk streɪt fər fɔːr blɑːks ənˈtɪl juː riːtʃ fɪfθ ˈævənuː/"
     },
     {
       "id": "travel-022",
@@ -3617,7 +3923,9 @@
         "A2-B1",
         "Vacation",
         "Transport"
-      ]
+      ],
+      "chunkIpa": "/ˈɑːn ðə ˈkɔrnɜːr ˈʌv ənd/",
+      "sentenceIpa": "/ðə kənˈvenʃn ˈsentər ɪz raɪt ɑːn ðə ˈkɔːrnər əv ˈsteɪdiəm ˈævənuː ənd pɑːrk striːt/"
     },
     {
       "id": "travel-023",
@@ -3640,7 +3948,9 @@
         "Travel",
         "Vacation",
         "Transport"
-      ]
+      ],
+      "chunkIpa": "/əˈkrɔs ðə ˈstriːt ˈkrɔs ðə ˈstriːt/",
+      "sentenceIpa": "/ˈaʊər hoʊˈtel ɪz raɪt əˈkrɔːs ðə striːt, dʒʌst biː ˈkerfl wen juː krɔːs ðə striːt ˈdʊrɪŋ rʌʃ ˈaʊər/"
     },
     {
       "id": "travel-024",
@@ -3663,7 +3973,9 @@
         "Travel",
         "Vacation",
         "Transport"
-      ]
+      ],
+      "chunkIpa": "/tɜːrn left ət ðiː ˌɪntərˈsekʃn/",
+      "sentenceIpa": "/draɪv tuː maɪlz əˈhed ənd tɜːrn left ət ðiː ˌɪntərˈsekʃn wɪð ðə ˈtræfɪk laɪts/"
     },
     {
       "id": "travel-025",
@@ -3686,7 +3998,9 @@
         "Travel",
         "Vacation",
         "Transport"
-      ]
+      ],
+      "chunkIpa": "/ˈbiː əˈbaʊt ˈtuː/",
+      "sentenceIpa": "/ˈhɜːri ʌp, ðə ˈbɔːrdɪŋ ɡeɪt ɪz əˈbaʊt tuː kloʊz ɪn faɪv ˈmɪnɪts!/"
     },
     {
       "id": "travel-026",
@@ -3709,7 +4023,9 @@
         "Travel",
         "Vacation",
         "Transport"
-      ]
+      ],
+      "chunkIpa": "/teɪk ən ʌmˈbrelə wɪð juː/",
+      "sentenceIpa": "/ðə skaɪ lʊks ˌoʊvərˈkæst, juː ʃʊd ˈdefɪnətli teɪk ən ʌmˈbrelə wɪð juː/"
     },
     {
       "id": "travel-027",
@@ -3732,7 +4048,9 @@
         "Travel",
         "Vacation",
         "Transport"
-      ]
+      ],
+      "chunkIpa": "/moʊst ˈmemərəbl veɪˈkeɪʃn/",
+      "sentenceIpa": "/maɪ moʊst ˈmemərəbl veɪˈkeɪʃn wəz ə ˈbækpækɪŋ trɪp θruː ðə ˈmaʊntnz əv daː laːt/"
     },
     {
       "id": "travel-028",
@@ -3755,7 +4073,9 @@
         "B1-B2",
         "Vacation",
         "Transport"
-      ]
+      ],
+      "chunkIpa": "/ˈʃoʊ ˈsʌmˌwən ˈsʌtʃ ə ˈgʊd ˈtaɪm/",
+      "sentenceIpa": "/ðə ˈloʊkl hoʊsts wər soʊ ˈwelkəmɪŋ ənd ʃoʊd ʌs sʌtʃ ə ɡʊd taɪm ˈdʊrɪŋ ˈaʊər steɪ/"
     },
     {
       "id": "travel-029",
@@ -3778,7 +4098,9 @@
         "Travel",
         "Vacation",
         "Transport"
-      ]
+      ],
+      "chunkIpa": "/ˈspɛnd ðə ɪnˈtaɪɜːr ˈtaɪm ˈsɜːrfɪŋ ənd ˈdaɪvɪŋ/",
+      "sentenceIpa": "/wiː ɪˈskeɪpt ðə ˈsɪti hiːt ənd spent ðiː ɪnˈtaɪər taɪm ˈsɜːrfɪŋ ənd ˈdaɪvɪŋ ɪn fuː kwɑːk/"
     },
     {
       "id": "travel-030",
@@ -3801,7 +4123,9 @@
         "Travel",
         "Vacation",
         "Transport"
-      ]
+      ],
+      "chunkIpa": "/steɪ ɪn fər ðiː ɪnˈtaɪər trɪp/",
+      "sentenceIpa": "/ʌnˈfɔːrtʃənətli, aɪ kɔːt fuːd ˈpɔɪzənɪŋ ənd hæd tuː steɪ ɪn fər ðiː ɪnˈtaɪər trɪp/"
     },
     {
       "id": "travel-031",
@@ -3824,7 +4148,9 @@
         "A2-B1",
         "Vacation",
         "Transport"
-      ]
+      ],
+      "chunkIpa": "/ˈluːz ˈwʌnz ˈpɜːrs ˈvæljəbəlz/",
+      "sentenceIpa": "/ˈɔːlweɪz kiːp ən aɪ ɑːn jʊr bɪˈlɔːŋɪŋz ɪn ˈkraʊdɪd ˈtʊrɪst spɑːts soʊ juː doʊnt luːz jʊr pɜːrs/"
     },
     {
       "id": "food-001",
@@ -3847,7 +4173,9 @@
         "Food",
         "Dining",
         "Cafe"
-      ]
+      ],
+      "chunkIpa": "/ˈkæn ˈaɪ ˈgɛt ə ˈkæn ˈaɪ ˈhæv ə/",
+      "sentenceIpa": "/həˈloʊ, kæn aɪ ɡet ən aɪst ˈlɑːteɪ wɪð oʊt mɪlk, pliːz?/"
     },
     {
       "id": "food-002",
@@ -3870,7 +4198,9 @@
         "Food",
         "Dining",
         "Cafe"
-      ]
+      ],
+      "chunkIpa": "/ˈfɔr ˈhiːr ˈɔr ˈtuː ˈgoʊ ˈtuː ˈgoʊ ˈpliːz/",
+      "sentenceIpa": "/stæf: ɪz ðæt fər hɪr ɔːr tə ɡoʊ? - ˈkʌstəmər: tə ɡoʊ, pliːz/"
     },
     {
       "id": "food-003",
@@ -3893,7 +4223,9 @@
         "Food",
         "Dining",
         "Cafe"
-      ]
+      ],
+      "chunkIpa": "/ˈiːzi ɑːn ði aɪs/",
+      "sentenceIpa": "/kæn aɪ ɡet ən aɪst əˌmerɪˈkɑːnoʊ, ˈiːzi ɑːn ði aɪs, pliːz?/"
     },
     {
       "id": "food-004",
@@ -3916,7 +4248,9 @@
         "Food",
         "Dining",
         "Cafe"
-      ]
+      ],
+      "chunkIpa": "/wɑːts ðə ˈwaɪ faɪ ˈpæswɜːrd?/",
+      "sentenceIpa": "/ɪkˈskjuːz miː, kəd juː tel miː wɑːts ðə ˈwaɪ faɪ ˈpæswɜːrd?/"
     },
     {
       "id": "food-005",
@@ -3939,7 +4273,9 @@
         "A2-B1",
         "Dining",
         "Cafe"
-      ]
+      ],
+      "chunkIpa": "/kiːp ðə tʃeɪndʒ!/",
+      "sentenceIpa": "/hɪr ɪz ten ˈdɑːlərz. kiːp ðə tʃeɪndʒ!/"
     },
     {
       "id": "food-006",
@@ -3962,7 +4298,9 @@
         "Food",
         "Dining",
         "Cafe"
-      ]
+      ],
+      "chunkIpa": "/ə ˈteɪbl fər tuː pliːz/",
+      "sentenceIpa": "/ɡʊd ˈiːvnɪŋ, ə ˈteɪbl fər tuː, pliːz. baɪ ðə ˈwɪndoʊ ɪf ˈpɑːsəbl/"
     },
     {
       "id": "food-007",
@@ -3985,7 +4323,9 @@
         "Food",
         "Dining",
         "Cafe"
-      ]
+      ],
+      "chunkIpa": "/ˈkʊd ˈwiː ˈsiː ðə ˈmɛnjuː ˈpliːz/",
+      "sentenceIpa": "/kəd wi siː ðə dɪˈzɜːrt ˈmenjuː, pliːz?/"
     },
     {
       "id": "food-008",
@@ -4008,7 +4348,9 @@
         "Food",
         "Dining",
         "Cafe"
-      ]
+      ],
+      "chunkIpa": "/wɑːt duː juː ˌrekəˈmend?/",
+      "sentenceIpa": "/ɪts ˈaʊər fɜːrst taɪm hɪr, wɑːt duː juː ˌrekəˈmend?/"
     },
     {
       "id": "food-009",
@@ -4031,7 +4373,9 @@
         "Food",
         "Dining",
         "Cafe"
-      ]
+      ],
+      "chunkIpa": "/wɪr ˈredi tə ˈɔːrdər/",
+      "sentenceIpa": "/ɪkˈskjuːz miː, wɪr ˈredi tə ˈɔːrdər naʊ/"
     },
     {
       "id": "food-010",
@@ -4054,7 +4398,9 @@
         "Food",
         "Dining",
         "Cafe"
-      ]
+      ],
+      "chunkIpa": "/aɪm əˈlɜːrdʒɪk tə/",
+      "sentenceIpa": "/aɪm əˈlɜːrdʒɪk tə ˈsiːfuːd, soʊ dʌz ðɪs suːp kənˈteɪn ʃrɪmp?/"
     },
     {
       "id": "food-011",
@@ -4077,7 +4423,9 @@
         "Food",
         "Dining",
         "Cafe"
-      ]
+      ],
+      "chunkIpa": "/ɑːn ðə saɪd/",
+      "sentenceIpa": "/kəd aɪ hæv ðə ˈsæləd wɪð ðə ˈdresɪŋ ɑːn ðə saɪd, pliːz?/"
     },
     {
       "id": "food-012",
@@ -4100,7 +4448,9 @@
         "Food",
         "Dining",
         "Cafe"
-      ]
+      ],
+      "chunkIpa": "/kəd wi ɡet sʌm ˈekstrə ˈnæpkɪnz/",
+      "sentenceIpa": "/ɪkˈskjuːz miː, kəd wi ɡet sʌm ˈekstrə ˈnæpkɪnz, pliːz?/"
     },
     {
       "id": "food-013",
@@ -4123,7 +4473,9 @@
         "Food",
         "Dining",
         "Cafe"
-      ]
+      ],
+      "chunkIpa": "/kəd wi ɡet ðə tʃek pliːz?/",
+      "sentenceIpa": "/ɪkˈskjuːz miː, kəd wi ɡet ðə tʃek, pliːz? wɪr ɔːl dʌn/"
     },
     {
       "id": "food-014",
@@ -4146,7 +4498,9 @@
         "Food",
         "Dining",
         "Cafe"
-      ]
+      ],
+      "chunkIpa": "/kæn wi splɪt ðə bɪl/",
+      "sentenceIpa": "/kæn wi splɪt ðə bɪl ˈiːkwəli bɪˈtwiːn ðə θriː əv ʌs?/"
     },
     {
       "id": "food-015",
@@ -4169,7 +4523,9 @@
         "Food",
         "Dining",
         "Cafe"
-      ]
+      ],
+      "chunkIpa": "/ˈɪts ˈɑːn ˈmiː/",
+      "sentenceIpa": "/pʊt jɔːr ˈwɑːlɪt əˈweɪ, lʌntʃ ɪz ɑːn miː təˈdeɪ!/"
     },
     {
       "id": "food-016",
@@ -4192,7 +4548,9 @@
         "Food",
         "Dining",
         "Cafe"
-      ]
+      ],
+      "chunkIpa": "/duː juː teɪk ˈkredɪt kɑːrdz/",
+      "sentenceIpa": "/duː juː teɪk ˈkredɪt kɑːrdz, ɔːr duː juː ˈoʊnli əkˈsept kæʃ?/"
     },
     {
       "id": "food-017",
@@ -4215,7 +4573,9 @@
         "Food",
         "Dining",
         "Cafe"
-      ]
+      ],
+      "chunkIpa": "/duː juː wɑːnt tə hæv lʌntʃ təˈmɔːroʊ?/",
+      "sentenceIpa": "/duː juː wɑːnt tə hæv lʌntʃ təˈmɔːroʊ? ðerz ə nuː ˈbiːstroʊ daʊn ðə striːt/"
     },
     {
       "id": "food-018",
@@ -4238,7 +4598,9 @@
         "Food",
         "Dining",
         "Cafe"
-      ]
+      ],
+      "chunkIpa": "/dɪɡ ɪn!/",
+      "sentenceIpa": "/ðə fuːd ɪz hɑːt ənd ˈredi, ˈevriwʌn. dɪɡ ɪn!/"
     },
     {
       "id": "food-019",
@@ -4261,7 +4623,9 @@
         "A2-B1",
         "Dining",
         "Cafe"
-      ]
+      ],
+      "chunkIpa": "/ˈɑːn ə ˈdaɪət ˈluːz ˈweɪt/",
+      "sentenceIpa": "/juː ˈriːəli doʊnt lʊk ˌoʊvərˈweɪt ət ɔːl, waɪ ɑːr juː ɑːn ə strɪkt ˈdaɪət tə luːz weɪt?/"
     },
     {
       "id": "food-020",
@@ -4284,7 +4648,9 @@
         "Food",
         "Dining",
         "Cafe"
-      ]
+      ],
+      "chunkIpa": "/kʌt daʊn ɑːn kɑːrbz/",
+      "sentenceIpa": "/aɪm ˈtraɪɪŋ tə kʌt daʊn ɑːn kɑːrbz ənd əˈvɔɪd ˈʃʊɡəri drɪŋks ðɪs mʌnθ/"
     },
     {
       "id": "food-021",
@@ -4307,7 +4673,9 @@
         "A2-B1",
         "Dining",
         "Cafe"
-      ]
+      ],
+      "chunkIpa": "/əˈlɜːrdʒɪk tə/",
+      "sentenceIpa": "/pliːz let ðə ˈweɪtər noʊ ðæt aɪ æm əˈlɜːrdʒɪk tə ˈsiːfuːd ənd ˈpiːnʌts/"
     },
     {
       "id": "food-022",
@@ -4330,7 +4698,9 @@
         "Food",
         "Dining",
         "Cafe"
-      ]
+      ],
+      "chunkIpa": "/nɑːt ə bɪɡ miːt ˈiːtər/",
+      "sentenceIpa": "/aɪm nɑːt ə bɪɡ miːt ˈiːtər, bʌt ðɪs ɡrɪld biːf smelz soʊ dɪˈlaɪtfl ðæt aɪl hæv ə ˈlɪtl bɪt/"
     },
     {
       "id": "food-023",
@@ -4353,7 +4723,9 @@
         "B1-B2",
         "Dining",
         "Cafe"
-      ]
+      ],
+      "chunkIpa": "/ˈhaɪli nuːˈtrɪʃəs/",
+      "sentenceIpa": "/stiːmd ˈbrɑːkəli ənd freʃ ɡriːnz ɑːr ˈhaɪli nuːˈtrɪʃəs əˈdɪʃnz tuː ˈeni ˈɔːfɪs lʌntʃ/"
     },
     {
       "id": "food-024",
@@ -4376,7 +4748,9 @@
         "A2-B1",
         "Dining",
         "Cafe"
-      ]
+      ],
+      "chunkIpa": "/ˈspɛʃəl ˈrɛsəpi/",
+      "sentenceIpa": "/ˈaʊər ˈtiːmmeɪt spent ɔːl ˈiːvnɪŋ prɪˈperɪŋ ðɪs ˈdresɪŋ wɪð ə ˈspeʃl ˈfæməli ˈresəpi/"
     },
     {
       "id": "food-025",
@@ -4399,7 +4773,9 @@
         "A2-B1",
         "Dining",
         "Cafe"
-      ]
+      ],
+      "chunkIpa": "/smelz soʊ dɪˈlaɪtfl!/",
+      "sentenceIpa": "/wʌtˈevər juː ɑːr ˈwɔːrmɪŋ ʌp ɪn ðə ˈmaɪkrəweɪv smelz soʊ dɪˈlaɪtfl!/"
     },
     {
       "id": "food-026",
@@ -4422,7 +4798,9 @@
         "A2-B1",
         "Dining",
         "Cafe"
-      ]
+      ],
+      "chunkIpa": "/bɪɡ fæn əv/",
+      "sentenceIpa": "/aɪm ə bɪɡ fæn əv aɪst ˈmætʃə ˈlɑːteɪ, aɪ kʊd drɪŋk ɪt ˈɔːlmoʊst ˈevri ˈsɪŋɡl deɪ/"
     },
     {
       "id": "food-027",
@@ -4445,7 +4823,9 @@
         "A2-B1",
         "Dining",
         "Cafe"
-      ]
+      ],
+      "chunkIpa": "/fər dɪˈzɜːrt ənd/",
+      "sentenceIpa": "/naʊ ðæt ðə meɪn kɔːrs ɪz ˈfɪnɪʃt, ɪts taɪm fər dɪˈzɜːrt ənd hɑːt tiː/"
     },
     {
       "id": "food-028",
@@ -4468,7 +4848,9 @@
         "Food",
         "Dining",
         "Cafe"
-      ]
+      ],
+      "chunkIpa": "/ɡeɪn weɪt wɪð ˈevri baɪt!/",
+      "sentenceIpa": "/ðiːz ˈtʃɔːklət ˈkʊkiz ɑːr ˌɪrɪˈzɪstəbl, bʌt aɪ fiːl laɪk aɪ ɡeɪn weɪt wɪð ˈevri baɪt!/"
     },
     {
       "id": "tech-001",
@@ -4492,7 +4874,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/ɪn ˈmɑːrkˌdaʊn ˈfɔrˌmæt əˈpɪrz ˈæz ə ˈteɪbəl ˈɛləmənt/",
+      "sentenceIpa": "/aɪ æm ˈwʌndərɪŋ waɪ ðə rɪˈspɑːns frəm ðə ˈsɜːrvər ɪz ɪn ˈmɑːrkdaʊn ˈfɔːrmæt, bʌt wʌns dɪˈspleɪd ɑːn ði ˈɪntərfeɪs, ɪt əˈpɪrz əz ə ˈteɪbl ˈelɪmənt/"
     },
     {
       "id": "tech-002",
@@ -4516,7 +4900,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/doesn't ˈlʊk ˈvɛri əˈpiːlɪŋ ˈhɑːrd ˈtuː ˈlʊk ˈæt/",
+      "sentenceIpa": "/ðə rɪˈspɑːns ˈɪntərfeɪs ɪn ðə ˈtʃætbɑːt skrɪpt ˈdʌznt lʊk ˈveri əˈpiːlɪŋ; aɪ faɪnd ɪt ə bɪt hɑːrd tə lʊk æt/"
     },
     {
       "id": "tech-003",
@@ -4540,7 +4926,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/rɪˈviːl ðə neɪm əv ðə tuːl/",
+      "sentenceIpa": "/meɪk ʃʊr juː doʊnt rɪˈviːl ðə neɪm əv ðə tuːl ɪn ðə ˈfaɪnl ˈjuːzər ˈmesɪdʒ/"
     },
     {
       "id": "tech-004",
@@ -4564,7 +4952,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/dɪˈspleɪ ðə dɪˈskrɪpʃn fər iːtʃ ˌɪtəˈreɪʃn/",
+      "sentenceIpa": "/aɪ æm ˈjuːzɪŋ ən ˈeɪdʒənt luːp; haʊ duː aɪ dɪˈspleɪ ðə dɪˈskrɪpʃn fər iːtʃ ˌɪtəˈreɪʃn wɪˈðɪn ɪt?/"
     },
     {
       "id": "tech-005",
@@ -4588,7 +4978,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/ˈdʒɛnɜːrˌeɪt ˈriːzənɪŋ ˈstɛps ˈtʃeɪn ˈʌv ˈθɔt/",
+      "sentenceIpa": "/aɪv bɪn ˈwʌndərɪŋ waɪ wi doʊnt rɪˈkwaɪər el el emz tə ˈdʒenəreɪt ˈriːzənɪŋ steps fər iːtʃ steɪdʒ əv ˌeksɪˈkjuːʃn/"
     },
     {
       "id": "tech-006",
@@ -4612,7 +5004,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/emz rɪˈspɑːns ˈstrɪktli ədˈhɪrz tə/",
+      "sentenceIpa": "/juː ʃʊd ˈverɪfaɪ ðæt ði el el emz rɪˈspɑːns ˈstrɪktli ədˈhɪrz tə ði ɪnˈstrʌkʃnz/"
     },
     {
       "id": "tech-007",
@@ -4636,7 +5030,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/ˈkɔl ˈgræf dɜːrˈɛktli ˈæktʃəwəl rɪˈspɑːns/",
+      "sentenceIpa": "/juː ʃʊd kɔːl ɡræf dəˈrektli tə ɡet ði ˈæktʃuəl rɪˈspɑːns; aɪ doʊnt trʌst ðiːz test rɪˈzʌlts/"
     },
     {
       "id": "tech-008",
@@ -4660,7 +5056,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/rɪˈflekʃn noʊd/",
+      "sentenceIpa": "/beɪst ɑːn ðə prəˈvaɪdɪd ˈmesɪdʒɪz, ˈverɪfaɪ ˈweðər ðə rɪˈflekʃn noʊd ɪz ˈfʌŋkʃənɪŋ ˈprɑːpərli/"
     },
     {
       "id": "tech-009",
@@ -4684,7 +5082,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/ˌkɔːrəˈspɑːnd tə ðə dɪˈzaɪərd ˈprɑːdʌkt/",
+      "sentenceIpa": "/ɪn fækt, aɪ ˈkænɑːt ˌɡærənˈtiː ðæt ði ˈɪmɪdʒɪz ɪn ðə sɜːrtʃ rɪˈzʌlts wɪl ˌkɔːrəˈspɑːnd tə ðə dɪˈzaɪərd ˈprɑːdʌkt/"
     },
     {
       "id": "tech-010",
@@ -4708,7 +5108,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/rɪˈlaɪ ˈɑːn ðə ˈteɪbəl ˈstrʌktʃɜːr ˈtuː ˈraɪt ðə ˈkwiːri/",
+      "sentenceIpa": "/ðɪs ɪz dʒʌst ə ˈɡaɪdlaɪn; ði ˈeɪdʒənt wɪl rɪˈlaɪ ɑːn ðə ˈteɪbl ˈstrʌktʃər tə raɪt ðə prɪˈsaɪs ˈkwɪri, woʊnt ɪt?/"
     },
     {
       "id": "tech-011",
@@ -4732,7 +5134,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/ˈgɪvɪŋ ə ˈmɑːdəl ˈmɔr ˈprɑːmpts doesn't ˈmeɪk ˈɪt ˈsmɑːrtɜːr/",
+      "sentenceIpa": "/ˈɡɪvɪŋ ə ˈmɑːdl mɔːr prɑːmpts ˈdʌznt ˌnesəˈserəli meɪk ɪt ˈsmɑːrtər; kənˈsaɪs ˈkɑːntekst ɪz kiː/"
     },
     {
       "id": "tech-012",
@@ -4756,7 +5160,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/doʊˈmeɪn æɡˈnɑːstɪk/",
+      "sentenceIpa": "/boʊθ prɑːmpts ɑːr naʊ ˈfʊli doʊˈmeɪn æɡˈnɑːstɪk ənd kæn bi juːzd əˈkrɔːs ˈmʌltɪpl ˈprɑːdʒekts/"
     },
     {
       "id": "tech-013",
@@ -4780,7 +5186,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/siː læŋ smɪθ ˈlɔːɡɪŋ/",
+      "sentenceIpa": "/ɑːr ðiːz ˈkɔːlɪŋ ði em siː piː? aɪ æsk bɪˈkɔːz aɪ siː læŋ smɪθ ˈlɔːɡɪŋ ˈtreɪsɪz fər ðem/"
     },
     {
       "id": "tech-014",
@@ -4804,7 +5212,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/ˌpiː.ɑːrˈdiː ˈprɑːdəkt rɪˈkwaɪrmənts ˈdɑːkjəmɛnt/",
+      "sentenceIpa": "/wi niːd tə ˈfaɪnəlaɪz ðə piː ɑːr diː bɪˈfɔːr ðə ˈbækend tiːm stɑːrts ˌɪmplɪmenˈteɪʃn/"
     },
     {
       "id": "tech-015",
@@ -4828,7 +5238,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/ˌɑːr.ɛfˈsiː rɪˈkwɛst ˈfɔr ˈkɑːmɛnts/",
+      "sentenceIpa": "/aɪ hæv ˈrɪtn ən ɑːr ef siː fər ðə nuː ɔːˌθentɪˈkeɪʃn ˈsɜːrvɪs; pliːz rɪˈvjuː ɪt ənd liːv ˈkɑːments/"
     },
     {
       "id": "tech-016",
@@ -4852,7 +5264,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/ˈskoʊp ˈsʌmθɪŋ ˈaʊt/",
+      "sentenceIpa": "/lets skoʊp aʊt ðə ˈteknɪkl rɪˈkwaɪərmənts bɪˈfɔːr ˈestɪmeɪtɪŋ ðə ˈtaɪmlaɪn/"
     },
     {
       "id": "tech-017",
@@ -4876,7 +5290,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/ˈtrʌbəlˌʃuːt ˈæn ˈɪʃuː/",
+      "sentenceIpa": "/ˈaʊər ˌendʒɪˈnɪrz ɑːr ˈkɜːrəntli ˈtrʌblʃuːtɪŋ ði ˈɪʃuː ɑːn ðə prəˈdʌkʃn ˈsɜːrvər/"
     },
     {
       "id": "tech-018",
@@ -4900,7 +5316,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/wɑːt ˈhæpənz wen ðə koʊd ˈriːtʃɪz ən əˈweɪt/",
+      "sentenceIpa": "/wɑːt ˈhæpənz wen ðə koʊd ˈriːtʃɪz ən əˈweɪt ɪkˈspreʃn ɪn ˈpaɪθɑːnz əˈsɪŋk aɪ oʊ?/"
     },
     {
       "id": "tech-019",
@@ -4924,7 +5342,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/ˈteɪbl ˈækses kənˈtroʊl/",
+      "sentenceIpa": "/wi niːd tə ˈɪmplɪment ˈteɪbl ˈækses kənˈtroʊl tə sɪˈkjʊr ˈsensətɪv ɪmˈplɔɪiː ˈrekərdz/"
     },
     {
       "id": "tech-020",
@@ -4948,7 +5368,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/riːdɪˈfaɪn ə ˈfʌŋkʃən/",
+      "sentenceIpa": "/waɪ ˌriːdɪˈfaɪn ðə ɡet diː biː ˈfʌŋkʃn hɪr wen ə ɡet diː biː ˈfʌŋkʃn ɔːlˈredi ɪɡˈzɪsts ɪn ðə ˈdeɪtəbeɪs ˈmɑːdʒuːl?/"
     },
     {
       "id": "tech-021",
@@ -4972,7 +5394,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/ˈvaɪəleɪts ˈruːtɜːr ˈprɪnsəpəlz ˈteɪks ˈɑːn ˈtuː ˈmɛni riːˌspɑːnsəˈbɪlətiːz/",
+      "sentenceIpa": "/ðɪs ˈruːtər ˈvaɪəleɪts ˈruːtər ˈprɪnsəplz; ɪt teɪks ɑːn tuː ˈmeni rɪˌspɑːnsəˈbɪlətiz ɪnˈkluːdɪŋ ˈbɪznəs ˈlɑːdʒɪk/"
     },
     {
       "id": "tech-022",
@@ -4996,7 +5420,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/saʊndz tuː veɪɡ/",
+      "sentenceIpa": "/lets ˌriːˈneɪm ɪt; ðə ˈriːpoʊ neɪm saʊndz tuː veɪɡ/"
     },
     {
       "id": "tech-023",
@@ -5020,7 +5446,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/ˈmuːv ˈtuː dɪˈpɛndənsiːz ənd ˌɪnˈkluːd ˈæz ə pɜːrˈæmətɜːr/",
+      "sentenceIpa": "/muːv ɪt tə ðə dɪˈpendənsiz ˈsekʃn ənd ɪnˈkluːd ɪt əz ə pəˈræmɪtər ɪn iːtʃ ruːt ˈfʌŋkʃn/"
     },
     {
       "id": "tech-024",
@@ -5044,7 +5472,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/kɔːl ði əˈnɑːnɪməs ˈtoʊkən/",
+      "sentenceIpa": "/ɪt siːmz juː ˈhævnt ˈɪmplɪmentɪd ˈlɑːdʒɪk tə kɔːl ði əˈnɑːnɪməs ˈtoʊkən frəm jɔːr ˈtʃætbɑːt skrɪpt/"
     },
     {
       "id": "tech-025",
@@ -5068,7 +5498,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/ˈgɛtɪŋ ˈbɪgɜːr ənd ˈbɪgɜːr ˈkiːp ˈɪt ˈsɪmpəl ənd meɪnˈteɪnəbəl/",
+      "sentenceIpa": "/ðɪs faɪl ɪz ˈɡetɪŋ ˈbɪɡər ənd ˈbɪɡər; duː juː hæv ˈeni sơˈluːʃnz tə kiːp ɪt ˈsɪmpl ənd ˈiːzi tə meɪnˈteɪn?/"
     },
     {
       "id": "tech-026",
@@ -5092,7 +5524,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/ˈswɪtʃt ˈtuː ˈjuːzɪŋ ˈprɑːdʒɛkt ˈɪd/",
+      "sentenceIpa": "/aɪ hæv swɪtʃt tə ˈjuːzɪŋ ðə ˈprɑːdʒekt aɪ diː ɪnˈsted əv ðə ˈtenənt aɪ diː əz bɪˈfɔːr/"
     },
     {
       "id": "tech-027",
@@ -5116,7 +5550,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/ɪkˈspɪriənsɪŋ ən ˈɪʃuː/",
+      "sentenceIpa": "/ˈsʌmtaɪmz aɪ klɪk ðə ˈbʌtn tə send ə rɪˈkwest bʌt noʊ lɔːɡ əˈpɪrz, soʊ aɪ θɪŋk ðə ˈsɜːrvər ɪz ɪkˈspɪriənsɪŋ ən ˈɪʃuː/"
     },
     {
       "id": "tech-028",
@@ -5140,7 +5576,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/səˈprest baɪ ˈjuːvɪkɔːrn/",
+      "sentenceIpa": "/ðə ˈbækɡraʊnd θred kræʃt, bʌt ði ɪkˈsepʃn wəz səˈprest baɪ ˈjuːvɪkɔːrn/"
     },
     {
       "id": "tech-029",
@@ -5164,7 +5602,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/ˈhoʊldɪŋ ðə ˈkiː ˈhoʊldɪŋ ðə ˈlɑːk/",
+      "sentenceIpa": "/ði ʌpˈdeɪt rɪˈkwest taɪmd aʊt bɪˈkɔːz əˈnʌðər kənˈkɜːrənt rɪˈkwest wəz ˈhoʊldɪŋ ðə kiː/"
     },
     {
       "id": "tech-030",
@@ -5188,7 +5628,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/ˈrɛdəli əˈveɪləbəl ɪn ˈræm ˈɔr ˈbʌfɜːr/",
+      "sentenceIpa": "/ðer ɪz noʊ ˈdeɪtə ðæt ɪz ˈredɪli əˈveɪləbl ɪn ræm ɔːr ə ˈbʌfər wɪˈðaʊt ən ɪˈnɪʃl fetʃ/"
     },
     {
       "id": "tech-031",
@@ -5212,7 +5654,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/ˈtʃeɪndʒəz ˈɑːr prəˈzɜːrvd rɪˈteɪnd ˈæftɜːr ˈbiːɪŋ ˈmɑːdəˌfaɪd/",
+      "sentenceIpa": "/ðə ˈtʃeɪndʒɪz meɪd ɪnˈsaɪd ðə ˈfʌŋkʃn ɑːr prɪˈzɜːrvd ˈiːvn ˈæftər ðə kɔːl ˈfɪnɪʃɪz/"
     },
     {
       "id": "tech-032",
@@ -5236,7 +5680,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/rɪˈpetətɪv diː aɪ ˈbɔɪlərpleɪt/",
+      "sentenceIpa": "/ˈɔːtoʊfæk seɪvz ʌs frəm ˈraɪtɪŋ rɪˈpetətɪv diː aɪ ˈbɔɪlərpleɪt koʊd baɪ ˈjuːzɪŋ əˈsembli ˈskænɪŋ/"
     },
     {
       "id": "tech-033",
@@ -5260,7 +5706,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/ɪnˈtenʃənl ɪˈventʃuəl kənˈsɪstənsi baɪ dɪˈzaɪn/",
+      "sentenceIpa": "/ðæt slaɪt dɪˈleɪ ˈɪznt ə bʌɡ; ðæts ði ɪnˈtenʃənl ɪˈventʃuəl kənˈsɪstənsi baɪ dɪˈzaɪn/"
     },
     {
       "id": "tech-034",
@@ -5284,7 +5732,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/ɪnˈfɔːrs ˈbɪznəs ruːlz/",
+      "sentenceIpa": "/ðə doʊˈmeɪn ˈentəti mʌst ɪnˈfɔːrs ˈbɪznəs ruːlz dəˈrektli ˈræðər ðæn rɪˈlaɪɪŋ ɑːn ðə juː aɪ/"
     },
     {
       "id": "tech-035",
@@ -5308,7 +5758,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/breɪks ɪt daʊn ˈɪntə tʃʌŋks/",
+      "sentenceIpa": "/ɪt ˈdʌznt send ə lɑːrdʒ əˈmaʊnt əv ˈkɑːntent ɔːl ət wʌns; ɪt breɪks ɪt daʊn ˈɪntə tʃʌŋks/"
     },
     {
       "id": "tech-036",
@@ -5332,7 +5784,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/ˈruːtɪŋ aʊt ði ˈɪʃuː/",
+      "sentenceIpa": "/ɪnˈsted əv əˈplaɪɪŋ ˈtempəreri ˈpætʃɪz, lets spend taɪm ˈruːtɪŋ aʊt ði ˈɪʃuː/"
     },
     {
       "id": "tech-037",
@@ -5356,7 +5810,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/ˈæɡrɪɡət ruːt/",
+      "sentenceIpa": "/ðə ˈsɪstəm dʌz nɑːt əˈlaʊ ˈmɑːdɪfaɪɪŋ ən ˈɔːrdər ˈaɪtəm wɪˈðaʊt ˈɡoʊɪŋ θruː ði ˈæɡrɪɡət ruːt/"
     },
     {
       "id": "tech-038",
@@ -5380,7 +5836,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/ˈɡloʊbl ˈerər dɑːt/",
+      "sentenceIpa": "/wɑːt əˈbaʊt ðə ˈɡloʊbl ˈerər dɑːt tiː eks eks faɪl? aɪ siː ðə dɪˈspleɪ ˈerər ɪz aɪˈdentɪkl ˈweðər ɪts ɑːn ə pɑːrt əv ðə peɪdʒ ɔːr ði ɪnˈtaɪər peɪdʒ/"
     },
     {
       "id": "tech-039",
@@ -5404,7 +5862,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/ʌnˈsteɪbl ɪf ðə ˈjuːzər ˈɪntərfeɪs ˈtʃeɪndʒɪz ˈfriːkwəntli/",
+      "sentenceIpa": "/end tə end test swiːts bɪˈkʌm ʌnˈsteɪbl ɪf ðə ˈjuːzər ˈɪntərfeɪs ˈtʃeɪndʒɪz ˈfriːkwəntli/"
     },
     {
       "id": "tech-040",
@@ -5428,7 +5888,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/ˈtoʊkənz ɪn ˈkʊki beɪst ɔːˌθentɪˈkeɪʃn/",
+      "sentenceIpa": "/ˈtoʊkənz ɪn ˈkʊki beɪst ɔːˌθentɪˈkeɪʃn ˈmekənɪzəmz ɑːr ˈtɪpɪkli nɑːt dʒeɪ ˈdʌbljuː tiːz/"
     },
     {
       "id": "tech-041",
@@ -5452,7 +5914,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/steɪt əv ði ɑːrt/",
+      "sentenceIpa": "/ðə nuː læb ɪz ɪˈkwɪpt wɪð steɪt əv ði ɑːrt ˌɑːrtɪˈfɪʃl ɪnˈtelɪdʒəns ˈwɜːrksteɪʃnz/"
     },
     {
       "id": "tech-042",
@@ -5476,7 +5940,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/tek ˈsævi/",
+      "sentenceIpa": "/ˈiːvn ðoʊ maɪ ˈɡrænmʌðər ɪz ɪn hər ˈsevəntiz, ʃiː ɪz sərˈpraɪzɪŋli tek ˈsævi/"
     },
     {
       "id": "tech-043",
@@ -5500,7 +5966,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/dɪˈstɪl ˈdɑːkjəmənts ˈɪntuː ˈkiː ˈɪnˌsaɪts/",
+      "sentenceIpa": "/ˈaʊər eɪ aɪ ˈsɜːrvɪs kən dɪˈstɪl ɪnˈtɜːrnl ˈdɑːkjumənts ˈɪntə kiː ˈɪnsaɪts wɪˈðɪn ˈsekəndz/"
     },
     {
       "id": "tech-044",
@@ -5524,7 +5992,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/rɪsk ðə seɪm feɪt/",
+      "sentenceIpa": "/wɪˈðaʊt ˈprɑːpər ˌriːˈfæktərɪŋ, ðə ˈleɡəsi ˈkoʊdbeɪs wɪl rɪsk ðə seɪm feɪt əv əˈbændənmənt/"
     },
     {
       "id": "tech-045",
@@ -5548,7 +6018,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/ˈsiːmləs ˈhændɔːf/",
+      "sentenceIpa": "/wiː niːd klɪr ˌdɑːkjumenˈteɪʃn tuː ɪnˈʃʊr ə ˈsiːmləs ˈhændɔːf bɪˈtwiːn ˈbækend ənd ˈmoʊbl ˌendʒɪˈnɪrz/"
     },
     {
       "id": "tech-046",
@@ -5572,7 +6044,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/kliːn ˈɑːrkɪtektʃər ˌriːˈfæktər/",
+      "sentenceIpa": "/wiː ʃʊd kənˈdʌkt ə kliːn ˈɑːrkɪtektʃər ˌriːˈfæktər ɪnˈsted əv ˈmɪksɪŋ kənˈflɪktɪŋ dɪˈzaɪn ˈpætərnz/"
     },
     {
       "id": "tech-047",
@@ -5596,7 +6070,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/əˈʃʊrəns ˈvɜːrsəz ˌriːəˈʃʊrəns/",
+      "sentenceIpa": "/ðiː es el eɪ prəˈvaɪdz ɪˈnɪʃl əˈʃʊrəns, waɪl proʊˈæktɪv ˈmɑːnɪtərɪŋ ˈɔːfərz kənˈtɪnjuəs ˌriːəˈʃʊrəns tuː ˈsteɪkhoʊldərz/"
     },
     {
       "id": "tech-048",
@@ -5620,7 +6096,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/ˌkʌt̬ɪŋ ˈedʒ tekˈnɑːlədʒi/",
+      "sentenceIpa": "/əˈdɑːptɪŋ ˌkʌt̬ɪŋ ˈedʒ tekˈnɑːlədʒi hæz drəˈmætɪkli ˈbuːstɪd ˈaʊər ˈdeɪtə ˈprɑːsesɪŋ ˈθruːpʊt/"
     },
     {
       "id": "tech-049",
@@ -5644,7 +6122,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/ˈɪm ˈwɜːrkɪŋ ˈɑːn ˈɪt/",
+      "sentenceIpa": "/doʊnt ˈwɜːri əˈbaʊt ðə ˈpendɪŋ pʊl rɪˈkwest; aɪm ˈwɜːrkɪŋ ɑːn ɪt raɪt naʊ/"
     },
     {
       "id": "tech-050",
@@ -5668,7 +6148,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/ˈwʊd ˈræðɜːr ˈðæn/",
+      "sentenceIpa": "/aɪ wʊd ˈræðər raɪt ˌkɑːmprɪˈhensɪv ˈjuːnɪt tests naʊ ðæn diːˈbʌɡ ˈkɑːmpleks prəˈdʌkʃn ˈaʊtɪdʒɪz ˈleɪtər/"
     },
     {
       "id": "tech-051",
@@ -5692,7 +6174,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/ɪf ˈoʊnli/",
+      "sentenceIpa": "/ɪf ˈoʊnli wiː hæd ˈɔːtəmeɪtɪd ˈdeɪtəbeɪs ˈbækʌps, rɪˈkʌvərɪŋ frəm ˈjestərdeɪz kræʃ wʊd hæv bɪn ˈɪnstənt/"
     },
     {
       "id": "tech-052",
@@ -5716,7 +6200,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/əˈstaʊndɪŋ tɛkˈnɑːlədʒi/",
+      "sentenceIpa": "/ðə spiːd əv ˈriːəl taɪm spiːtʃ trænzˈleɪʃn ɪz ˈtruːli əˈstaʊndɪŋ/"
     },
     {
       "id": "tech-053",
@@ -5740,7 +6226,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/ˈkæptɪˌveɪtɪd ˈbaɪ ˈmɑːdɜːrn ˈtɛk/",
+      "sentenceIpa": "/ðə tiːm wəz ˈkæptɪveɪtɪd baɪ ðə ˌkeɪpəˈbɪlətiz əv ðə ˈleɪtɪst ˌmʌltiˈmoʊdl eɪ aɪ ˈmɑːdl/"
     },
     {
       "id": "tech-054",
@@ -5764,7 +6252,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/ˈhæv ˈsʌmθɪŋ ˈdʌn/",
+      "sentenceIpa": "/wiː niːd tuː hæv ðə prəˈdʌkʃn ˈsɜːrvərz ˈɔːdɪtɪd bɪˈfɔːr ðiː ˈænjuəl kəmˈplaɪəns rɪˈvjuː/"
     },
     {
       "id": "tech-055",
@@ -5788,7 +6278,9 @@
         "Tech",
         "Engineering",
         "Architecture"
-      ]
+      ],
+      "chunkIpa": "/kənˈteɪn dɪˈstɜːrbɪŋ ˈkɑːntɛnt/",
+      "sentenceIpa": "/ðə ˌmɑːdəˈreɪʃn ˈælɡərɪðəm flæɡd ðiː ˌʌpˈloʊdɪd ˈvɪdioʊ fər kənˈteɪnɪŋ dɪˈstɜːrbɪŋ ˈkɑːntent/"
     },
     {
       "id": "money-001",
@@ -5811,7 +6303,9 @@
         "Payment",
         "Price",
         "Shopping"
-      ]
+      ],
+      "chunkIpa": "/ɡʊd ˈvæljuː fər ˈmʌni/",
+      "sentenceIpa": "/ðɪs ˈlæptɑːp ɪz ˈriːəli ɡʊd ˈvæljuː fər ˈmʌni kəmˈperd tə ˈʌðər ˈmɑːdlz/"
     },
     {
       "id": "money-002",
@@ -5834,7 +6328,9 @@
         "Payment",
         "Price",
         "Shopping"
-      ]
+      ],
+      "chunkIpa": "/ə ˈrɪp ˈɔf/",
+      "sentenceIpa": "/ten ˈdɑːlərz fər ə smɔːl ˈbɑːtl əv ˈwɔːtər ət ði ˈerpɔːrt ɪz ə ˈtoʊtl ˈrɪp ɔːf!/"
     },
     {
       "id": "money-003",
@@ -5857,7 +6353,9 @@
         "Payment",
         "Price",
         "Shopping"
-      ]
+      ],
+      "chunkIpa": "/ʃɑːp əˈraʊnd/",
+      "sentenceIpa": "/ɪt ˈɔːlweɪz peɪz tə ʃɑːp əˈraʊnd bɪˈfɔːr ˈbaɪɪŋ ɪkˈspensɪv hoʊm əˈplaɪənsɪz/"
     },
     {
       "id": "money-004",
@@ -5880,7 +6378,9 @@
         "Payment",
         "Price",
         "Shopping"
-      ]
+      ],
+      "chunkIpa": "/ɑːn ə taɪt ˈbʌdʒɪt/",
+      "sentenceIpa": "/wen aɪ wəz ə ˌjuːnɪˈvɜːrsəti ˈstuːdnt, aɪ wəz ˈɔːlweɪz ɑːn ə taɪt ˈbʌdʒɪt/"
     },
     {
       "id": "money-005",
@@ -5903,7 +6403,9 @@
         "Payment",
         "Price",
         "Shopping"
-      ]
+      ],
+      "chunkIpa": "/meɪk endz miːt/",
+      "sentenceIpa": "/wɪð ˈraɪzɪŋ ˈlɪvɪŋ kɔːsts, ˈmeni jʌŋ ˈwɜːrkərz ˈstrʌɡl tə meɪk endz miːt/"
     },
     {
       "id": "money-006",
@@ -5926,7 +6428,9 @@
         "Payment",
         "Price",
         "Shopping"
-      ]
+      ],
+      "chunkIpa": "/ˌaɪ.piːˈoʊ ˌɪˈnɪʃəl ˈpʌblɪk ˈɔfɜːrɪŋ/",
+      "sentenceIpa": "/ðə tek ˈstɑːrtʌp ɪz prɪˈperɪŋ fər ɪts aɪ piː oʊ ɑːn ðə stɑːk ɪksˈtʃeɪndʒ nekst jɪr/"
     },
     {
       "id": "communication-001",
@@ -5949,7 +6453,9 @@
         "Requests",
         "Politeness",
         "Opinions"
-      ]
+      ],
+      "chunkIpa": "/əˈɡriː tə ˌdɪsəˈɡriː/",
+      "sentenceIpa": "/lets əˈɡriː tə ˌdɪsəˈɡriː ənd muːv ˈfɔːrwərd fər naʊ/"
     },
     {
       "id": "communication-002",
@@ -5972,7 +6478,9 @@
         "Requests",
         "Politeness",
         "Opinions"
-      ]
+      ],
+      "chunkIpa": "/aɪ siː jɔːr pɔɪnt bʌt/",
+      "sentenceIpa": "/aɪ siː jɔːr pɔɪnt, bʌt aɪ θɪŋk wi ʃʊd kənˈsɪdər ðə ˈbʌdʒɪt fɜːrst/"
     },
     {
       "id": "communication-003",
@@ -5995,7 +6503,9 @@
         "Requests",
         "Politeness",
         "Opinions"
-      ]
+      ],
+      "chunkIpa": "/ðæts ə fer pɔɪnt/",
+      "sentenceIpa": "/ðæts ə fer pɔɪnt, aɪ ˈhædnt θɔːt əv ɪt ðæt weɪ/"
     },
     {
       "id": "communication-004",
@@ -6018,7 +6528,9 @@
         "Requests",
         "Politeness",
         "Opinions"
-      ]
+      ],
+      "chunkIpa": "/tə bi ˈɑːnɪst/",
+      "sentenceIpa": "/tə bi ˈɑːnɪst, aɪ θɪŋk ðə fɜːrst ˈɑːpʃn ɪz mʌtʃ ˈbetər fər ˈaʊər tiːm/"
     },
     {
       "id": "communication-005",
@@ -6041,7 +6553,9 @@
         "Requests",
         "Politeness",
         "Opinions"
-      ]
+      ],
+      "chunkIpa": "/əz fɑːr əz aɪ noʊ/",
+      "sentenceIpa": "/əz fɑːr əz aɪ noʊ, ðə ˈmiːtɪŋ həz bɪn ˌriːˈskedʒuːld tə təˈmɔːroʊ ˈmɔːrnɪŋ/"
     },
     {
       "id": "communication-006",
@@ -6064,7 +6578,9 @@
         "Requests",
         "Politeness",
         "Opinions"
-      ]
+      ],
+      "chunkIpa": "/wɑːt aɪ miːn ɪz ðæt/",
+      "sentenceIpa": "/wɑːt aɪ miːn ɪz ðæt wi ʃʊd ˈfoʊkəs ɑːn ðə moʊst ˈɜːrdʒənt tæsks fɜːrst/"
     },
     {
       "id": "communication-007",
@@ -6087,7 +6603,9 @@
         "Requests",
         "Politeness",
         "Opinions"
-      ]
+      ],
+      "chunkIpa": "/tə sʌm ʌp/",
+      "sentenceIpa": "/tə sʌm ʌp, ˈaʊər seɪlz ɡruː baɪ ˈtwenti pərˈsent ðɪs ˈkwɔːrtər θæŋks tə ðə nuː ˈmɑːrkɪtɪŋ kæmˈpeɪn/"
     },
     {
       "id": "communication-008",
@@ -6110,7 +6628,9 @@
         "Requests",
         "Politeness",
         "Opinions"
-      ]
+      ],
+      "chunkIpa": "/aɪm ˈsɑːri fər ðə dɪˈleɪ/",
+      "sentenceIpa": "/aɪm ˈsɑːri fər ðə dɪˈleɪ, aɪl send juː ðə ˈfaɪnəlaɪzd rɪˈpɔːrt baɪ təˈmɔːroʊ/"
     },
     {
       "id": "communication-009",
@@ -6133,7 +6653,9 @@
         "Requests",
         "Politeness",
         "Opinions"
-      ]
+      ],
+      "chunkIpa": "/ɪt woʊnt ˈhæpən əˈɡen/",
+      "sentenceIpa": "/ɪt woʊnt ˈhæpən əˈɡen, aɪ ˈprɑːmɪs tə ˈdʌbl tʃek ˈevriθɪŋ nekst taɪm/"
     },
     {
       "id": "communication-010",
@@ -6156,7 +6678,9 @@
         "Requests",
         "Politeness",
         "Opinions"
-      ]
+      ],
+      "chunkIpa": "/frəm ðə pərˈspektɪv əv/",
+      "sentenceIpa": "/ɪf wi kənˈsɪdər ɪt frəm ðə pərˈspektɪv əv ɔːˌθentɪˈkeɪʃn, dʒeɪ ˈdʌbljuː tiːz skeɪl mʌtʃ ˈbetər ðæn ˈsɜːrvər ˈseʃnz/"
     },
     {
       "id": "communication-011",
@@ -6179,7 +6703,9 @@
         "Requests",
         "Politeness",
         "Opinions"
-      ]
+      ],
+      "chunkIpa": "/ɪz ðæt wɑːt juː miːn?/",
+      "sentenceIpa": "/juː wɑːnt tə raɪt ə ˈfɔːlbæk ˈmekənɪzəm ɪn keɪs ðə kæʃ ˈmɪsɪz; ɪz ðæt wɑːt juː miːn?/"
     },
     {
       "id": "communication-012",
@@ -6202,7 +6728,9 @@
         "Requests",
         "Politeness",
         "Opinions"
-      ]
+      ],
+      "chunkIpa": "/wɑːt dɪd juː dʒʌst seɪ?/",
+      "sentenceIpa": "/ˈsɑːri, maɪ ˈɔːdioʊ ɡlɪtʃt fər ə ˈsekənd; wɑːt dɪd juː dʒʌst seɪ?/"
     },
     {
       "id": "communication-013",
@@ -6225,7 +6753,9 @@
         "Requests",
         "Politeness",
         "Opinions"
-      ]
+      ],
+      "chunkIpa": "/aɪ æm stɪl nɑːt klɪr ɑːn jɔːr ˈkwestʃən/",
+      "sentenceIpa": "/aɪ æm stɪl nɑːt klɪr ɑːn jɔːr ˈkwestʃən; kəd juː ɡɪv ə ˈkɑːnkriːt səˈnærioʊ?/"
     },
     {
       "id": "communication-014",
@@ -6248,7 +6778,9 @@
         "Requests",
         "Politeness",
         "Opinions"
-      ]
+      ],
+      "chunkIpa": "/ðə kɔːr ˈdɪfrəns laɪz ɪn/",
+      "sentenceIpa": "/ðə kɔːr ˈdɪfrəns laɪz ɪn haʊ steɪt ɪz ˈmænɪdʒd əˈkrɔːs dɪˈstrɪbjuːtɪd noʊdz/"
     },
     {
       "id": "communication-015",
@@ -6271,7 +6803,9 @@
         "Requests",
         "Politeness",
         "Opinions"
-      ]
+      ],
+      "chunkIpa": "/duː juː miːn wʌn tuː mʌnθs ɔːr wʌn tuː jɪrz?/",
+      "sentenceIpa": "/wen dɪˈskʌsɪŋ ðə ˈprɑːdʌkt ˈroʊdmæp, duː juː miːn wʌn tuː mʌnθs ɔːr wʌn tuː jɪrz?/"
     },
     {
       "id": "communication-016",
@@ -6294,7 +6828,9 @@
         "Requests",
         "Politeness",
         "Opinions"
-      ]
+      ],
+      "chunkIpa": "/duː aɪ nɑːt niːd tə səˈlekt ðə ˈteɪbl tə tʃek ɪt/",
+      "sentenceIpa": "/duː aɪ nɑːt niːd tə səˈlekt ðə ˈteɪbl tə tʃek ɪt bɪˈfɔːr ˈrʌnɪŋ ðə maɪˈɡreɪʃn?/"
     },
     {
       "id": "communication-017",
@@ -6317,7 +6853,9 @@
         "Requests",
         "Politeness",
         "Opinions"
-      ]
+      ],
+      "chunkIpa": "/duː juː maɪnd ɪf aɪ dʒɔɪn juː/",
+      "sentenceIpa": "/ɪz ðɪs siːt ˈteɪkən? duː juː maɪnd ɪf aɪ dʒɔɪn juː fər ˈkɔːfi?/"
     },
     {
       "id": "communication-018",
@@ -6340,7 +6878,9 @@
         "Requests",
         "Politeness",
         "Opinions"
-      ]
+      ],
+      "chunkIpa": "/duː juː maɪnd ɪf aɪ teɪk ə lʊk?/",
+      "sentenceIpa": "/ðæt dɪˈzaɪn lʊks ˈfæsɪneɪtɪŋ. duː juː maɪnd ɪf aɪ teɪk ə lʊk?/"
     },
     {
       "id": "communication-019",
@@ -6363,7 +6903,9 @@
         "Requests",
         "Politeness",
         "Opinions"
-      ]
+      ],
+      "chunkIpa": "/ˈɪm ˈstɪl ˈbɪzi ˈwɪð ˈðɪs ˈwʌn/",
+      "sentenceIpa": "/kəd juː rɪˈvjuː ðɪs ˈtɪkɪt? - ˈsɑːri, aɪm stɪl ˈbɪzi wɪð ðɪs wʌn/"
     },
     {
       "id": "communication-020",
@@ -6386,7 +6928,9 @@
         "Requests",
         "Politeness",
         "Opinions"
-      ]
+      ],
+      "chunkIpa": "/ˈdʒʌst don't ˈtɛl ˈɛniːˌwən/",
+      "sentenceIpa": "/aɪl let juː ɪn ɑːn ðə sərˈpraɪz, dʒʌst doʊnt tel ˈeniwʌn bɪˈfɔːr ˈfraɪdeɪ/"
     },
     {
       "id": "communication-021",
@@ -6409,7 +6953,9 @@
         "Requests",
         "Politeness",
         "Opinions"
-      ]
+      ],
+      "chunkIpa": "/juː ʃʊd hæv sed ðæt ˈɜːrliər/",
+      "sentenceIpa": "/juː ʃʊd hæv sed ðæt ˈɜːrliər bɪˈfɔːr wi ˈfaɪnəlaɪzd ðə ˈbʊkɪŋ!/"
     },
     {
       "id": "communication-022",
@@ -6432,7 +6978,9 @@
         "Requests",
         "Politeness",
         "Opinions"
-      ]
+      ],
+      "chunkIpa": "/ˈaɪ ˈkænt ˈpʊt ˈɪt ˈdaʊn/",
+      "sentenceIpa": "/ðɪs ˈmɪstəri ˈnɑːvl ɪz soʊ ˈɡrɪpɪŋ ðæt aɪ kænt pʊt ɪt daʊn/"
     },
     {
       "id": "communication-023",
@@ -6455,7 +7003,9 @@
         "Requests",
         "Politeness",
         "Opinions"
-      ]
+      ],
+      "chunkIpa": "/ɑːr juː hɪr baɪ jɔːrˈself?/",
+      "sentenceIpa": "/heɪ, ɑːr juː hɪr baɪ jɔːrˈself? wʊd juː laɪk tə sɪt wɪð ʌs?/"
     },
     {
       "id": "communication-024",
@@ -6478,7 +7028,9 @@
         "Requests",
         "Politeness",
         "Opinions"
-      ]
+      ],
+      "chunkIpa": "/ə ˈriːəl peɪdʒ ˈtɜːrnər/",
+      "sentenceIpa": "/hər ˈleɪtɪst tek ˈθrɪlər ɪz ə ˈriːəl peɪdʒ ˈtɜːrnər frəm stɑːrt tə ˈfɪnɪʃ/"
     },
     {
       "id": "communication-025",
@@ -6501,7 +7053,9 @@
         "Requests",
         "Politeness",
         "Opinions"
-      ]
+      ],
+      "chunkIpa": "/ˈðɛrz ˈnʌθɪŋ ˈkwaɪt ˈlaɪk/",
+      "sentenceIpa": "/ðerz ˈnʌθɪŋ kwaɪt laɪk ˈsɪpɪŋ hɑːt ˈkɔːfi ɑːn ə ˈreɪni ˈmɔːrnɪŋ/"
     },
     {
       "id": "communication-026",
@@ -6524,7 +7078,9 @@
         "Requests",
         "Politeness",
         "Opinions"
-      ]
+      ],
+      "chunkIpa": "/aɪ ment ðɪs wʌn/",
+      "sentenceIpa": "/noʊ, nɑːt ðə red ˈfoʊldər; aɪ ment ðɪs wʌn ɑːn ðə left desk/"
     },
     {
       "id": "communication-027",
@@ -6547,7 +7103,9 @@
         "Requests",
         "Politeness",
         "Opinions"
-      ]
+      ],
+      "chunkIpa": "/nɑːn ˈfɪkʃn/",
+      "sentenceIpa": "/aɪ ˈjuːʒuəli prɪˈfɜːr ˈriːdɪŋ nɑːn ˈfɪkʃn bʊks əˈbaʊt ˈsaɪəns ənd ˈstɑːrtʌps/"
     },
     {
       "id": "communication-028",
@@ -6570,7 +7128,9 @@
         "Requests",
         "Politeness",
         "Opinions"
-      ]
+      ],
+      "chunkIpa": "/ˈfæntəsi/",
+      "sentenceIpa": "/ðə lɔːrd əv ðə rɪŋz ɪz ðə moʊst ˈfeɪməs ˈfæntəsi ˈnɑːvl ɪn ðə wɜːrld/"
     },
     {
       "id": "communication-029",
@@ -6593,7 +7153,9 @@
         "Requests",
         "Politeness",
         "Opinions"
-      ]
+      ],
+      "chunkIpa": "/ən ˈiːzi riːd/",
+      "sentenceIpa": "/ɪf juː wɑːnt tə rɪˈlæks ˈæftər wɜːrk, ðɪs laɪt ˈkɑːmədi bʊk ɪz ən ˈiːzi riːd/"
     },
     {
       "id": "communication-030",
@@ -6616,7 +7178,9 @@
         "Requests",
         "Politeness",
         "Opinions"
-      ]
+      ],
+      "chunkIpa": "/ˈpʊt ˈsʌmθɪŋ ˈdaʊn/",
+      "sentenceIpa": "/ʃiː ˈdʒentli pʊt ðə bʊk daʊn ɑːn ðə ˈkɔːfi ˈteɪbl bɪˈfɔːr ˈliːvɪŋ/"
     },
     {
       "id": "daily-001",
@@ -6639,7 +7203,9 @@
         "Routine",
         "Daily",
         "Casual"
-      ]
+      ],
+      "chunkIpa": "/i've ˈbɪn ˈmiːnɪŋ ˈtuː ˈduː ˈsʌmθɪŋ/",
+      "sentenceIpa": "/aɪv bɪn ˈmiːnɪŋ tə kɔːl juː ɔːl wiːk, bʌt θɪŋz ɡɑːt ˈkreɪzi ˈbɪzi ət wɜːrk/"
     },
     {
       "id": "daily-002",
@@ -6662,7 +7228,9 @@
         "Routine",
         "Daily",
         "Casual"
-      ]
+      ],
+      "chunkIpa": "/ˈkætʃ ˈʌp ˈwɪð ˈsʌmˌwən/",
+      "sentenceIpa": "/lets ɡræb ə ˈkɔːfi ðɪs ˈsʌndeɪ soʊ wi kæn kætʃ ʌp!/"
     },
     {
       "id": "daily-003",
@@ -6685,7 +7253,9 @@
         "A2-B1",
         "Daily",
         "Casual"
-      ]
+      ],
+      "chunkIpa": "/aɪ hoʊp wi hæv ə fʌn taɪm əˈhed/",
+      "sentenceIpa": "/ˈwelkəm tə ðə skwɑːd! aɪ hoʊp wi hæv ə fʌn taɪm əˈhed ˈbɪldɪŋ kuːl θɪŋz təˈɡeðər/"
     },
     {
       "id": "daily-004",
@@ -6708,7 +7278,9 @@
         "Routine",
         "Daily",
         "Casual"
-      ]
+      ],
+      "chunkIpa": "/ˈmeɪk ˈʌp ˈwʌnz ˈmaɪnd/",
+      "sentenceIpa": "/aɪ ˈriːəli kænt meɪk ʌp maɪ maɪnd bɪˈtwiːn ðə tuː dʒɑːb ˈɔːfərz/"
     },
     {
       "id": "daily-005",
@@ -6731,7 +7303,9 @@
         "Routine",
         "Daily",
         "Casual"
-      ]
+      ],
+      "chunkIpa": "/ˈtʃeɪndʒ ˈwʌnz ˈmaɪnd/",
+      "sentenceIpa": "/aɪ wəz ˈplænɪŋ tə steɪ hoʊm, bʌt aɪ tʃeɪndʒd maɪ maɪnd ənd went tə ðə ˈpɑːrti/"
     },
     {
       "id": "daily-006",
@@ -6754,7 +7328,9 @@
         "Routine",
         "Daily",
         "Casual"
-      ]
+      ],
+      "chunkIpa": "/ˈrʌn ˈaʊt ˈʌv ˈsʌmθɪŋ/",
+      "sentenceIpa": "/maɪ foʊn ɪz əˈbaʊt tə rʌn aʊt əv ˈbætəri, duː juː hæv ə sper ˈtʃɑːrdʒər?/"
     },
     {
       "id": "daily-007",
@@ -6777,7 +7353,9 @@
         "Routine",
         "Daily",
         "Casual"
-      ]
+      ],
+      "chunkIpa": "/ˈluːz ˈwʌnz ˈfoʊkəs ˈgɛt dɪˈstræktəd/",
+      "sentenceIpa": "/aɪ kiːp ˈluːzɪŋ maɪ ˈfoʊkəs ðɪs ˌæftərˈnuːn bɪˈkɔːz əv ðə laʊd ˈtʃætər əˈraʊnd miː/"
     },
     {
       "id": "daily-008",
@@ -6800,7 +7378,9 @@
         "A2-B1",
         "Daily",
         "Casual"
-      ]
+      ],
+      "chunkIpa": "/ˈpaʊər ˈaʊtɪdʒ/",
+      "sentenceIpa": "/ˈaʊər hoʊl ˈneɪbərhʊd ˈsʌfərd ən ˌʌnɪkˈspektɪd ˈpaʊər ˈaʊtɪdʒ ˈdʊrɪŋ ðə stɔːrm/"
     },
     {
       "id": "daily-009",
@@ -6823,7 +7403,9 @@
         "A2-B1",
         "Daily",
         "Casual"
-      ]
+      ],
+      "chunkIpa": "/ˈæftər ə ˈpɪriəd əv taɪm/",
+      "sentenceIpa": "/ˈæftər ə ˈpɪriəd əv taɪm, ˈtempəreri ˈækses ˈtoʊkənz wɪl ɪkˈspaɪər ˌɔːtəˈmætɪkli/"
     },
     {
       "id": "daily-010",
@@ -6846,7 +7428,9 @@
         "Routine",
         "Daily",
         "Casual"
-      ]
+      ],
+      "chunkIpa": "/ˈwɪlɪŋ tə spend ˈmʌni ɑːn/",
+      "sentenceIpa": "/juː ɑːr ˈwɪlɪŋ tə spend ˈmʌni ɑːn mɪlk tiː ɪnˈsted əv ən ˈɑːnlaɪn kɔːrs!/"
     },
     {
       "id": "daily-011",
@@ -6869,7 +7453,9 @@
         "Routine",
         "Daily",
         "Casual"
-      ]
+      ],
+      "chunkIpa": "/jʊr ˈstɑːrtld/",
+      "sentenceIpa": "/jʊr ˈstɑːrtld bɪˈkɔːz ðə ˈfaɪər əˈlɑːrm ˈsʌdənli went ɔːf ˈlaʊdli/"
     },
     {
       "id": "daily-012",
@@ -6892,7 +7478,9 @@
         "Routine",
         "Daily",
         "Casual"
-      ]
+      ],
+      "chunkIpa": "/muːv tə ə nuː haʊs/",
+      "sentenceIpa": "/ðeər ˈɡoʊɪŋ tə muːv tə ə nuː haʊs nekst mʌnθ/"
     },
     {
       "id": "daily-013",
@@ -6915,7 +7503,9 @@
         "Routine",
         "Daily",
         "Casual"
-      ]
+      ],
+      "chunkIpa": "/əˈtend ðə ˈpɑːrti/",
+      "sentenceIpa": "/aɪ æm nɑːt ˈɡoʊɪŋ tə əˈtend ðə ˈpɑːrti təˈnaɪt bɪˈkɔːz aɪ niːd tə rest/"
     },
     {
       "id": "daily-014",
@@ -6938,7 +7528,9 @@
         "Routine",
         "Daily",
         "Casual"
-      ]
+      ],
+      "chunkIpa": "/wʌt ɑːr juː ˈɡoʊɪŋ tə duː ðɪs ˈwiːkend?/",
+      "sentenceIpa": "/wʌt ɑːr juː ˈɡoʊɪŋ tə duː ðɪs ˈwiːkend? duː juː wɑːnt tə hæŋ aʊt?/"
     },
     {
       "id": "daily-015",
@@ -6961,7 +7553,9 @@
         "Routine",
         "Daily",
         "Casual"
-      ]
+      ],
+      "chunkIpa": "/ˈrenəveɪt ðə haʊs/",
+      "sentenceIpa": "/maɪ ˈperənts ɑːr ˈɡoʊɪŋ tə ˈrenəveɪt ðə haʊs nekst ˈsʌmər/"
     },
     {
       "id": "daily-016",
@@ -6984,7 +7578,9 @@
         "A2-B1",
         "Daily",
         "Casual"
-      ]
+      ],
+      "chunkIpa": "/ˈsiːɪŋ ə ˈfrɛnd ˈfrʌm ˈtuː/",
+      "sentenceIpa": "/aɪm ˈsiːɪŋ ə frend frəm fɔːr ˈθɜːrti tə faɪv ˈθɜːrti, ðen aɪl hed hoʊm/"
     },
     {
       "id": "daily-017",
@@ -7007,7 +7603,9 @@
         "Routine",
         "Daily",
         "Casual"
-      ]
+      ],
+      "chunkIpa": "/duː juː wɑːnt tə ɡoʊ siː ə ˈmuːvi wɪð miː/",
+      "sentenceIpa": "/duː juː wɑːnt tə ɡoʊ siː ə ˈmuːvi wɪð miː təˈnaɪt? ə nuː ˈmɑːrvl fɪlm dʒʌst keɪm aʊt/"
     },
     {
       "id": "daily-018",
@@ -7030,7 +7628,9 @@
         "Routine",
         "Daily",
         "Casual"
-      ]
+      ],
+      "chunkIpa": "/wʌt ɑːr juː ˈduːɪŋ ðɪs wiːk?/",
+      "sentenceIpa": "/wʌt ɑːr juː ˈduːɪŋ ðɪs wiːk? lets əˈreɪndʒ ə taɪm tə kætʃ ʌp/"
     },
     {
       "id": "daily-019",
@@ -7053,7 +7653,9 @@
         "Routine",
         "Daily",
         "Casual"
-      ]
+      ],
+      "chunkIpa": "/wen wər juː ˈθɪŋkɪŋ əv ˈliːvɪŋ?/",
+      "sentenceIpa": "/wen wər juː ˈθɪŋkɪŋ əv ˈliːvɪŋ? aɪ kæn ɡɪv juː ə raɪd tə ðə ˈsteɪʃn/"
     },
     {
       "id": "daily-020",
@@ -7076,7 +7678,9 @@
         "A2-B1",
         "Daily",
         "Casual"
-      ]
+      ],
+      "chunkIpa": "/haʊ əˈbaʊt leɪt ˌæftərˈnuːn?/",
+      "sentenceIpa": "/aɪ hæv ˈmiːtɪŋz ɔːl ˈmɔːrnɪŋ. haʊ əˈbaʊt leɪt ˌæftərˈnuːn?/"
     },
     {
       "id": "daily-021",
@@ -7099,7 +7703,9 @@
         "Routine",
         "Daily",
         "Casual"
-      ]
+      ],
+      "chunkIpa": "/ðə ˈmuːvi ɪz ˈɡoʊɪŋ tə stɑːrt ət/",
+      "sentenceIpa": "/wid ˈbetər ˈhɜːri ʌp, ðə ˈmuːvi ɪz ˈɡoʊɪŋ tə stɑːrt ət eɪt piː em!/"
     },
     {
       "id": "daily-022",
@@ -7122,7 +7728,9 @@
         "Routine",
         "Daily",
         "Casual"
-      ]
+      ],
+      "chunkIpa": "/ɡet ʌp ət əˈraʊnd/",
+      "sentenceIpa": "/ɑːn ˈwiːkdeɪz, aɪ ɡet ʌp ət əˈraʊnd sɪks ˈθɜːrti tə ɡet ˈredi/"
     },
     {
       "id": "daily-023",
@@ -7145,7 +7753,9 @@
         "Routine",
         "Daily",
         "Casual"
-      ]
+      ],
+      "chunkIpa": "/ˈgɛt ˈaʊt ˈʌv ðə ˈhaʊs/",
+      "sentenceIpa": "/aɪ ˈnevər ɡet aʊt bɪˈfɔːr hæf pæst eɪt bɪˈkɔːz əv ˈhevi ˈmɔːrnɪŋ ˈtræfɪk/"
     },
     {
       "id": "daily-024",
@@ -7168,7 +7778,9 @@
         "Routine",
         "Daily",
         "Casual"
-      ]
+      ],
+      "chunkIpa": "/ˈteɪk ˈwʌnz ˈdɔg ˈfɔr ə ˈwɔk/",
+      "sentenceIpa": "/bɪˈfɔːr ˈbrekfəst, aɪ ˈɔːlweɪz teɪk maɪ dɔːɡ fər ə wɔːk əˈraʊnd ðə ˈneɪbərhʊd/"
     },
     {
       "id": "daily-025",
@@ -7191,7 +7803,9 @@
         "Routine",
         "Daily",
         "Casual"
-      ]
+      ],
+      "chunkIpa": "/duː ðə ˈlɔːndri/",
+      "sentenceIpa": "/ˈevri ˈmɔːrnɪŋ, aɪ duː ðə ˈlɔːndri bɪˈfɔːr ˈsɪtɪŋ daʊn ət maɪ desk/"
     },
     {
       "id": "daily-026",
@@ -7214,7 +7828,9 @@
         "A2-B1",
         "Daily",
         "Casual"
-      ]
+      ],
+      "chunkIpa": "/ɡoʊ tə sliːp leɪt?/",
+      "sentenceIpa": "/wen duː juː ɡoʊ tə sliːp leɪt? juː lʊk ə bɪt ɪɡˈzɔːstɪd təˈdeɪ/"
     },
     {
       "id": "daily-027",
@@ -7237,7 +7853,9 @@
         "A2-B1",
         "Daily",
         "Casual"
-      ]
+      ],
+      "chunkIpa": "/teɪk ə næp/",
+      "sentenceIpa": "/ˈæftər lʌntʃ, ˈsʌmtaɪmz aɪ ˈiːvn teɪk ə næp fər ˌfɪfˈtiːn ˈmɪnɪts tə ˌriːˈtʃɑːrdʒ/"
     },
     {
       "id": "daily-028",
@@ -7260,7 +7878,9 @@
         "Routine",
         "Daily",
         "Casual"
-      ]
+      ],
+      "chunkIpa": "/juː ɑːr leɪt təˈdeɪ əˈɡen!/",
+      "sentenceIpa": "/juː ɑːr leɪt təˈdeɪ, əˈɡen! dɪd juː ɡet stʌk ɪn ðə ˈtræfɪk dʒæm?/"
     },
     {
       "id": "daily-029",
@@ -7283,7 +7903,9 @@
         "Routine",
         "Daily",
         "Casual"
-      ]
+      ],
+      "chunkIpa": "/em! wʌt duː juː duː soʊ ˈɜːrli ɪn ðə/",
+      "sentenceIpa": "/jʊr ˈɔːlweɪz ʌp ət faɪv eɪ em! wʌt duː juː duː soʊ ˈɜːrli ɪn ðə ˈmɔːrnɪŋ?/"
     },
     {
       "id": "daily-030",
@@ -7306,7 +7928,9 @@
         "A2-B1",
         "Daily",
         "Casual"
-      ]
+      ],
+      "chunkIpa": "/ˈpɜːrsənl ˈhaɪdʒiːn ruːˈtiːn/",
+      "sentenceIpa": "/ˈæftər ˈweɪkɪŋ ʌp, aɪ duː maɪ ˈpɜːrsənl ˈhaɪdʒiːn ruːˈtiːn ənd ɡet drest/"
     },
     {
       "id": "daily-031",
@@ -7329,7 +7953,9 @@
         "Routine",
         "Daily",
         "Casual"
-      ]
+      ],
+      "chunkIpa": "/ˈgræb ə ˈkwɪk ˈbrɛkfəst/",
+      "sentenceIpa": "/ɑːn ðə weɪ tə ði ˈɔːfɪs, aɪ ˈjuːʒuəli baɪ ə kwɪk ˈbrekfəst laɪk baːɲ miː ɔːr ˈstɪki raɪs/"
     },
     {
       "id": "daily-032",
@@ -7352,7 +7978,9 @@
         "Routine",
         "Daily",
         "Casual"
-      ]
+      ],
+      "chunkIpa": "/hæv ə swiːt tuːθ/",
+      "sentenceIpa": "/aɪ ˈriːəli hæv ə swiːt tuːθ, wɪtʃ ɪz waɪ aɪ kæn ˈnevər tɜːrn daʊn ə ˈtʃɑːklət ˈkʌpkeɪk/"
     },
     {
       "id": "daily-033",
@@ -7375,7 +8003,9 @@
         "Routine",
         "Daily",
         "Casual"
-      ]
+      ],
+      "chunkIpa": "/duː juː rɪˈmembər huː ðɪs ɪz?/",
+      "sentenceIpa": "/lʊk ət ðɪs ˈθroʊbæk ˈælbəm! duː juː rɪˈmembər huː ðɪs ɪz?/"
     },
     {
       "id": "daily-034",
@@ -7398,7 +8028,9 @@
         "Routine",
         "Daily",
         "Casual"
-      ]
+      ],
+      "chunkIpa": "/ˌʌnɪkˈspektɪd ˈɪnsɪdənt/",
+      "sentenceIpa": "/duː tə ən ˌʌnɪkˈspektɪd ˈɪnsɪdənt ɑːn ðə ˈhaɪweɪ, ˈaʊər ˈfæməli əˈraɪvd ən ˈaʊər leɪt/"
     },
     {
       "id": "society-001",
@@ -7421,7 +8053,9 @@
         "Personality",
         "People",
         "Appearance"
-      ]
+      ],
+      "chunkIpa": "/ˈgɛt əˈlɔŋ ˈwɛl ˈwɪð ˈsʌmˌwən/",
+      "sentenceIpa": "/aɪ ɡet əˈlɔːŋ ˈriːəli wel wɪð ɔːl maɪ ˈkɑːliːɡz ɪn ði ˈɔːfɪs/"
     },
     {
       "id": "society-002",
@@ -7444,7 +8078,9 @@
         "Personality",
         "People",
         "Appearance"
-      ]
+      ],
+      "chunkIpa": "/ˈsiː ˈaɪ ˈtuː ˈaɪ ˈwɪð ˈsʌmˌwən/",
+      "sentenceIpa": "/maɪ ˈmænɪdʒər ənd aɪ doʊnt ˈɔːlweɪz siː aɪ tə aɪ, bʌt wi stɪl rɪˈspekt iːtʃ ˈʌðər/"
     },
     {
       "id": "society-003",
@@ -7467,7 +8103,9 @@
         "Personality",
         "People",
         "Appearance"
-      ]
+      ],
+      "chunkIpa": "/ˈkiːp ɪn ˈtʌtʃ ˈwɪð ˈsʌmˌwən/",
+      "sentenceIpa": "/wi stɪl kiːp ɪn tʌtʃ ˈreɡjələrli ˈiːvn ðoʊ wi lɪv ɪn ˈdɪfrənt ˈsɪtiz/"
     },
     {
       "id": "society-004",
@@ -7490,7 +8128,9 @@
         "Personality",
         "People",
         "Appearance"
-      ]
+      ],
+      "chunkIpa": "/ˈluːz ˈtʌtʃ ˈwɪð ˈsʌmˌwən/",
+      "sentenceIpa": "/aɪ lɔːst tʌtʃ wɪð moʊst əv maɪ ˈkɑːlɪdʒ frendz ˈæftər ˌɡrædʒuˈeɪʃn/"
     },
     {
       "id": "society-005",
@@ -7513,7 +8153,9 @@
         "Personality",
         "People",
         "Appearance"
-      ]
+      ],
+      "chunkIpa": "/brɪdʒ ðə ɡæp/",
+      "sentenceIpa": "/ˌɑːnˈlaɪn ˌedʒuˈkeɪʃn helps brɪdʒ ðə ɡæp bɪˈtwiːn ˈɜːrbən ənd ˈrʊrəl ˈstuːdnts/"
     },
     {
       "id": "society-006",
@@ -7536,7 +8178,9 @@
         "Personality",
         "People",
         "Appearance"
-      ]
+      ],
+      "chunkIpa": "/ˈgʊd ˈlʊkɪŋ/",
+      "sentenceIpa": "/ˈevriwʌn ɪn ðə ruːm ˈnoʊtɪst haʊ ʃiːz rɪˈmɑːrkəbli ɡʊd ˈlʊkɪŋ/"
     },
     {
       "id": "society-007",
@@ -7559,7 +8203,9 @@
         "Personality",
         "People",
         "Appearance"
-      ]
+      ],
+      "chunkIpa": "/don't ˈjuː ˈθɪŋk ˈðeɪ ˈmeɪk ə ˈbjuːtəfəl ˈkʌpəl/",
+      "sentenceIpa": "/lʊk ət ðə braɪd ənd ɡruːm! doʊnt juː θɪŋk ðeɪ meɪk ə ˈbjuːtɪfl ˈkʌpl təˈɡeðər?/"
     },
     {
       "id": "society-008",
@@ -7582,7 +8228,9 @@
         "Personality",
         "People",
         "Appearance"
-      ]
+      ],
+      "chunkIpa": "/huː ɪz ðɪs jʌŋ ˈleɪdi/",
+      "sentenceIpa": "/huː ɪz ðɪs jʌŋ ˈleɪdi ˈstændɪŋ bɪˈsaɪd jɔːr ˈsɪstər ɪn ðə ˈfoʊtoʊ?/"
     },
     {
       "id": "society-009",
@@ -7605,7 +8253,9 @@
         "Personality",
         "People",
         "Appearance"
-      ]
+      ],
+      "chunkIpa": "/ˈkɑːlɪdʒ ˈstuːdənt/",
+      "sentenceIpa": "/ʃiː wɜːrks pɑːrt taɪm ət ə ˈloʊkl kæˈfeɪ waɪl ʃiːz ə ˈkɑːlɪdʒ ˈstuːdnt/"
     },
     {
       "id": "society-010",
@@ -7628,7 +8278,9 @@
         "Personality",
         "People",
         "Appearance"
-      ]
+      ],
+      "chunkIpa": "/ɪn maɪ juːθ/",
+      "sentenceIpa": "/ɪt wəz ə fjuː jɪrz bæk ɪn maɪ juːθ wen aɪ ˈtrævld əˈkrɔːs ˌsaʊθˈiːst ˈeɪʒə/"
     },
     {
       "id": "society-011",
@@ -7651,7 +8303,9 @@
         "Personality",
         "People",
         "Appearance"
-      ]
+      ],
+      "chunkIpa": "/duː aɪ lʊk ðæt oʊld?/",
+      "sentenceIpa": "/ðə klɜːrk ˈɔːfərd miː ə ˈsiːniər ˈsɪtɪzn ˈdɪskaʊnt. duː aɪ lʊk ðæt oʊld?/"
     },
     {
       "id": "society-012",
@@ -7674,7 +8328,9 @@
         "Personality",
         "People",
         "Appearance"
-      ]
+      ],
+      "chunkIpa": "/faɪv hiː ɪz nɑːt ðæt/",
+      "sentenceIpa": "/wʌt duː juː miːn oʊld mæn? hiː ɪz ˈoʊnli ˈsɪksti faɪv, hiː ɪz nɑːt ðæt oʊld!/"
     },
     {
       "id": "environment-001",
@@ -7697,7 +8353,9 @@
         "Climate",
         "Green",
         "Environment"
-      ]
+      ],
+      "chunkIpa": "/ˈreɪz əˈwɛrnəs ˈʌv ˈsʌmθɪŋ/",
+      "sentenceIpa": "/wi niːd tə reɪz əˈwernəs əv ɪnˌvaɪrənˈmentl ˈɪʃuːz ɪn ˈloʊkl skuːlz/"
     },
     {
       "id": "environment-002",
@@ -7720,7 +8378,9 @@
         "Climate",
         "Green",
         "Environment"
-      ]
+      ],
+      "chunkIpa": "/ˈkʌt ˈdaʊn ˈɑːn ˈsʌmθɪŋ/",
+      "sentenceIpa": "/ˈaʊər ˈfæməli ɪz ˈæktɪvli ˈtraɪɪŋ tə kʌt daʊn ɑːn ˈsɪŋɡl juːs ˈplæstɪk/"
     },
     {
       "id": "environment-003",
@@ -7743,7 +8403,9 @@
         "B1-B2",
         "Green",
         "Environment"
-      ]
+      ],
+      "chunkIpa": "/rɪˈduːs ˈwʌnz ˈkɑːrbən ˈfʊtˌprɪnt/",
+      "sentenceIpa": "/ˈteɪkɪŋ ˈpʌblɪk ˈtrænzɪt ɪz ən ɪˈfektɪv weɪ tə rɪˈduːs jɔːr ˈkɑːrbən ˈfʊtprɪnt/"
     },
     {
       "id": "environment-004",
@@ -7766,7 +8428,9 @@
         "B1-B2",
         "Green",
         "Environment"
-      ]
+      ],
+      "chunkIpa": "/ˈteɪk ə ˈtoʊl ˈɑːn ˈsʌmθɪŋ/",
+      "sentenceIpa": "/ˈplæstɪk pəˈluːʃn ɪz ˈteɪkɪŋ ə ˈhevi toʊl ɑːn məˈriːn ˈiːkoʊsɪstəmz/"
     },
     {
       "id": "environment-005",
@@ -7789,7 +8453,9 @@
         "Climate",
         "Green",
         "Environment"
-      ]
+      ],
+      "chunkIpa": "/ˈiːkoʊ ˈfrendli ɔːlˈtɜːrnətɪvz/",
+      "sentenceIpa": "/ˈmeni kæˈfeɪz ɑːr ˈswɪtʃɪŋ tə ˈiːkoʊ ˈfrendli ɔːlˈtɜːrnətɪvz laɪk ˈpeɪpər strɔːz ənd ɡlæs dʒɑːrz/"
     },
     {
       "id": "environment-006",
@@ -7812,7 +8478,9 @@
         "A2-B1",
         "Green",
         "Environment"
-      ]
+      ],
+      "chunkIpa": "/ði oʊld ˈbɪldɪŋ ɪz ˈɡoʊɪŋ tə kəˈlæps suːn/",
+      "sentenceIpa": "/pliːz steɪ klɪr əv ðæt kənˈstrʌkʃn ˈeriə; ði oʊld ˈbɪldɪŋ ɪz ˈɡoʊɪŋ tə kəˈlæps suːn/"
     },
     {
       "id": "environment-007",
@@ -7835,7 +8503,9 @@
         "A2-B1",
         "Green",
         "Environment"
-      ]
+      ],
+      "chunkIpa": "/ðə fruːt ɪz ˈɡoʊɪŋ tə fɔːl daʊn/",
+      "sentenceIpa": "/ðɪs triː ɪz kəmˈpliːtli raɪp, ðə fruːt ɪz ˈɡoʊɪŋ tə fɔːl daʊn ɪf wi doʊnt ˈhɑːrvɪst ɪt təˈdeɪ/"
     },
     {
       "id": "weather-001",
@@ -7858,7 +8528,9 @@
         "Weather",
         "Seasons",
         "Forecast"
-      ]
+      ],
+      "chunkIpa": "/ɪt lʊks laɪk reɪn/",
+      "sentenceIpa": "/lʊk ət ðoʊz dɑːrk klaʊdz, ɪt lʊks laɪk reɪn/"
     },
     {
       "id": "weather-002",
@@ -7881,7 +8553,9 @@
         "Weather",
         "Seasons",
         "Forecast"
-      ]
+      ],
+      "chunkIpa": "/ə ˈsʌdn ˈdaʊnpɔːr/",
+      "sentenceIpa": "/wi wər ˈwɔːkɪŋ ɪn ðə pɑːrk wen ə ˈsʌdn ˈdaʊnpɔːr ˈstɑːrtɪd/"
     },
     {
       "id": "weather-003",
@@ -7904,7 +8578,9 @@
         "Weather",
         "Seasons",
         "Forecast"
-      ]
+      ],
+      "chunkIpa": "/ˈgɛt ˈkɑːt ɪn ðə ˈreɪn/",
+      "sentenceIpa": "/aɪ ˈdɪdnt tʃek ðə ˈfɔːrkæst ənd ɡɑːt kɔːt ɪn ðə reɪn ɑːn maɪ weɪ hoʊm/"
     },
     {
       "id": "weather-004",
@@ -7927,7 +8603,9 @@
         "Weather",
         "Seasons",
         "Forecast"
-      ]
+      ],
+      "chunkIpa": "/ˈpɔr ˈwɪð ˈreɪn/",
+      "sentenceIpa": "/ɪt həz bɪn ˈpɔːrɪŋ wɪð reɪn ɔːl ˈmɔːrnɪŋ, soʊ wi steɪd ɪnˈsaɪd/"
     },
     {
       "id": "weather-005",
@@ -7950,7 +8628,9 @@
         "Weather",
         "Seasons",
         "Forecast"
-      ]
+      ],
+      "chunkIpa": "/ˈgɛt ˈsoʊkt ˈtuː ðə ˈskɪn/",
+      "sentenceIpa": "/aɪ fərˈɡɑːt maɪ ˈreɪnkoʊt ənd ɡɑːt soʊkt tə ðə skɪn/"
     },
     {
       "id": "weather-006",
@@ -7973,7 +8653,9 @@
         "Weather",
         "Seasons",
         "Forecast"
-      ]
+      ],
+      "chunkIpa": "/ˈskætərd ˈʃaʊərz/",
+      "sentenceIpa": "/ðə ˈfɔːrkæst sez ðer wɪl bi ˈskætərd ˈʃaʊərz ɪn ði ˌæftərˈnuːn/"
     },
     {
       "id": "weather-007",
@@ -7996,7 +8678,9 @@
         "Weather",
         "Seasons",
         "Forecast"
-      ]
+      ],
+      "chunkIpa": "/ˈklɪr ˈʌp/",
+      "sentenceIpa": "/aɪ hoʊp ðə ˈweðər klɪrz ʌp bɪˈfɔːr ˈaʊər ˌaʊtˈdɔːr ˈbɑːrbɪkjuː/"
     },
     {
       "id": "weather-008",
@@ -8019,7 +8703,9 @@
         "Weather",
         "Seasons",
         "Forecast"
-      ]
+      ],
+      "chunkIpa": "/teɪk ən ʌmˈbrelə dʒʌst ɪn keɪs/",
+      "sentenceIpa": "/ðə skaɪ ɪz ˌoʊvərˈkæst, soʊ juː ʃʊd teɪk ən ʌmˈbrelə dʒʌst ɪn keɪs/"
     },
     {
       "id": "weather-009",
@@ -8042,7 +8728,9 @@
         "Weather",
         "Seasons",
         "Forecast"
-      ]
+      ],
+      "chunkIpa": "/ˈfriːzɪŋ koʊld/",
+      "sentenceIpa": "/ɪts ˈfriːzɪŋ koʊld ˌaʊtˈsaɪd, soʊ doʊnt fərˈɡet jɔːr ɡlʌvz/"
     },
     {
       "id": "weather-010",
@@ -8065,7 +8753,9 @@
         "Weather",
         "Seasons",
         "Forecast"
-      ]
+      ],
+      "chunkIpa": "/ə bɪt ˈtʃɪli/",
+      "sentenceIpa": "/ɪts ə bɪt ˈtʃɪli ðɪs ˈiːvnɪŋ; juː maɪt niːd ə laɪt ˈdʒækɪt/"
     },
     {
       "id": "weather-011",
@@ -8088,7 +8778,9 @@
         "Weather",
         "Seasons",
         "Forecast"
-      ]
+      ],
+      "chunkIpa": "/ˈbʌndl ʌp/",
+      "sentenceIpa": "/meɪk ʃʊr juː ˈbʌndl ʌp bɪˈfɔːr ˈhedɪŋ aʊt ˈɪntə ðə snoʊ/"
     },
     {
       "id": "weather-012",
@@ -8111,7 +8803,9 @@
         "Weather",
         "Seasons",
         "Forecast"
-      ]
+      ],
+      "chunkIpa": "/ðerz ə tʃɪl ɪn ði er/",
+      "sentenceIpa": "/ˈɔːtəm həz əˈraɪvd ənd ðerz ə tʃɪl ɪn ði er ˈevri ˈmɔːrnɪŋ/"
     },
     {
       "id": "weather-013",
@@ -8134,7 +8828,9 @@
         "Weather",
         "Seasons",
         "Forecast"
-      ]
+      ],
+      "chunkIpa": "/ˈbaɪtɪŋ wɪnd/",
+      "sentenceIpa": "/ðə ˈbaɪtɪŋ wɪnd meɪd ɪt ˈdɪfɪkəlt tə wɔːk əˈlɔːŋ ðə brɪdʒ/"
     },
     {
       "id": "weather-014",
@@ -8157,7 +8853,9 @@
         "Weather",
         "Seasons",
         "Forecast"
-      ]
+      ],
+      "chunkIpa": "/ˈkætʃ ə ˈkoʊld ˈfrʌm ðə ˈwɛðɜːr/",
+      "sentenceIpa": "/aɪ ˈdɪdnt wer ɪˈnʌf wɔːrm kloʊðz ənd kɔːt ə koʊld frəm ðə ˈweðər/"
     },
     {
       "id": "weather-015",
@@ -8180,7 +8878,9 @@
         "Weather",
         "Seasons",
         "Forecast"
-      ]
+      ],
+      "chunkIpa": "/ˈbɔɪlɪŋ hɑːt/",
+      "sentenceIpa": "/ɪt wəz ˈbɔɪlɪŋ hɑːt ˈjestərdeɪ, ˈriːtʃɪŋ ˈoʊvər ˌθɜːrti ˈeɪt dɪˈɡriːz ˈselsiəs/"
     },
     {
       "id": "weather-016",
@@ -8203,7 +8903,9 @@
         "Weather",
         "Seasons",
         "Forecast"
-      ]
+      ],
+      "chunkIpa": "/ˈmʌɡi ənd ˈhjuːmɪd/",
+      "sentenceIpa": "/ðə ˈweðər hɪr ɪn ˈsʌmər ɪz ˈjuːʒuəli ˈmʌɡi ənd ˈhjuːmɪd/"
     },
     {
       "id": "weather-017",
@@ -8226,7 +8928,9 @@
         "Weather",
         "Seasons",
         "Forecast"
-      ]
+      ],
+      "chunkIpa": "/ˈskɔːrtʃɪŋ sʌn/",
+      "sentenceIpa": "/əˈvɔɪd ˈeksərsaɪzɪŋ ˌaʊtˈdɔːrz ˈʌndər ðə ˈskɔːrtʃɪŋ sʌn ət nuːn/"
     },
     {
       "id": "weather-018",
@@ -8249,7 +8953,9 @@
         "Weather",
         "Seasons",
         "Forecast"
-      ]
+      ],
+      "chunkIpa": "/biːt ðə hiːt/",
+      "sentenceIpa": "/wi dɪˈsaɪdɪd tə ɡoʊ tə ðə ˈwɔːtər pɑːrk tə biːt ðə hiːt/"
     },
     {
       "id": "weather-019",
@@ -8272,7 +8978,9 @@
         "Weather",
         "Seasons",
         "Forecast"
-      ]
+      ],
+      "chunkIpa": "/wɑːts ðə ˈweðər laɪk təˈdeɪ?/",
+      "sentenceIpa": "/wɑːts ðə ˈweðər laɪk təˈdeɪ? ʃʊd aɪ wer ə koʊt?/"
     },
     {
       "id": "weather-020",
@@ -8295,7 +9003,9 @@
         "Weather",
         "Seasons",
         "Forecast"
-      ]
+      ],
+      "chunkIpa": "/ˈlʌvli ˈweðər təˈdeɪ ˈɪznt ɪt?/",
+      "sentenceIpa": "/ˈlʌvli ˈweðər təˈdeɪ, ˈɪznt ɪt? ˈpɜːrfɪkt fər ə stroʊl/"
     },
     {
       "id": "weather-021",
@@ -8318,7 +9028,9 @@
         "Weather",
         "Seasons",
         "Forecast"
-      ]
+      ],
+      "chunkIpa": "/tʃek ðə ˈweðər ˈfɔːrkæst/",
+      "sentenceIpa": "/ˈɔːlweɪz tʃek ðə ˈweðər ˈfɔːrkæst bɪˈfɔːr ˈplænɪŋ ə ˈwiːkend ˈkæmpɪŋ trɪp/"
     },
     {
       "id": "weather-022",
@@ -8341,7 +9053,9 @@
         "Weather",
         "Seasons",
         "Forecast"
-      ]
+      ],
+      "chunkIpa": "/dres fər ðə ˈweðər/",
+      "sentenceIpa": "/ðə ˈtemprətʃər wɪl drɑːp təˈnaɪt, soʊ meɪk ʃʊr juː dres fər ðə ˈweðər/"
     },
     {
       "id": "weather-023",
@@ -8364,7 +9078,9 @@
         "Weather",
         "Seasons",
         "Forecast"
-      ]
+      ],
+      "chunkIpa": "/ðə ˈweðər ɪz ˌʌnprɪˈdɪktəbl/",
+      "sentenceIpa": "/ðə ˈweðər ɪz ˌʌnprɪˈdɪktəbl ət ðɪs taɪm əv jɪr; ɪt kəd reɪn ˈenitaɪm/"
     },
     {
       "id": "weather-024",
@@ -8387,7 +9103,9 @@
         "Weather",
         "Seasons",
         "Forecast"
-      ]
+      ],
+      "chunkIpa": "/ˈhevi fɔːɡ/",
+      "sentenceIpa": "/flaɪts wər dɪˈleɪd ðɪs ˈmɔːrnɪŋ duː tə ˈhevi fɔːɡ/"
     },
     {
       "id": "weather-025",
@@ -8410,7 +9128,9 @@
         "Weather",
         "Seasons",
         "Forecast"
-      ]
+      ],
+      "chunkIpa": "/ɪts ˈɡoʊɪŋ tə reɪn/",
+      "sentenceIpa": "/lʊk ət ðə klaʊdz! ɪts ˈɡoʊɪŋ tə reɪn; wi ʃʊd pæk ʌp ənd hed ɪnˈsaɪd/"
     },
     {
       "id": "weather-026",
@@ -8433,7 +9153,9 @@
         "Weather",
         "Seasons",
         "Forecast"
-      ]
+      ],
+      "chunkIpa": "/ɪt ɪz ˈɡoʊɪŋ tə snoʊ təˈnaɪt/",
+      "sentenceIpa": "/ðə ˈweðər ˈfɔːrkæst sez ɪt ɪz ˈɡoʊɪŋ tə snoʊ təˈnaɪt, soʊ doʊnt fərˈɡet tə tɜːrn ɑːn ðə ˈhiːtər/"
     }
   ]
 }

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 🎬 YouTube Transcript & Timing Extraction Service
  * 
  * Nguồn gốc & Kiến trúc:

@@ -1,4 +1,4 @@
-export type CEFRLevel = 'A2' | 'B1' | 'B2' | 'C1';
+export type CEFRLevel = "A2" | "B1" | "B2" | "C1";
 
 export interface AuthUser {
   uid: string;
@@ -76,13 +76,19 @@ export interface UserStats {
   dailyGoal: number; // default 20
   customChunksCount?: number;
   totalChunksCount?: number;
+
+  // ── Multi-Device Sync & Tombstones ─────────────────────────────
+  /** Danh sách tối đa 100 ID custom chunk đã xóa gần nhất (FIFO) */
+  deletedChunkIds?: string[];
+  /** Timestamp lần cuối có custom chunk được tạo, sửa hoặc xóa */
+  lastCustomChunksUpdatedAt?: number;
 }
 
-export type PracticeMode = 'shadowing' | 'blanks' | 'reflex' | 'browse' | 'analytics';
+export type PracticeMode = "shadowing" | "blanks" | "reflex" | "browse" | "analytics";
 
 export interface WordMatchToken {
   word: string;
-  status: 'correct' | 'missing' | 'extra';
+  status: "correct" | "missing" | "extra";
 }
 
 export interface SpeechEvalResult {

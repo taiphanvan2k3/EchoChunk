@@ -7,6 +7,7 @@ const PROGRESS_KEY = "echo_chunk_progress_v1";
 const STATS_KEY = "echo_chunk_stats_v1";
 const CUSTOM_CHUNKS_KEY = "echo_chunk_custom_chunks_v1";
 const DELETED_CHUNK_IDS_KEY = "echo_chunk_deleted_ids_v1";
+const LAST_SYNCED_CHUNKS_AT_KEY = "echo_chunk_last_synced_chunks_at_v1";
 
 export function getTodayDateStr(): string {
   return new Date().toISOString().split("T")[0];
@@ -43,11 +44,28 @@ export function clearGuestStorage(): void {
   localStorage.removeItem(`${STATS_KEY}_guest`);
   localStorage.removeItem(`${CUSTOM_CHUNKS_KEY}_guest`);
   localStorage.removeItem(`${DELETED_CHUNK_IDS_KEY}_guest`);
+  localStorage.removeItem(`${LAST_SYNCED_CHUNKS_AT_KEY}_guest`);
+
+  // Clean legacy un-suffixed keys
   localStorage.removeItem(PROGRESS_KEY);
   localStorage.removeItem(STATS_KEY);
   localStorage.removeItem(CUSTOM_CHUNKS_KEY);
   localStorage.removeItem(DELETED_CHUNK_IDS_KEY);
+  localStorage.removeItem(LAST_SYNCED_CHUNKS_AT_KEY);
 }
+
+export function loadLastSyncedChunksAt(uid?: string | null): number {
+  if (typeof window === "undefined") return 0;
+  const raw = getItemWithFallback(LAST_SYNCED_CHUNKS_AT_KEY, uid);
+  return raw ? parseInt(raw, 10) || 0 : 0;
+}
+
+export function saveLastSyncedChunksAt(timestamp: number, uid?: string | null): void {
+  if (typeof window === "undefined") return;
+  const key = getStorageKey(LAST_SYNCED_CHUNKS_AT_KEY, uid);
+  localStorage.setItem(key, timestamp.toString());
+}
+
 
 export function loadProgressMap(uid?: string | null): Record<string, ChunkProgress> {
   if (typeof window === "undefined") return {};
@@ -134,7 +152,26 @@ export function loadCustomChunks(uid?: string | null): SpeakingChunk[] {
   if (typeof window === "undefined") return [];
   try {
     const raw = getItemWithFallback(CUSTOM_CHUNKS_KEY, uid);
-    return raw ? JSON.parse(raw) : [];
+    if (!raw) return [];
+    const list: SpeakingChunk[] = JSON.parse(raw);
+    let hasDirty = false;
+    const sanitized = list.map((c) => {
+      if (c.topicName === "Đã luyện tập" || c.sectionTitle === "Đã luyện tập" || c.topicId === "STUDIED") {
+        hasDirty = true;
+        return {
+          ...c,
+          topicId: "CUSTOM",
+          topicName: "Từ vựng của tôi",
+          sectionTitle: "Từ vựng của tôi",
+          topicIcon: "⭐"
+        };
+      }
+      return c;
+    });
+    if (hasDirty) {
+      saveCustomChunks(sanitized, uid);
+    }
+    return sanitized;
   } catch (e) {
     console.error("Failed to load custom chunks", e);
     return [];

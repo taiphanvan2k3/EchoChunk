@@ -1,4 +1,4 @@
-// Speech Synthesis (TTS) & Web Speech Recognition (STT) + Mobile-Optimized Deduplication
+﻿// Speech Synthesis (TTS) & Web Speech Recognition (STT) + Mobile-Optimized Deduplication
 import { SpeechEvalResult, WordMatchToken } from '@/types';
 
 interface SpeechRecognitionResultLike {

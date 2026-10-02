@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { memo, forwardRef } from "react";
 import { YouTubeSentence, YouTubeWord } from "@/types/youtube";

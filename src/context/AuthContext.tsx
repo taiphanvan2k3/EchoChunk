@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { createContext, useContext, useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { AuthUser, onAuthChange, signInWithGoogle, signOutUser } from "@/lib/client/firebase/auth";

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { Mic, Edit3, MessageSquare, BookOpen } from 'lucide-react';
 

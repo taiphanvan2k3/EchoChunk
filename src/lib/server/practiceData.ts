@@ -13,11 +13,13 @@ import {
 } from '@/types';
 import { sortQueue } from '@/lib/shared/srs';
 import { getAdminInstances, verifyUserSession } from '@/lib/server/admin';
+import { isUserOwnedChunk } from '@/lib/shared/chunkClassification';
 
 const data = dataset as unknown as ChunksDataset;
 
 export interface InitialPracticeData {
-  allChunks?: SpeakingChunk[];
+  /** Chunk đầu tiên trong queue nếu user đã sửa nó - dùng để tránh IPA flicker khi SSR→hydration */
+  firstChunk?: SpeakingChunk;
   progressMap: Record<string, ChunkProgress>;
   userStats: UserStats;
   dynamicTopics: TopicMeta[];
@@ -42,15 +44,20 @@ function computeDynamicTopics(
   customChunksCount: number = 0
 ): TopicMeta[] {
   const counts: Record<string, number> = {};
-  let customCount = customChunksCount;
+  let customCount = 0;
 
   allChunks.forEach((c) => {
-    if (c.isCustom || c.topicId === 'CUSTOM') {
-      customCount += 1;
-    } else {
+    if (c.topicId && c.topicId !== 'CUSTOM' && c.topicId !== 'STUDIED') {
       counts[c.topicId] = (counts[c.topicId] || 0) + 1;
     }
+    if (isUserOwnedChunk(c)) {
+      customCount += 1;
+    }
   });
+
+  if (customCount === 0) {
+    customCount = customChunksCount;
+  }
 
   // Đếm chính xác số câu đã luyện tập từ progressMap (không phụ thuộc allChunks)
   const studiedCount = Object.values(progressMap).filter(
@@ -131,6 +138,7 @@ export async function getInitialServerData(): Promise<InitialServerResult> {
   let initialUser: AuthUser | null = null;
   const progressMap: Record<string, ChunkProgress> = {};
   let userStats: UserStats = defaultStats;
+  let adminDb: ReturnType<typeof getAdminInstances>['db'] | null = null;
 
   if (sessionCookie) {
     const decoded = await verifyUserSession(sessionCookie);
@@ -143,6 +151,7 @@ export async function getInitialServerData(): Promise<InitialServerResult> {
       };
 
       const { db } = getAdminInstances();
+      adminDb = db;
       if (db) {
         try {
           const userDocRef = db.collection('users').doc(decoded.uid);
@@ -221,6 +230,8 @@ export async function getInitialServerData(): Promise<InitialServerResult> {
               dailyGoal: Number(raw.dailyGoal) || 20,
               customChunksCount,
               totalChunksCount: savedTotalChunksCount,
+              deletedChunkIds: Array.isArray(raw.deletedChunkIds) ? (raw.deletedChunkIds as string[]) : [],
+              lastCustomChunksUpdatedAt: Number(raw.lastCustomChunksUpdatedAt) || 0,
             };
           }
         } catch (error) {
@@ -230,9 +241,44 @@ export async function getInitialServerData(): Promise<InitialServerResult> {
     }
   }
 
-  const allChunks = data.chunks;
+  // Tính chunk đầu tiên sẽ hiển thị để fetch ĐÚNG 1 document nếu user đã sửa nó.
+  // Tránh IPA flicker SSR → hydration mà không serialize cả 800KB base data.
+  const baseChunks = data.chunks;
+  let firstChunk: SpeakingChunk | undefined;
+
+  if (initialUser && adminDb) {
+    try {
+      // sortQueue cần progressMap đã được populate từ bước trước
+      const sortedQueue = sortQueue(baseChunks, progressMap);
+      const firstChunkId = sortedQueue[0]?.id;
+
+      if (firstChunkId) {
+        // Timeout riêng 400ms, không block SSR quá lâu
+        const fetchWithTimeout = Promise.race([
+          adminDb
+            .collection('users')
+            .doc(initialUser.uid)
+            .collection('customChunks')
+            .doc(firstChunkId)
+            .get(),
+          new Promise<null>((resolve) => {
+            const t = setTimeout(() => resolve(null), 400);
+            if (typeof t.unref === 'function') t.unref();
+          }),
+        ]);
+
+        const customChunkDoc = await fetchWithTimeout;
+        if (customChunkDoc && 'exists' in customChunkDoc && customChunkDoc.exists) {
+          firstChunk = serializeFirestoreData<SpeakingChunk>(customChunkDoc.data() as SpeakingChunk);
+        }
+      }
+    } catch (e) {
+      console.warn('[SSR] Could not prefetch first custom chunk:', e);
+    }
+  }
+
   const dynamicTopics = computeDynamicTopics(
-    allChunks,
+    baseChunks,
     progressMap,
     userStats.customChunksCount || 0
   );
@@ -242,15 +288,14 @@ export async function getInitialServerData(): Promise<InitialServerResult> {
     return new Date(prog.dueDate).getTime() <= todayTimestamp;
   }).length;
 
-  const totalChunksCount = userStats.totalChunksCount ?? (allChunks.length + (userStats.customChunksCount || 0));
+  const totalChunksCount = userStats.totalChunksCount ?? (baseChunks.length + (userStats.customChunksCount || 0));
   const studiedKeysCount = Object.keys(progressMap).filter((k) => progressMap[k]?.repetitions > 0).length;
   const unstudiedCount = Math.max(0, totalChunksCount - studiedKeysCount);
 
-  // Tối ưu hóa: Không truyền mảng allChunks và practiceQueue trùng lặp qua RSC Payload
-  // để giảm bớt ~800KB chuỗi JSON khỏi tài liệu HTML ban đầu
   return toPlainObject({
     initialUser,
     initialPracticeData: {
+      firstChunk,
       progressMap,
       userStats,
       dynamicTopics,

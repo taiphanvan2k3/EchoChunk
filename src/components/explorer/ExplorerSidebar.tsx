@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { TopicMeta, SpeakingChunk } from "@/types";
 import { Brain, Clock, Star } from "lucide-react";

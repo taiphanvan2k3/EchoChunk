@@ -2,7 +2,7 @@
 
 > **Tài liệu tham chiếu:** [docs/specs/05-capacitor-mobile-app/spec.md](spec.md) (`SPEC-05`)  
 > **Phiên bản:** 1.0  
-> **Trạng thái:** Sẵn sàng triển khai (Ready for Implementation)  
+> **Trạng thái:** ✅ Đã hoàn thành (Implemented & Verified)  
 > **Nền tảng mục tiêu:** Android (Giai đoạn 1) ➔ iOS (Giai đoạn 2)
 
 ---

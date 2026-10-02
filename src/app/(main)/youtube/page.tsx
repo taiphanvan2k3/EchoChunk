@@ -1,4 +1,4 @@
-import { Metadata } from 'next';
+﻿import { Metadata } from 'next';
 import { YouTubeStudyRoom } from '@/components/youtube/YouTubeStudyRoom';
 
 export const metadata: Metadata = {

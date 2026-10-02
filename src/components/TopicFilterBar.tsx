@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useCallback, WheelEvent } from 'react';
+﻿import { useRef, useState, useEffect, useCallback, WheelEvent } from 'react';
 import { soundManager } from '@/lib/client/sound';
 import { TopicMeta } from '@/types';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
