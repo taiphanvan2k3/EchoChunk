@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+"use client";
+
+import { useState } from "react";
 import {
   Volume2,
   Trash2,
@@ -8,8 +10,8 @@ import {
   Eraser,
   MessageSquare,
   AlertTriangle,
-  PenLine,
-  Eye
+  Eye,
+  Edit3
 } from "lucide-react";
 import { formatMarkdown } from "@/lib/shared/formatMarkdown";
 import { ModalExampleItem } from "@/hooks/useChunkEditor";
@@ -33,7 +35,7 @@ interface ExampleCardProps {
   onClearHighlight: (index: number) => void;
 }
 
-export const ExampleCard: React.FC<ExampleCardProps> = ({
+export function ExampleCard({
   ex,
   index,
   totalCount,
@@ -50,162 +52,138 @@ export const ExampleCard: React.FC<ExampleCardProps> = ({
   onToggleHighlight,
   onAutoHighlight,
   onClearHighlight
-}) => {
+}: ExampleCardProps) {
   const [activeTab, setActiveTab] = useState<"edit" | "preview">("edit");
 
   return (
-    <div className="notion-callout-editor notion-example-item-card">
-      {/* Card header */}
-      <div className="callout-editor-header">
-        <div className="callout-label-row">
-          <MessageSquare size={15} className="callout-icon" />
-          <span className="callout-title">Câu ví dụ thực tế #{index + 1}</span>
+    <div className="bg-slate-50/70 border border-slate-200/90 rounded-xl p-3.5 sm:p-4 space-y-3 shadow-[0_1px_2px_rgba(0,0,0,0.03)] hover:border-slate-300 transition-all">
+      {/* Card Header: Badge + Actions */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700">
+          <MessageSquare size={13} className="shrink-0" />
+          <span>Câu ví dụ #{index + 1}</span>
         </div>
-        <div className="callout-actions-row">
+
+        <div className="flex items-center gap-1.5">
           <button
             type="button"
-            className="callout-listen-btn"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 bg-white hover:bg-blue-50 border border-gray-200 rounded-lg px-2.5 py-1 transition-colors cursor-pointer"
             onClick={() => onTestAudio(ex.sentence)}
             title="Nghe thử phát âm câu ví dụ này"
           >
-            <Volume2 size={14} />
+            <Volume2 size={13} />
             <span>Nghe thử</span>
           </button>
+
+          <button
+            type="button"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-gray-600 hover:text-gray-900 bg-white hover:bg-gray-100 border border-gray-200 rounded-lg px-2 py-1 transition-colors cursor-pointer"
+            onClick={() => setActiveTab(activeTab === "edit" ? "preview" : "edit")}
+            title={activeTab === "edit" ? "Xem trước câu khi học" : "Chuyển sang soạn thảo"}
+          >
+            {activeTab === "edit" ? (
+              <>
+                <Eye size={13} />
+                <span className="hidden sm:inline">Xem trước</span>
+              </>
+            ) : (
+              <>
+                <Edit3 size={13} />
+                <span className="hidden sm:inline">Soạn thảo</span>
+              </>
+            )}
+          </button>
+
           {totalCount > 1 && (
             <button
               type="button"
-              className="callout-remove-btn"
+              className="inline-flex items-center text-xs font-semibold text-red-500 hover:text-red-700 bg-white hover:bg-red-50 border border-red-200 rounded-lg p-1 transition-colors cursor-pointer"
               onClick={() => onRemove(index)}
               title="Xóa câu ví dụ này"
             >
-              <Trash2 size={14} />
-              <span>Xóa</span>
+              <Trash2 size={13} />
             </button>
           )}
         </div>
       </div>
 
-      {/* Tabbed Editor Box (Soạn thảo / Xem chi tiết) */}
-      <div className="example-sentence-editor-box">
-        {/* Editor Tab Bar */}
-        <div className="example-editor-tabs-bar">
-          <div className="example-editor-tabs" role="tablist">
+      {/* Sentence Editor or Preview */}
+      {activeTab === "edit" ? (
+        <div className="space-y-1.5">
+          <textarea
+            ref={textareaRef}
+            className="w-full bg-white border border-gray-200 focus:border-blue-500 rounded-lg p-3 text-sm text-gray-900 leading-relaxed placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500/10 outline-none transition-all resize-y min-h-[72px]"
+            rows={2}
+            placeholder={`Ví dụ #${index + 1}: Nhập câu ví dụ tiếng Anh... (bấm Enter để xuống dòng nếu hội thoại)`}
+            value={ex.sentence}
+            onChange={(e) => onSentenceChange(index, e.target.value)}
+            onKeyDown={(e) => {
+              if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "b") {
+                e.preventDefault();
+                onToggleHighlight(index);
+              }
+            }}
+          />
+
+          {/* Highlight Toolbar */}
+          <div className="flex items-center gap-1.5 flex-wrap">
             <button
               type="button"
-              role="tab"
-              aria-selected={activeTab === "edit"}
-              className={`example-editor-tab ${activeTab === "edit" ? "active" : ""}`}
-              onClick={() => setActiveTab("edit")}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200/80 transition-colors cursor-pointer"
+              onClick={() => onToggleHighlight(index)}
+              title="Bôi đen chữ rồi bấm (hoặc Ctrl+B) để highlight cụm từ"
             >
-              <PenLine size={13} />
-              <span>Soạn thảo</span>
+              <Highlighter size={12} />
+              <span>Highlight cụm</span>
+              <kbd className="hidden sm:inline font-mono text-[0.65rem] opacity-70 ml-0.5">Ctrl+B</kbd>
             </button>
+
             <button
               type="button"
-              role="tab"
-              aria-selected={activeTab === "preview"}
-              className={`example-editor-tab ${activeTab === "preview" ? "active" : ""}`}
-              onClick={() => setActiveTab("preview")}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium bg-white hover:bg-purple-50 text-purple-700 border border-purple-200 transition-colors cursor-pointer disabled:opacity-40"
+              onClick={() => onAutoHighlight(index)}
+              disabled={!chunkText.trim()}
+              title={
+                chunkText.trim()
+                  ? `Tự động tìm và bôi đậm cụm "${chunkText}" trong câu`
+                  : "Cần nhập cụm từ trước"
+              }
             >
-              <Eye size={13} />
-              <span>Xem chi tiết</span>
+              <Sparkles size={12} />
+              <span>Tự tìm cụm</span>
+            </button>
+
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-white hover:bg-red-50 text-gray-500 hover:text-red-600 border border-gray-200 hover:border-red-200 transition-colors cursor-pointer"
+              onClick={() => onClearHighlight(index)}
+              title="Xóa toàn bộ ký tự highlight"
+            >
+              <Eraser size={12} />
+              <span className="hidden sm:inline">Bỏ highlight</span>
             </button>
           </div>
-
-          <span className="editor-toolbar-hint">
-            {activeTab === "edit" ? "Enter để xuống dòng" : "Xem trước hiển thị câu khi học"}
-          </span>
         </div>
-
-        {/* Tab 1: Soạn thảo */}
-        {activeTab === "edit" && (
-          <div className="example-editor-edit-pane">
-            {/* Formatting toolbar */}
-            <div className="example-editor-toolbar">
-              <div className="editor-toolbar-actions">
-                <button
-                  type="button"
-                  className="editor-toolbar-btn highlight"
-                  onClick={() => onToggleHighlight(index)}
-                  title="Bôi đen chữ rồi bấm (hoặc bấm phím tắt Ctrl+B) để highlight cụm từ"
-                >
-                  <Highlighter size={13} />
-                  <span>Highlight cụm</span>
-                  <kbd className="toolbar-kbd">Ctrl+B</kbd>
-                </button>
-
-                <button
-                  type="button"
-                  className="editor-toolbar-btn auto"
-                  onClick={() => onAutoHighlight(index)}
-                  disabled={!chunkText.trim()}
-                  title={
-                    chunkText.trim()
-                      ? `Tự động tìm và bôi đậm cụm "${chunkText}" trong câu`
-                      : "Cần nhập cụm từ trước"
-                  }
-                >
-                  <Sparkles size={13} />
-                  <span>Tự tìm cụm</span>
-                </button>
-
-                <button
-                  type="button"
-                  className="editor-toolbar-btn clear"
-                  onClick={() => onClearHighlight(index)}
-                  title="Xóa toàn bộ ký tự định dạng (** hoặc `)"
-                >
-                  <Eraser size={13} />
-                  <span>Bỏ highlight</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Main sentence textarea */}
-            <textarea
-              ref={textareaRef}
-              className="notion-callout-textarea"
-              rows={3}
-              placeholder={`Ví dụ #${index + 1}: Bấm Enter thoải mái để xuống dòng (hỗ trợ câu hội thoại nhiều người)...`}
-              value={ex.sentence}
-              onChange={(e) => onSentenceChange(index, e.target.value)}
-              onKeyDown={(e) => {
-                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "b") {
-                  e.preventDefault();
-                  onToggleHighlight(index);
-                }
-              }}
-            />
-          </div>
-        )}
-
-        {/* Tab 2: Xem chi tiết */}
-        {activeTab === "preview" && (
-          <div className="example-editor-preview-pane">
-            {ex.sentence.trim() ? (
-              <div className="preview-main-quote">
-                &ldquo;{formatMarkdown(ex.sentence)}&rdquo;
-              </div>
-            ) : (
-              <div className="example-detail-empty">
-                <p className="empty-text">Chưa có nội dung câu ví dụ để xem trước.</p>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Sentence IPA row */}
-      <div className="callout-sentence-ipa-row">
-        <div className="callout-sentence-ipa-label">
-          <span>🔤</span>
-          <span>Phiên âm IPA câu ví dụ (tự sinh khi gõ):</span>
+      ) : (
+        <div className="p-3 bg-white rounded-lg border border-gray-200 font-serif text-[0.95rem] leading-relaxed text-gray-900 whitespace-pre-line min-h-[64px] flex items-center">
+          {ex.sentence.trim() ? (
+            <div>&ldquo;{formatMarkdown(ex.sentence)}&rdquo;</div>
+          ) : (
+            <span className="text-gray-400 text-xs italic">Chưa có nội dung câu ví dụ để xem trước.</span>
+          )}
         </div>
-        <div className="callout-sentence-ipa-input-wrap">
+      )}
+
+      {/* Sentence IPA */}
+      <div className="flex flex-col gap-1">
+        <label className="text-[0.72rem] font-bold text-gray-500 uppercase tracking-wider">
+          Phiên âm IPA câu ví dụ:
+        </label>
+        <div className="flex items-center gap-2">
           <input
             type="text"
-            className="notion-inline-input callout-sentence-ipa-input flex-1"
-            placeholder="Tự động sinh khi gõ câu ví dụ... (hoặc tự chỉnh sửa)"
+            className="flex-1 bg-white border border-gray-200 focus:border-blue-500 rounded-lg py-1.5 px-3 font-mono text-xs sm:text-sm text-gray-800 outline-none focus:ring-2 focus:ring-blue-500/10 placeholder:text-gray-400 transition-all"
+            placeholder="Tự động sinh khi gõ câu... (hoặc tự chỉnh sửa)"
             value={ex.sentenceIpa}
             onChange={(e) => onIpaChange(index, e.target.value)}
           />
@@ -213,51 +191,53 @@ export const ExampleCard: React.FC<ExampleCardProps> = ({
             <button
               type="button"
               onClick={() => onForceIpa(index)}
-              className="notion-btn-inline-action"
+              className="inline-flex items-center gap-1 py-1.5 px-2.5 rounded-lg border border-blue-200 bg-blue-50 text-blue-700 text-xs font-semibold hover:bg-blue-100 transition-colors cursor-pointer shrink-0"
               title="Tự động đồng bộ lại phiên âm IPA cho câu ví dụ này"
             >
-              <Wand2 size={13} />
-              <span>Tạo lại IPA</span>
+              <Wand2 size={12} />
+              <span className="hidden sm:inline">Tạo lại IPA</span>
             </button>
           )}
         </div>
       </div>
 
-      {/* Translation & context */}
-      <div className="notion-example-meta-fields">
-        <div className="sub-field">
-          <label className="sub-field-label">🇻🇳 Dịch nghĩa câu ví dụ #{index + 1}:</label>
-          <textarea
-            rows={2}
-            className="notion-sub-input notion-sub-textarea"
-            placeholder="Dịch nghĩa câu (có thể bấm Enter xuống dòng theo từng câu/nhân vật)..."
-            value={ex.translation}
-            onChange={(e) => onTranslationChange(index, e.target.value)}
-          />
-        </div>
-
-        <div className="sub-field">
-          <label className="sub-field-label">💡 Ghi chú ngữ cảnh (tùy chọn):</label>
-          <textarea
-            rows={1}
-            className="notion-sub-input notion-sub-textarea"
-            placeholder="Ví dụ: Thường dùng trong email công việc hoặc khi trao đổi ngắn..."
-            value={ex.context}
-            onChange={(e) => onContextChange(index, e.target.value)}
-          />
-        </div>
+      {/* Translation */}
+      <div className="flex flex-col gap-1">
+        <label className="text-[0.72rem] font-bold text-gray-500 uppercase tracking-wider">
+          Dịch nghĩa tiếng Việt:
+        </label>
+        <input
+          type="text"
+          className="w-full bg-white border border-gray-200 focus:border-blue-500 rounded-lg py-1.5 px-3 text-xs sm:text-sm text-gray-800 outline-none focus:ring-2 focus:ring-blue-500/10 placeholder:text-gray-400 transition-all"
+          placeholder="Dịch nghĩa câu ví dụ..."
+          value={ex.translation}
+          onChange={(e) => onTranslationChange(index, e.target.value)}
+        />
       </div>
 
-      {/* Chunk-in-sentence warning */}
+      {/* Context Note */}
+      <div className="flex flex-col gap-1">
+        <label className="text-[0.72rem] font-bold text-gray-400 uppercase tracking-wider">
+          Ghi chú ngữ cảnh (tùy chọn):
+        </label>
+        <input
+          type="text"
+          className="w-full bg-white border border-gray-200 focus:border-blue-500 rounded-lg py-1.5 px-3 text-xs sm:text-sm text-gray-800 outline-none focus:ring-2 focus:ring-blue-500/10 placeholder:text-gray-400 transition-all"
+          placeholder="VD: Dùng trong email công việc hoặc khi trao đổi ngắn..."
+          value={ex.context}
+          onChange={(e) => onContextChange(index, e.target.value)}
+        />
+      </div>
+
+      {/* Chunk-in-sentence Warning */}
       {showWarning && (
-        <div className="chunk-context-hint">
-          <AlertTriangle size={14} className="shrink-0 text-amber-600" />
+        <div className="flex items-start gap-2 p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800">
+          <AlertTriangle size={14} className="shrink-0 text-amber-600 mt-0.5" />
           <span>
-            Gợi ý: Câu ví dụ nên chứa cụm từ <strong>&quot;{chunkText}&quot;</strong> để bài tập nhại câu và điền từ
-            hoạt động chuẩn xác nhất.
+            Gợi ý: Câu ví dụ nên chứa cụm từ <strong>&quot;{chunkText}&quot;</strong> để các bài tập phản xạ hoạt động chuẩn xác nhất.
           </span>
         </div>
       )}
     </div>
   );
-};
+}

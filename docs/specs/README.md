@@ -38,3 +38,4 @@ docs/specs/<feature-folder>/
 | **SPEC-02** | **My 24 Hours Ecosystem (Quick Capture & Branching)** | 🟡 Backlog | *Đang soạn thảo* |
 | **SPEC-03** | **Dictation Lab (Nghe chép chính tả đục lỗ)** | 🟡 Backlog | *Đang soạn thảo* |
 | **SPEC-04** | **YouTube Study Suite (Interactive Player & Practice Hub)** | 🟢 Approved / In-Progress | [04-youtube-study-suite/spec.md](04-youtube-study-suite/spec.md) |
+| **SPEC-05** | **Physical Mobile App (Capacitor Native Shell, Notifications & Speech Adapter)** | 🟢 Approved / Ready | [Spec](05-capacitor-mobile-app/spec.md) • [Kế hoạch triển khai](05-capacitor-mobile-app/plan.md) |

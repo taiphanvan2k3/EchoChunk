@@ -1,6 +1,5 @@
-"use client";
-
-import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import Image from "next/image";
 import { ChunkProgress, SpeakingChunk, SpeechEvalResult, SRSRating } from "@/types";
 import { speechService } from "@/lib/client/speech";
 import { soundManager } from "@/lib/client/sound";
@@ -20,14 +19,14 @@ interface ShadowingModeProps {
   onEditChunk?: (chunk: SpeakingChunk) => void;
 }
 
-export const ShadowingMode: React.FC<ShadowingModeProps> = ({
+export function ShadowingMode({
   chunk,
   onRate,
   onShuffle,
   currentIndex,
   totalInQueue,
   onEditChunk
-}) => {
+}: ShadowingModeProps) {
   const [playingAudioType, setPlayingAudioType] = useState<"normal" | "slow" | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [spokenTranscript, setSpokenTranscript] = useState("");
@@ -291,81 +290,103 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
   }, [evalResult, inspectedWord, missingTokens, drilledSuccessWords]);
 
   return (
-    <div className="practice-card">
+    <div className="bg-white border border-notion-border rounded-xl p-4 sm:p-7 shadow-[0_1px_3px_rgba(0,0,0,0.04)] relative transition-all duration-200">
       {/* Card Header Meta */}
-      <div className="card-top-bar">
-        <div className="meta-badges">
-          <span className="badge topic-badge">
-            {chunk.topicIcon} {chunk.topicName}
+      <div className="flex items-center justify-between gap-2 mb-3 pb-2.5 border-b border-notion-border/60">
+        <div className="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-lg bg-notion-surface-subtle border border-notion-border text-notion-text min-w-0 max-w-[62%] sm:max-w-none shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+          <span className="shrink-0 text-xs sm:text-sm leading-none">{chunk.topicIcon}</span>
+          <span className="text-[0.74rem] sm:text-xs font-semibold text-notion-text truncate max-w-[130px] xs:max-w-[190px] sm:max-w-none" title={chunk.topicName}>
+            {chunk.topicName}
           </span>
-          <span className="badge level-badge">{chunk.level}</span>
+          <span className="w-px h-3 bg-notion-border shrink-0" />
+          <span
+            className={`text-[0.66rem] sm:text-[0.7rem] font-bold tracking-wider uppercase shrink-0 font-mono ${
+              chunk.level === 'A2'
+                ? 'text-notion-green-text'
+                : chunk.level === 'B2'
+                ? 'text-notion-purple-text'
+                : 'text-notion-blue-text'
+            }`}
+          >
+            {chunk.level}
+          </span>
         </div>
 
-        <div className="card-top-actions">
+        <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
           {onShuffle && (
             <button
               type="button"
-              className="card-quick-edit-btn card-shuffle-btn"
+              className="inline-flex items-center gap-1 py-1 px-1.5 sm:px-2.5 rounded-md text-[0.72rem] sm:text-xs font-semibold text-notion-secondary hover:text-notion-text hover:bg-notion-hover transition-colors border border-notion-border bg-white cursor-pointer shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
               onClick={onShuffle}
               title="Xáo trộn ngẫu nhiên thứ tự các câu trong chủ đề này"
             >
-              <Shuffle size={13} />
-              <span>Xáo trộn</span>
+              <Shuffle size={12} className="shrink-0" />
+              <span className="hidden sm:inline">Xáo trộn</span>
             </button>
           )}
           {onEditChunk && (
             <button
               type="button"
-              className="card-quick-edit-btn"
+              className="inline-flex items-center gap-1 py-1 px-1.5 sm:px-2.5 rounded-md text-[0.72rem] sm:text-xs font-semibold text-notion-secondary hover:text-notion-text hover:bg-notion-hover transition-colors border border-notion-border bg-white cursor-pointer shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
               onClick={() => onEditChunk(chunk)}
               title="Chỉnh sửa chunk này"
             >
-              <Edit2 size={13} />
-              <span>Sửa</span>
+              <Edit2 size={12} className="shrink-0" />
+              <span className="hidden sm:inline">Sửa</span>
             </button>
           )}
-          <span className="queue-indicator">
+          <span className="text-[0.7rem] sm:text-xs text-notion-muted font-mono ml-0.5 sm:ml-1 whitespace-nowrap bg-notion-surface-subtle px-1.5 py-0.5 rounded border border-notion-border">
             {currentIndex + 1} / {totalInQueue}
           </span>
         </div>
       </div>
 
       {/* Target Speaking Chunk */}
-      <div className="target-chunk-hero">
-        <div className="chunk-heading-wrap">
-          <h2 className="chunk-text-heading">{chunk.chunk}</h2>
+      <div className="text-center py-1 pb-3 flex flex-col items-center w-full">
+        <div className="flex items-center justify-center gap-2 w-full mb-1 flex-wrap">
+          <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-notion-text m-0 leading-tight text-center break-words">
+            {chunk.chunk}
+          </h2>
           <button
             type="button"
-            className="chunk-title-speaker-btn"
+            className="inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-notion-btn-secondary hover:bg-notion-blue-bg border border-notion-border text-notion-blue-text hover:text-notion-primary hover:scale-105 transition-all cursor-pointer shrink-0"
             onClick={() => speechService.speak(chunk.chunk, 0.85)}
             title="Nghe phát âm riêng cụm từ này"
           >
-            <Volume2 size={20} />
+            <Volume2 className="w-4 h-4 text-notion-blue-text" />
           </button>
         </div>
 
         {/* Chunk IPA on its own dedicated subline - never cramped with title */}
         {chunkIpa && (
-          <div className="chunk-ipa-row">
-            <span className="chunk-ipa-text">{chunkIpa}</span>
+          <div className="flex items-center justify-center w-full mb-1.5">
+            <span className="font-ipa text-sm sm:text-base lg:text-lg font-medium tracking-wide text-notion-blue-text text-center break-words">
+              {chunkIpa}
+            </span>
           </div>
         )}
 
-        <p className="core-meaning-text">➜ {chunk.meaning}</p>
+        <p className="text-base sm:text-lg lg:text-xl text-notion-green-text font-semibold leading-relaxed m-0 text-center max-w-[90%] break-words">
+          ➜ {chunk.meaning}
+        </p>
       </div>
 
       {/* Example Sentence with highlighted chunk */}
-      <div className="example-sentence-box">
+      <div className="bg-notion-surface border border-notion-border border-l-4 border-l-notion-primary rounded-lg p-3 sm:p-5 mb-3 sm:mb-4">
         {/* Multi-example switcher if chunk has multiple examples */}
         {chunk.examples && chunk.examples.length > 1 && (
-          <div className="example-selector-bar">
-            <span className="example-selector-label">Ngữ cảnh ví dụ ({chunk.examples.length}):</span>
-            <div className="example-selector-pills">
+          <div className="flex items-center gap-2 p-1.5 px-2 bg-notion-blue-bg/40 border border-notion-blue-border rounded-md mb-2.5 flex-wrap">
+            <span className="text-[0.72rem] sm:text-xs font-bold text-notion-blue-text">Ngữ cảnh ví dụ ({chunk.examples.length}):</span>
+            <div className="inline-flex gap-1 flex-wrap">
               {chunk.examples.map((ex, idx) => (
                 <button
                   key={ex.id || idx}
                   type="button"
-                  className={`example-selector-pill ${activeExampleIndex === idx ? 'active' : ''}`}
+                  className={`px-2 py-0.5 rounded text-[0.72rem] sm:text-xs font-semibold border cursor-pointer transition-all ${
+                    activeExampleIndex === idx
+                      ? "bg-notion-primary text-white border-notion-primary shadow-sm"
+                      : "border-notion-blue-border bg-white text-notion-text hover:bg-notion-blue-bg hover:text-notion-blue-text"
+                  }`}
                   onClick={() => {
                     setActiveExampleIndex(idx);
                     setEvalResult(null);
@@ -380,60 +401,82 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
           </div>
         )}
 
-        <div className="example-label">
+        <div className="flex items-center justify-between mb-2.5 text-[0.72rem] sm:text-xs font-semibold text-notion-blue-text">
           <span>Câu ví dụ thực chiến (Shadowing Target):</span>
-          <div className="duo-audio-controls-row">
+          <div className="flex items-center gap-2">
             {/* 1. Loa phát âm tốc độ bình thường (Duolingo Style Speaker) */}
             <button
               type="button"
-              className={`duo-audio-btn duo-normal-btn ${playingAudioType === "normal" ? "is-playing" : ""}`}
+              className={`inline-flex items-center justify-center cursor-pointer select-none bg-duo hover:bg-duo-hover active:bg-duo-active w-9 h-9 sm:w-11 sm:h-11 rounded-[10px] sm:rounded-[14px] shadow-[0_3px_0_theme(colors.duo.dark)] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-[0_1px_0_theme(colors.duo.dark)] transition-all ${
+                playingAudioType === "normal" ? "animate-pulse bg-duo-dark" : ""
+              }`}
               onClick={() => playAudio(1.0)}
               title="Phát âm tốc độ bình thường (Phím tắt: Space)"
               aria-label="Phát âm tốc độ bình thường (Space)"
             >
-              <span className="duo-speaker-icon" aria-hidden="true" />
+              <Image
+                src="/icons/duo-speaker.png"
+                alt="Phát âm bình thường"
+                width={22}
+                height={18}
+                className="w-[19px] sm:w-[24px] h-auto object-contain pointer-events-none select-none"
+                priority
+              />
             </button>
 
             {/* 2. Loa hình con rùa (Duolingo Style Turtle Slow Audio - nằm sau loa bình thường) */}
             <button
               type="button"
-              className={`duo-audio-btn duo-turtle-btn ${playingAudioType === "slow" ? "is-playing" : ""}`}
+              className={`inline-flex items-center justify-center cursor-pointer select-none bg-duo hover:bg-duo-hover active:bg-duo-active w-8 h-8 sm:w-[36px] sm:h-[36px] rounded-[8px] sm:rounded-[11px] shadow-[0_2.5px_0_theme(colors.duo.dark)] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-[0_1px_0_theme(colors.duo.dark)] transition-all ${
+                playingAudioType === "slow" ? "animate-pulse bg-duo-dark" : ""
+              }`}
               onClick={() => playAudio(0.6)}
               title="Phát âm chậm rãi từng từ (Tốc độ con rùa 0.75x)"
               aria-label="Phát âm chậm tốc độ con rùa"
             >
-              <span className="duo-turtle-icon" aria-hidden="true" />
+              <Image
+                src="/icons/duo-turtle.png"
+                alt="Phát âm chậm"
+                width={20}
+                height={12}
+                className="w-[17px] sm:w-[22px] h-auto object-contain pointer-events-none select-none"
+                priority
+              />
             </button>
           </div>
         </div>
 
-        <p className="example-content">
+        <p className="font-serif text-[0.98rem] sm:text-[1.2rem] leading-[1.6] text-notion-text font-normal mb-2.5 sm:mb-3.5 whitespace-pre-line">
           &ldquo;{formatMarkdown(currentRawSentence)}&rdquo;
         </p>
 
         {/* Full Sentence IPA cleanly structured as a responsive phonetic block (handles long sentences smoothly) */}
         {currentSentenceIpa && (
-          <div className="sentence-ipa-block" title="Phiên âm ngữ âm của câu ví dụ thực chiến">
-            <p className="sentence-ipa-text">{currentSentenceIpa}</p>
+          <div className="block bg-notion-surface-subtle border border-notion-border border-l-[3px] border-l-notion-primary rounded-md py-1.5 px-3 mb-2.5 sm:mb-3.5 w-full box-border" title="Phiên âm ngữ âm của câu ví dụ thực chiến">
+            <p className="font-ipa text-xs sm:text-sm leading-relaxed text-notion-text tracking-wide m-0 break-words">{currentSentenceIpa}</p>
           </div>
         )}
 
         {/* Translation & Context Reveal */}
-        <div className="context-reveal-wrap">
-          <button className="toggle-reveal-btn" onClick={() => setShowDetails(!showDetails)}>
+        <div className="border-t border-notion-border pt-2.5">
+          <button
+            type="button"
+            className="flex items-center gap-1.5 bg-transparent border-none text-notion-secondary hover:text-notion-text text-xs font-medium cursor-pointer transition-colors p-0"
+            onClick={() => setShowDetails(!showDetails)}
+          >
             {showDetails ? <EyeOff size={15} /> : <Eye size={15} />}
             <span>{showDetails ? "Ẩn bản dịch & ngữ cảnh" : "Hiện nghĩa tiếng Việt & ngữ cảnh"}</span>
           </button>
 
           {showDetails && (
-            <div className="revealed-details">
+            <div className="mt-2.5 text-sm">
               {currentTranslation && (
-                <p className="detail-translation">
+                <p className="text-notion-text mb-1.5 whitespace-pre-line">
                   ➜ <em>{currentTranslation}</em>
                 </p>
               )}
               {currentContext && (
-                <p className="detail-context">
+                <p className="text-notion-secondary text-[0.85rem] whitespace-pre-line">
                   💡 <strong>Ngữ cảnh:</strong> {currentContext}
                 </p>
               )}
@@ -443,22 +486,25 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
       </div>
 
       {/* Voice Shadowing Recording Area */}
-      <div className="shadowing-action-box">
-        <div className="mic-button-wrapper">
+      <div className="flex flex-col items-center gap-2 sm:gap-2.5 p-3 sm:p-5 bg-notion-surface border border-dashed border-notion-border-medium rounded-xl mb-3 sm:mb-4">
+        <div className="flex flex-col items-center gap-2 text-center">
           <button
             type="button"
-            className={`main-mic-btn ${isRecording ? "recording" : ""}`}
+            className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center cursor-pointer transition-all shadow-md hover:scale-105 active:scale-95 text-white ${
+              isRecording
+                ? "bg-notion-red shadow-[0_4px_16px_rgba(235,87,87,0.4)] animate-pulse"
+                : "bg-notion-primary hover:bg-notion-primary-hover shadow-[0_4px_14px_rgba(35,131,226,0.35)]"
+            }`}
             onClick={toggleRecording}
             title={isRecording ? "Dừng ghi âm & Chấm điểm ngay" : "Bật Mic & Đọc theo câu trên"}
           >
-            {isRecording ? <MicOff size={28} /> : <Mic size={28} />}
-            <span className="mic-glow-ring"></span>
+            {isRecording ? <MicOff className="w-6 h-6 sm:w-7 sm:h-7" /> : <Mic className="w-6 h-6 sm:w-7 sm:h-7" />}
           </button>
-          <div className="mic-hint-box">
-            <span className="mic-hint-title">
+          <div className="flex flex-col items-center gap-0.5 text-center">
+            <span className="text-xs sm:text-sm font-semibold text-notion-text">
               {isRecording ? "🔴 Đang lắng nghe liên tục..." : "Nhấn nút Micro và đọc to câu trên để chấm điểm"}
             </span>
-            <span className="mic-hint-desc">
+            <span className="text-[0.72rem] sm:text-xs text-notion-secondary max-w-md leading-relaxed">
               {isRecording
                 ? "Bạn cứ thong thả nói (thoải mái lấy hơi giữa các vế). Đọc xong bấm nút dưới hoặc dừng 2.5s để chấm."
                 : "💡 Hệ thống lắng nghe liên tục, cho phép dừng nghỉ tự nhiên không lo bị tắt giữa chừng."}
@@ -468,21 +514,25 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
 
         {/* Active Recording Action Panel & Live Stream */}
         {isRecording && (
-          <div className="recording-active-panel">
-            <button type="button" className="finish-speaking-btn" onClick={toggleRecording}>
+          <div className="w-full flex flex-col items-center gap-3 mt-2">
+            <button
+              type="button"
+              className="inline-flex items-center gap-2 bg-notion-green hover:opacity-90 text-white font-semibold text-sm py-2 px-4 rounded-lg shadow cursor-pointer transition-all hover:-translate-y-0.5"
+              onClick={toggleRecording}
+            >
               <CheckCircle2 size={18} />
               <span>Đã đọc xong câu ➔ Chấm điểm ngay</span>
             </button>
-            <div className="live-speech-card">
-              <div className="live-speech-header">
-                <span className="live-dot-pulse"></span>
+            <div className="w-full bg-white border border-notion-border rounded-lg p-3 text-center">
+              <div className="flex items-center justify-center gap-2 text-xs font-semibold text-notion-secondary mb-1">
+                <span className="w-2 h-2 rounded-full bg-notion-red animate-ping inline-block"></span>
                 <span>Từ máy đang nghe được từ giọng bạn:</span>
               </div>
-              <p className="live-speech-text">
+              <p className="text-sm font-medium text-notion-text italic">
                 {spokenTranscript ? (
                   <span>&ldquo;{spokenTranscript}&rdquo;</span>
                 ) : (
-                  <em className="text-muted">Đang lắng nghe... Hãy bắt đầu đọc câu mẫu...</em>
+                  <em className="text-notion-muted">Đang lắng nghe... Hãy bắt đầu đọc câu mẫu...</em>
                 )}
               </p>
             </div>
@@ -491,39 +541,58 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
 
         {/* Error message */}
         {recordingError && (
-          <div className="recording-error-alert">
+          <div className="w-full bg-notion-red-bg border border-notion-red-border text-notion-red-text p-2.5 rounded-lg text-xs">
             <span>⚠️ {recordingError}</span>
           </div>
         )}
 
         {/* Real-time speech transcript & evaluation (when evaluated) */}
         {!isRecording && evalResult && (
-          <div className="speech-result-box">
-            <div className="result-header">
-              <div className="result-title-group">
-                <span className="result-title">Kết quả giọng nói của bạn:</span>
-                <span className="token-click-hint">(💡 Bấm vào từ bất kỳ để nghe phát âm & xem IPA)</span>
+          <div className="w-full bg-white border border-notion-border rounded-lg p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-2.5 flex-wrap gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-bold text-notion-secondary">Kết quả giọng nói của bạn:</span>
+                <span className="text-[0.75rem] text-notion-muted font-normal">(💡 Bấm vào từ bất kỳ để nghe phát âm &amp; xem IPA)</span>
               </div>
               <span
-                className={`accuracy-badge ${evalResult.accuracy >= 80 ? "high" : evalResult.accuracy >= 50 ? "med" : "low"}`}
+                className={`text-xs font-bold py-1 px-2 rounded ${
+                  evalResult.accuracy >= 80
+                    ? "bg-notion-green-bg text-notion-green-text border border-notion-green-border"
+                    : evalResult.accuracy >= 50
+                      ? "bg-notion-yellow-bg text-notion-yellow-text border border-notion-yellow-border"
+                      : "bg-notion-red-bg text-notion-red-text border border-notion-red-border"
+                }`}
               >
                 Độ chính xác: {evalResult.accuracy}%
               </span>
             </div>
 
             {/* Clean, uniform word token pills (100% same height, smooth baseline) */}
-            <div className="word-tokens-stream">
+            <div className="flex flex-wrap gap-1 items-center leading-relaxed text-base">
               {evalResult.tokens.map((tok, i) => {
                 const cleanWord = tok.word.replace(/^[+*`]/, "").toLowerCase();
                 const isWordFixed = drilledSuccessWords.has(cleanWord);
-                const statusClass = isWordFixed ? "fixed-success" : tok.status;
+                const status = isWordFixed ? "fixed-success" : tok.status;
                 const isSelected = activeInspectToken?.cleanWord === cleanWord;
+
+                let tokenStyle = "text-notion-secondary border-transparent hover:border-notion-border-medium";
+                if (status === "correct") {
+                  tokenStyle = "text-notion-green-text bg-notion-green-bg border-notion-green-border font-semibold";
+                } else if (status === "missing") {
+                  tokenStyle = "text-notion-red-text bg-notion-red-bg border-notion-red-border font-semibold";
+                } else if (status === "extra") {
+                  tokenStyle = "text-notion-yellow-text bg-notion-yellow-bg border-notion-yellow-border";
+                } else if (status === "fixed-success") {
+                  tokenStyle = "text-notion-green-text bg-notion-green-border border-notion-green-text font-bold";
+                }
 
                 return (
                   <button
                     key={i}
                     type="button"
-                    className={`word-token-btn ${statusClass} ${activeWordPlaying === cleanWord ? "is-speaking" : ""} ${isSelected ? "is-selected" : ""}`}
+                    className={`inline-flex items-center gap-1 font-inherit text-base border py-0.5 px-1.5 rounded cursor-pointer transition-all ${tokenStyle} ${
+                      activeWordPlaying === cleanWord ? "ring-2 ring-notion-primary animate-pulse" : ""
+                    } ${isSelected ? "ring-2 ring-notion-primary/70" : ""}`}
                     onClick={() => {
                       setInspectedWord(cleanWord);
                       handlePlayWord(tok.word, 0.8);
@@ -531,8 +600,8 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
                     title={`Bấm để chọn & nghe từ "${cleanWord}" (0.8x)`}
                   >
                     <span>{tok.word}</span>
-                    {statusClass === "missing" && <span className="word-sound-icon">🔊</span>}
-                    {statusClass === "fixed-success" && <span className="word-check-icon">✓</span>}
+                    {status === "missing" && <span className="text-xs opacity-70">🔊</span>}
+                    {status === "fixed-success" && <span className="text-xs font-bold text-notion-green-text">✓</span>}
                   </button>
                 );
               })}
@@ -540,16 +609,26 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
 
             {/* Clean Notion-style Inspector Bar for Selected Word */}
             {activeInspectToken && (
-              <div className="token-inspector-bar">
-                <div className="inspector-word-group">
-                  <span className="inspector-label">Từ đang chọn:</span>
-                  <strong className="inspector-word-name">{activeInspectToken.cleanWord}</strong>
+              <div className="mt-3.5 p-3 px-4 bg-notion-surface border border-notion-border border-l-[3px] border-l-notion-primary rounded-lg flex items-center justify-between flex-wrap gap-2.5 animate-[fadeIn_0.15s_ease]">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-xs font-medium text-notion-secondary">Từ đang chọn:</span>
+                  <strong className="text-base font-bold text-notion-text">{activeInspectToken.cleanWord}</strong>
                   {activeInspectToken.ipa && (
-                    <span className="inspector-ipa-pill" title="Phiên âm chuẩn Anh - Mỹ (General American IPA)">
+                    <span className="font-ipa text-xs font-semibold text-notion-blue-text bg-notion-blue-bg border border-notion-blue-border py-0.5 px-2 rounded tracking-wide" title="Phiên âm chuẩn Anh - Mỹ (General American IPA)">
                       🇺🇸 {activeInspectToken.ipa}
                     </span>
                   )}
-                  <span className={`inspector-status-badge ${activeInspectToken.status}`}>
+                  <span
+                    className={`text-xs font-semibold py-0.5 px-2 rounded ${
+                      activeInspectToken.status === "missing"
+                        ? "bg-notion-red-bg text-notion-red-text border border-notion-red-border"
+                        : activeInspectToken.status === "fixed-success"
+                          ? "bg-notion-green-bg text-notion-green-text border border-notion-green-border"
+                          : activeInspectToken.status === "extra"
+                            ? "bg-notion-orange-bg text-notion-orange-text border border-notion-orange-border"
+                            : "bg-notion-green-bg text-notion-green-text border border-notion-green-border"
+                    }`}
+                  >
                     {activeInspectToken.status === "missing"
                       ? "⚠️ Chưa đọc chuẩn"
                       : activeInspectToken.status === "fixed-success"
@@ -560,10 +639,10 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
                   </span>
                 </div>
 
-                <div className="inspector-actions">
+                <div className="flex items-center gap-1.5">
                   <button
                     type="button"
-                    className="inspector-audio-btn"
+                    className="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-md text-xs font-medium border border-notion-border bg-white text-notion-text hover:bg-notion-hover hover:border-notion-primary transition-colors cursor-pointer"
                     onClick={() => handlePlayWord(activeInspectToken.cleanWord, 1.0)}
                     title={`Nghe chuẩn tốc độ 1.0x của từ "${activeInspectToken.cleanWord}"`}
                   >
@@ -572,7 +651,7 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
                   </button>
                   <button
                     type="button"
-                    className="inspector-audio-btn slow"
+                    className="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-md text-xs font-medium border border-notion-border bg-white text-notion-orange-text hover:bg-notion-hover hover:border-notion-orange-border transition-colors cursor-pointer"
                     onClick={() => handlePlayWord(activeInspectToken.cleanWord, 0.7)}
                     title={`Nghe chậm 0.7x để rõ khẩu hình từ "${activeInspectToken.cleanWord}"`}
                   >
@@ -581,7 +660,7 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
                   {activeInspectToken.status === "missing" && (
                     <button
                       type="button"
-                      className="inspector-drill-btn"
+                      className="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-md text-xs font-semibold border border-notion-red-border bg-notion-red-bg text-notion-red-text hover:bg-notion-red hover:text-white transition-colors cursor-pointer"
                       onClick={() => handleStartDrillWord(activeInspectToken.cleanWord)}
                       title={`Bật mic đọc riêng từ "${activeInspectToken.cleanWord}"`}
                     >
@@ -597,20 +676,23 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
 
         {/* Pronunciation Clinic (Hỗ trợ những từ phát âm sai + IPA Anh-Mỹ) */}
         {!isRecording && evalResult && missingTokens.length > 0 && (
-          <div className="pronunciation-clinic-box">
-            <div className="clinic-header">
-              <div className="clinic-title-row">
-                <span className="clinic-icon-badge">🩺</span>
+          <div className="w-full bg-white border border-notion-border border-l-4 border-l-notion-red rounded-xl p-4 sm:p-5 shadow-sm mt-3">
+            <div className="flex items-start justify-between gap-4 mb-4 flex-wrap">
+              <div className="flex items-start gap-2.5">
+                <span className="text-xl leading-none">🩺</span>
                 <div>
-                  <h4 className="clinic-title">Hỗ trợ phát âm các từ chưa chuẩn ({missingTokens.length} từ)</h4>
-                  <p className="clinic-desc">
+                  <h4 className="text-base font-bold text-notion-text mb-0.5">
+                    Hỗ trợ phát âm các từ chưa chuẩn ({missingTokens.length} từ)
+                  </h4>
+                  <p className="text-xs text-notion-secondary">
                     Tích hợp phiên âm <strong>IPA chuẩn Anh - Mỹ (General American)</strong>, bấm nghe chậm 0.7x để rõ
                     khẩu hình hoặc luyện riêng từng từ:
                   </p>
                 </div>
               </div>
               <button
-                className="retry-whole-sentence-btn"
+                type="button"
+                className="inline-flex items-center gap-1.5 py-1.5 px-3 bg-notion-primary hover:bg-notion-primary-hover text-white rounded-md text-xs font-semibold cursor-pointer transition-colors shadow-sm"
                 onClick={toggleRecording}
                 title="Bật lại mic để nói lại cả câu"
               >
@@ -619,7 +701,7 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
               </button>
             </div>
 
-            <div className="clinic-words-list">
+            <div className="flex flex-col gap-2.5 mb-3">
               {missingTokens.map((tok, idx) => {
                 const word = tok.word.toLowerCase();
                 const isFixed = drilledSuccessWords.has(word);
@@ -627,28 +709,41 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
                 const americanIpa = getAmericanIpa(tok.word);
 
                 return (
-                  <div key={idx} className={`clinic-word-card ${isFixed ? "is-fixed" : ""}`}>
-                    <div className="clinic-word-left">
-                      <div className="clinic-word-title-group">
-                        <span className="clinic-word-name">{tok.word}</span>
+                  <div
+                    key={idx}
+                    className={`flex items-center justify-between p-2.5 px-3.5 rounded-lg border gap-3 flex-wrap transition-colors ${
+                      isFixed
+                        ? "bg-notion-green-bg border-notion-green-border"
+                        : "bg-notion-surface-subtle border-notion-border"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="flex items-center gap-2">
+                        <span className={`text-lg font-extrabold tracking-tight ${isFixed ? "text-notion-green-text" : "text-notion-red-text"}`}>
+                          {tok.word}
+                        </span>
                         {americanIpa && (
-                          <span className="clinic-word-ipa" title="Phiên âm chuẩn Anh - Mỹ (General American IPA)">
+                          <span className="font-ipa text-xs font-semibold text-notion-blue-text bg-notion-blue-bg border border-notion-blue-border py-0.5 px-2 rounded" title="Phiên âm chuẩn Anh - Mỹ (General American IPA)">
                             🇺🇸 {americanIpa}
                           </span>
                         )}
                       </div>
                       {isFixed ? (
-                        <span className="badge-fixed-pill">✓ Đã sửa đúng!</span>
+                        <span className="text-xs font-bold text-notion-green-text bg-notion-green-border border border-notion-green-text py-0.5 px-2 rounded">
+                          ✓ Đã sửa đúng!
+                        </span>
                       ) : (
-                        <span className="badge-missing-pill">Cần chỉnh</span>
+                        <span className="text-[0.7rem] font-bold text-notion-red-text bg-notion-red-bg border border-notion-red-border py-0.5 px-2 rounded">
+                          Cần chỉnh
+                        </span>
                       )}
                     </div>
 
-                    <div className="clinic-word-actions">
+                    <div className="flex items-center gap-1.5 flex-wrap">
                       {/* Standard Speed Audio */}
                       <button
                         type="button"
-                        className="clinic-action-btn"
+                        className="inline-flex items-center gap-1.5 bg-white border border-notion-border-medium text-notion-text hover:bg-notion-blue-bg hover:text-notion-blue-text hover:border-notion-blue-border py-1 px-2.5 rounded text-xs font-semibold cursor-pointer transition-colors"
                         onClick={() => handlePlayWord(tok.word, 1.0)}
                         title={`Nghe chuẩn tốc độ 1.0x của từ "${tok.word}"`}
                       >
@@ -659,7 +754,7 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
                       {/* Slow Turtle Audio */}
                       <button
                         type="button"
-                        className="clinic-action-btn slow-btn"
+                        className="inline-flex items-center gap-1.5 bg-white border border-notion-border-medium text-notion-text hover:bg-notion-yellow-bg hover:text-notion-yellow-text hover:border-notion-yellow-border py-1 px-2.5 rounded text-xs font-semibold cursor-pointer transition-colors"
                         onClick={() => handlePlayWord(tok.word, 0.7)}
                         title={`Nghe chậm 0.7x để nghe rõ trọng âm & âm đuôi của từ "${tok.word}"`}
                       >
@@ -669,7 +764,13 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
                       {/* Drill This Single Word */}
                       <button
                         type="button"
-                        className={`clinic-drill-btn ${isCurrentlyDrilling ? "drilling" : ""} ${isFixed ? "passed" : ""}`}
+                        className={`inline-flex items-center gap-1.5 py-1 px-3 rounded text-xs font-bold cursor-pointer transition-colors border ${
+                          isCurrentlyDrilling
+                            ? "bg-notion-red border-notion-red text-white animate-pulse"
+                            : isFixed
+                              ? "bg-notion-green-bg border-notion-green-border text-notion-green-text"
+                              : "bg-white border-notion-primary text-notion-primary hover:bg-notion-blue-bg"
+                        }`}
                         onClick={() => handleStartDrillWord(tok.word)}
                         title={`Bật mic đọc riêng từ "${tok.word}" để kiểm tra`}
                       >
@@ -684,21 +785,21 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
 
             {/* Misheard Words Comparison */}
             {extraTokens.length > 0 && (
-              <div className="clinic-misheard-row">
-                <span className="misheard-label">⚠️ Các từ máy nghe nhầm thành:</span>
-                <div className="misheard-chips">
+              <div className="flex items-center gap-2.5 pt-3 border-t border-notion-border flex-wrap text-xs text-notion-secondary">
+                <span className="font-medium text-notion-secondary">⚠️ Các từ máy nghe nhầm thành:</span>
+                <div className="flex items-center gap-1.5 flex-wrap">
                   {extraTokens.map((w, i) => {
                     const extraIpa = getAmericanIpa(w);
                     return (
                       <button
                         key={i}
                         type="button"
-                        className="misheard-chip-btn"
+                        className="inline-flex items-center gap-1.5 bg-notion-yellow-bg border border-notion-yellow-border text-notion-yellow-text py-1 px-2 rounded text-xs font-semibold cursor-pointer hover:bg-notion-yellow-border transition-colors"
                         onClick={() => handlePlayWord(w, 0.8)}
                         title={`Bấm để nghe thử từ máy nhận diện được: "${w}"`}
                       >
                         <span>{w}</span>
-                        {extraIpa && <span className="misheard-chip-ipa">{extraIpa}</span>}
+                        {extraIpa && <span className="font-ipa opacity-80">{extraIpa}</span>}
                         <Volume2 size={12} />
                       </button>
                     );
@@ -711,41 +812,41 @@ export const ShadowingMode: React.FC<ShadowingModeProps> = ({
       </div>
 
       {/* Streamlined Binary SRS Rating Bar */}
-      <div className="srs-rating-container">
-        <div className="srs-header-row">
-          <span className="srs-label">Đánh giá mức độ thuộc (SRS):</span>
-          <span className="srs-hint-text">
+      <div className="flex flex-col gap-2 mt-3.5">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <span className="text-xs font-bold text-notion-blue-text">Đánh giá mức độ thuộc (SRS):</span>
+          <span className="text-xs text-notion-muted">
             Bấm &ldquo;Tiếp tục&rdquo; để tự động dãn cách ngày ôn tập theo thuật toán
           </span>
         </div>
-        <div className="srs-buttons-grid-binary">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 items-stretch">
           <button
             type="button"
-            className="srs-btn srs-btn-forget"
+            className="flex flex-col items-start justify-center p-2.5 sm:p-3.5 rounded-xl border border-notion-border-medium bg-white hover:bg-notion-red-bg hover:border-notion-red-border hover:-translate-y-0.5 hover:shadow-md transition-all cursor-pointer text-left"
             onClick={() => onRate(1, evalResult?.accuracy || 0)}
             title="Đánh dấu cần ôn lại sớm (Phím tắt: 1)"
           >
-            <div className="srs-btn-top">
-              <span className="srs-text">Chưa thuộc</span>
-              <span className="srs-shortcut-badge">Phím 1</span>
+            <div className="flex items-center justify-between w-full mb-0.5">
+              <span className="font-bold text-sm sm:text-base text-notion-text hover:text-notion-red-text transition-colors">Chưa thuộc</span>
+              <span className="font-mono text-[0.66rem] font-semibold py-0.5 px-1.5 rounded bg-notion-surface-subtle text-notion-secondary">Phím 1</span>
             </div>
-            <span className="srs-sub">Ôn lại sớm (&lt; 1 ngày)</span>
+            <span className="text-[0.72rem] sm:text-xs text-notion-muted">Ôn lại sớm (&lt; 1 ngày)</span>
           </button>
 
           <button
             type="button"
-            className="srs-btn srs-btn-next"
+            className="flex flex-col items-start justify-center p-2.5 sm:p-3.5 rounded-xl border border-notion-primary bg-notion-primary hover:bg-notion-primary-hover hover:border-notion-primary-hover text-white shadow-md hover:-translate-y-0.5 hover:shadow-lg transition-all cursor-pointer text-left"
             onClick={() => onRate(3, evalResult?.accuracy || 0)}
             title="Đã thuộc câu này, chuyển tiếp tục (Phím tắt: Enter hoặc 2)"
           >
-            <div className="srs-btn-top">
-              <span className="srs-text">Tiếp tục ➔</span>
-              <span className="srs-shortcut-badge srs-badge-primary">Enter ↵</span>
+            <div className="flex items-center justify-between w-full mb-0.5">
+              <span className="font-bold text-sm sm:text-base text-white">Tiếp tục ➔</span>
+              <span className="font-mono text-[0.66rem] font-semibold py-0.5 px-1.5 rounded bg-white/20 text-white border border-white/30">Enter ↵</span>
             </div>
-            <span className="srs-sub">Đã nhớ tốt • Tự động tăng chu kỳ SRS</span>
+            <span className="text-[0.72rem] sm:text-xs text-white/90">Đã nhớ tốt • Tự động tăng chu kỳ SRS</span>
           </button>
         </div>
       </div>
     </div>
   );
-};
+}

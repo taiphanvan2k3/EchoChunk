@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { SpeakingChunk, ChunkProgress } from "@/types";
 import { speechService } from "@/lib/client/speech";
 import {
@@ -18,10 +18,10 @@ import { ExplorerSRSBadge } from "./ExplorerSRSBadge";
 import { SidebarSection } from "./ExplorerNavItem";
 
 const LEVEL_COLOR: Record<string, string> = {
-  A2: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  B1: "bg-blue-50 text-blue-700 border-blue-200",
-  B2: "bg-violet-50 text-violet-700 border-violet-200",
-  C1: "bg-rose-50 text-rose-700 border-rose-200"
+  A2: "bg-notion-green-bg text-notion-green-text border-notion-green-border",
+  B1: "bg-notion-blue-bg text-notion-blue-text border-notion-blue-border",
+  B2: "bg-notion-purple-bg text-notion-purple-text border-notion-purple-border",
+  C1: "bg-notion-red-bg text-notion-red-text border-notion-red-border"
 };
 
 const PAGE_SIZE_OPTIONS = [10, 50, 100] as const;
@@ -41,7 +41,7 @@ interface ExplorerChunkTableProps {
   showClearBtn: boolean;
 }
 
-export const ExplorerChunkTable: React.FC<ExplorerChunkTableProps> = ({
+export function ExplorerChunkTable({
   displayChunks,
   baseChunks,
   progressMap,
@@ -53,7 +53,7 @@ export const ExplorerChunkTable: React.FC<ExplorerChunkTableProps> = ({
   onDeleteChunk,
   onClearFilters,
   showClearBtn
-}) => {
+}: ExplorerChunkTableProps) {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState<PageSize>(10);
 
@@ -131,7 +131,7 @@ export const ExplorerChunkTable: React.FC<ExplorerChunkTableProps> = ({
             {displayChunks.length < baseChunks.length && ` (lọc từ ${baseChunks.length})`}
           </span>
           {showClearBtn && (
-            <button onClick={onClearFilters} className="text-blue-500 hover:underline">
+            <button onClick={onClearFilters} className="text-notion-primary hover:underline">
               Xóa bộ lọc
             </button>
           )}
@@ -141,14 +141,14 @@ export const ExplorerChunkTable: React.FC<ExplorerChunkTableProps> = ({
         <div className="flex items-center gap-3">
           {/* Page size selector */}
           <div className="flex items-center gap-1.5">
-            <span className="text-gray-400">Hiển thị</span>
+            <span className="text-notion-muted">Hiển thị</span>
             <select
               value={pageSize}
               onChange={(e) => {
                 setPageSize(Number(e.target.value) as PageSize);
                 setPage(1);
               }}
-              className="text-xs border border-gray-200 rounded-md px-1.5 py-1 bg-white text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="text-xs border border-notion-border rounded-md px-1.5 py-1 bg-notion-surface text-notion-text focus:outline-none focus:ring-1 focus:ring-notion-primary"
             >
               {PAGE_SIZE_OPTIONS.map((s) => (
                 <option key={s} value={s}>
@@ -156,7 +156,7 @@ export const ExplorerChunkTable: React.FC<ExplorerChunkTableProps> = ({
                 </option>
               ))}
             </select>
-            <span className="text-gray-400">/ trang</span>
+            <span className="text-notion-muted">/ trang</span>
           </div>
 
           {/* Pagination buttons */}
@@ -165,7 +165,7 @@ export const ExplorerChunkTable: React.FC<ExplorerChunkTableProps> = ({
               <button
                 onClick={() => setPage(1)}
                 disabled={safePage === 1}
-                className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="p-1.5 rounded hover:bg-notion-hover disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                 title="Trang đầu"
               >
                 <ChevronsLeft size={14} />
@@ -173,7 +173,7 @@ export const ExplorerChunkTable: React.FC<ExplorerChunkTableProps> = ({
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={safePage === 1}
-                className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="p-1.5 rounded hover:bg-notion-hover disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                 title="Trang trước"
               >
                 <ChevronLeft size={14} />
@@ -181,7 +181,7 @@ export const ExplorerChunkTable: React.FC<ExplorerChunkTableProps> = ({
 
               {getPageNumbers().map((p, i) =>
                 p === "..." ? (
-                  <span key={`dots-${i}`} className="px-2 text-gray-400">
+                  <span key={`dots-${i}`} className="px-2 text-notion-muted">
                     …
                   </span>
                 ) : (
@@ -189,7 +189,7 @@ export const ExplorerChunkTable: React.FC<ExplorerChunkTableProps> = ({
                     key={p}
                     onClick={() => setPage(p as number)}
                     className={`min-w-[28px] h-7 px-1.5 rounded text-xs font-semibold transition-colors ${
-                      safePage === p ? "bg-blue-600 text-white" : "hover:bg-gray-100 text-gray-600"
+                      safePage === p ? "bg-notion-primary text-white" : "hover:bg-notion-hover text-notion-secondary"
                     }`}
                   >
                     {p}
@@ -239,52 +239,52 @@ export const ExplorerChunkTable: React.FC<ExplorerChunkTableProps> = ({
               <th className="text-left font-semibold text-gray-500 text-xs uppercase tracking-wide px-4 py-3 hidden md:table-cell">
                 Câu ví dụ
               </th>
-              <th className="text-left font-semibold text-gray-500 text-xs uppercase tracking-wide px-4 py-3 hidden lg:table-cell">
+              <th className="text-left font-semibold text-notion-muted text-xs uppercase tracking-wide px-4 py-3 hidden lg:table-cell">
                 Tiến độ SRS
               </th>
-              <th className="text-right font-semibold text-gray-500 text-xs uppercase tracking-wide px-4 py-3">
+              <th className="text-right font-semibold text-notion-muted text-xs uppercase tracking-wide px-4 py-3">
                 Thao tác
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100 bg-white">
+          <tbody className="divide-y divide-notion-border bg-notion-surface">
             {pageChunks.map((chunk) => {
-              const levelCls = LEVEL_COLOR[chunk.level] ?? "bg-gray-100 text-gray-600 border-gray-200";
+              const levelCls = LEVEL_COLOR[chunk.level] ?? "bg-notion-hover text-notion-secondary border-notion-border";
               const practiceTopicId = activeSection !== "ALL" && activeSection !== "DUE" ? activeSection : undefined;
 
               return (
-                <tr key={chunk.id} className="hover:bg-blue-50/40 transition-colors">
+                <tr key={chunk.id} className="hover:bg-notion-hover transition-colors">
                   {/* Cụm từ & Level */}
                   <td className="px-4 py-3 align-top">
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-bold text-gray-900 leading-snug">{chunk.chunk}</span>
+                        <span className="font-bold text-notion-text leading-snug">{chunk.chunk}</span>
                         <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${levelCls}`}>
                           {chunk.level}
                         </span>
                         {chunk.isCustom && (
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded border bg-amber-50 text-amber-700 border-amber-200">
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded border bg-notion-yellow-bg text-notion-yellow-text border-notion-yellow-border">
                             Tự tạo
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-emerald-700 sm:hidden">➜ {chunk.meaning}</p>
+                      <p className="text-xs text-notion-green-text sm:hidden">➜ {chunk.meaning}</p>
                     </div>
                   </td>
 
                   {/* Nghĩa */}
                   <td className="px-4 py-3 align-top hidden sm:table-cell">
-                    <span className="text-emerald-700 font-medium leading-snug">{chunk.meaning}</span>
+                    <span className="text-notion-green-text font-medium leading-snug">{chunk.meaning}</span>
                   </td>
 
                   {/* Ví dụ */}
                   <td className="px-4 py-3 align-top hidden md:table-cell">
                     <div className="flex flex-col gap-1">
-                      <p className="text-gray-500 italic leading-snug text-[13px] line-clamp-2">
+                      <p className="text-notion-secondary italic leading-snug text-[13px] line-clamp-2">
                         &ldquo;{chunk.cleanExample}&rdquo;
                       </p>
                       {chunk.examples && chunk.examples.length > 1 && (
-                        <span className="self-start text-[10px] font-medium text-blue-600 bg-blue-50 border border-blue-100 rounded px-1.5 py-0.5">
+                        <span className="self-start text-[10px] font-medium text-notion-blue-text bg-notion-blue-bg border border-notion-blue-border rounded px-1.5 py-0.5">
                           +{chunk.examples.length - 1} ví dụ khác
                         </span>
                       )}
@@ -303,7 +303,7 @@ export const ExplorerChunkTable: React.FC<ExplorerChunkTableProps> = ({
                         type="button"
                         title="Nghe câu ví dụ"
                         onClick={() => speechService.speak(chunk.cleanExample)}
-                        className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                        className="p-1.5 rounded-lg text-notion-muted hover:text-notion-primary hover:bg-notion-hover transition-colors"
                       >
                         <Volume2 size={15} />
                       </button>
@@ -312,7 +312,7 @@ export const ExplorerChunkTable: React.FC<ExplorerChunkTableProps> = ({
                           type="button"
                           title="Luyện cụm từ này"
                           onClick={() => onPracticeChunk(chunk, practiceTopicId)}
-                          className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                          className="p-1.5 rounded-lg text-notion-muted hover:text-notion-primary hover:bg-notion-hover transition-colors"
                         >
                           <Play size={15} />
                         </button>
@@ -321,7 +321,7 @@ export const ExplorerChunkTable: React.FC<ExplorerChunkTableProps> = ({
                         type="button"
                         title="Sửa"
                         onClick={() => onEditChunk(chunk)}
-                        className="p-1.5 rounded-lg text-gray-400 hover:text-amber-600 hover:bg-amber-50 transition-colors"
+                        className="p-1.5 rounded-lg text-notion-muted hover:text-notion-yellow-text hover:bg-notion-hover transition-colors"
                       >
                         <Edit2 size={15} />
                       </button>
@@ -333,7 +333,7 @@ export const ExplorerChunkTable: React.FC<ExplorerChunkTableProps> = ({
                             onDeleteChunk(chunk.id);
                           }
                         }}
-                        className="p-1.5 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                        className="p-1.5 rounded-lg text-notion-muted hover:text-notion-red-text hover:bg-notion-hover transition-colors"
                       >
                         <Trash2 size={15} />
                       </button>
@@ -347,4 +347,4 @@ export const ExplorerChunkTable: React.FC<ExplorerChunkTableProps> = ({
       </div>
     </div>
   );
-};
+}

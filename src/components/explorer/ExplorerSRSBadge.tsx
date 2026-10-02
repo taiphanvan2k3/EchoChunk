@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { SpeakingChunk, ChunkProgress } from "@/types";
 import { Clock, Sparkles, RotateCcw } from "lucide-react";
 
@@ -10,15 +9,15 @@ interface ExplorerSRSBadgeProps {
   now: number;
 }
 
-export const ExplorerSRSBadge: React.FC<ExplorerSRSBadgeProps> = ({
+export function ExplorerSRSBadge({
   chunk,
   progressMap,
   now,
-}) => {
+}: ExplorerSRSBadgeProps) {
   const prog = progressMap[chunk.id];
 
   if (!prog || prog.repetitions === 0) {
-    return <span className="text-xs text-gray-400 italic">Chưa học</span>;
+    return <span className="text-xs text-notion-muted italic">Chưa học</span>;
   }
 
   const isDue = new Date(prog.dueDate).getTime() <= now;
@@ -35,21 +34,22 @@ export const ExplorerSRSBadge: React.FC<ExplorerSRSBadgeProps> = ({
   return (
     <div className="flex flex-col gap-1">
       {isDue ? (
-        <span className="inline-flex items-center gap-1 text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-full">
+        <span className="inline-flex items-center gap-1 text-xs font-semibold text-notion-red-text bg-notion-red-bg border border-notion-red-border px-2 py-0.5 rounded-full">
           <Clock size={10} /> Ôn ngay
         </span>
       ) : isMastered ? (
-        <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+        <span className="inline-flex items-center gap-1 text-xs font-semibold text-notion-green-text bg-notion-green-bg border border-notion-green-border px-2 py-0.5 rounded-full">
           <Sparkles size={10} /> Thành thạo
         </span>
       ) : (
-        <span className="inline-flex items-center gap-1 text-xs text-blue-600 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">
+        <span className="inline-flex items-center gap-1 text-xs text-notion-blue-text bg-notion-blue-bg border border-notion-blue-border px-2 py-0.5 rounded-full">
           <RotateCcw size={10} /> Sau {daysLeft}n
         </span>
       )}
-      <span className="text-[11px] text-gray-400">
+      <span className="text-[11px] text-notion-muted">
         {prog.repetitions}x · {prog.bestAccuracy > 0 ? `${prog.bestAccuracy}%` : "—"}
       </span>
     </div>
   );
-};
+}
+

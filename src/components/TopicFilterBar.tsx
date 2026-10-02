@@ -1,8 +1,5 @@
-'use client';
-
+import { useRef, useState, useEffect, useCallback, WheelEvent } from 'react';
 import { soundManager } from '@/lib/client/sound';
-
-import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { TopicMeta } from '@/types';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -18,7 +15,7 @@ interface TopicFilterBarProps {
   totalChunksCount?: number;
 }
 
-export const TopicFilterBar: React.FC<TopicFilterBarProps> = ({
+export function TopicFilterBar({
   topics,
   selectedTopicId,
   onSelectTopic,
@@ -27,7 +24,7 @@ export const TopicFilterBar: React.FC<TopicFilterBarProps> = ({
   searchQuery,
   onSearchChange,
   totalChunksCount,
-}) => {
+}: TopicFilterBarProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
@@ -58,7 +55,7 @@ export const TopicFilterBar: React.FC<TopicFilterBarProps> = ({
   };
 
   // Enable mouse wheel horizontal scrolling
-  const handleWheel = (e: React.WheelEvent) => {
+  const handleWheel = (e: WheelEvent) => {
     if (scrollRef.current && Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
       scrollRef.current.scrollLeft += e.deltaY;
       checkScrollBounds();
@@ -72,54 +69,74 @@ export const TopicFilterBar: React.FC<TopicFilterBarProps> = ({
     { id: 'B2', label: 'B2' },
   ];
 
+  const getLevelColorClass = (lvlId: string, isActive: boolean) => {
+    if (!isActive) return 'text-notion-secondary hover:text-notion-text';
+    switch (lvlId) {
+      case 'A2':
+        return 'bg-white text-notion-green-text font-bold shadow-[0_1px_3px_rgba(0,0,0,0.08),0_1px_2px_rgba(0,0,0,0.04)]';
+      case 'B1':
+        return 'bg-white text-notion-blue-text font-bold shadow-[0_1px_3px_rgba(0,0,0,0.08),0_1px_2px_rgba(0,0,0,0.04)]';
+      case 'B2':
+        return 'bg-white text-notion-purple-text font-bold shadow-[0_1px_3px_rgba(0,0,0,0.08),0_1px_2px_rgba(0,0,0,0.04)]';
+      default:
+        return 'bg-white text-notion-text font-bold shadow-[0_1px_3px_rgba(0,0,0,0.08),0_1px_2px_rgba(0,0,0,0.04)]';
+    }
+  };
+
   return (
-    <div className="filter-bar-wrapper">
+    <div className="mb-4 sm:mb-5 flex flex-col gap-2.5 sm:gap-3 w-full">
       {/* Search and Level Controls Row */}
-      <div className="filter-top-row">
+      <div className="flex items-center gap-1.5 sm:gap-2 w-full">
         {/* Clean Notion Search Box */}
-        <div className="search-box">
-          <Search size={15} className="search-icon" />
+        <div className="flex-1 min-w-0 relative flex items-center">
+          <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4 absolute left-2.5 sm:left-3 text-notion-muted pointer-events-none" />
           <input
             type="text"
             placeholder="Tìm theo cụm từ, nghĩa tiếng Việt, câu ví dụ..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="search-input"
+            className="w-full py-1 sm:py-1.5 pl-8 sm:pl-9 pr-7 sm:pr-8 bg-white border border-notion-border-medium rounded-lg text-xs sm:text-[0.84rem] text-notion-text placeholder-notion-muted outline-none transition-all shadow-[0_1px_2px_rgba(0,0,0,0.02)] focus:border-notion-primary focus:ring-2 focus:ring-notion-primary/15"
           />
           {searchQuery && (
-            <button className="clear-search" onClick={() => onSearchChange('')} title="Xóa tìm kiếm">
+            <button
+              type="button"
+              className="absolute right-2 bg-transparent border-none text-notion-muted hover:text-notion-text hover:bg-notion-hover text-sm sm:text-base cursor-pointer leading-none px-1 py-0.5 rounded"
+              onClick={() => onSearchChange('')}
+              title="Xóa tìm kiếm"
+            >
               ×
             </button>
           )}
         </div>
 
         {/* Premium Notion-style Segmented Level Switcher */}
-        <div className="notion-segmented-control" role="group" aria-label="Lọc theo cấp độ CEFR">
+        <div className="inline-flex items-center bg-notion-hover p-[2px] rounded-lg border border-notion-border gap-0.5 shrink-0 select-none" role="group" aria-label="Lọc theo cấp độ CEFR">
           {levelOptions.map((lvl) => (
             <button
               key={lvl.id}
               type="button"
-              className={`segmented-tab ${selectedLevel === lvl.id ? 'active' : ''} tab-${lvl.id.toLowerCase()}`}
+              className={`border-none bg-transparent py-0.5 px-1.5 sm:py-1 sm:px-2.5 rounded-md text-[0.7rem] sm:text-[0.78rem] font-semibold cursor-pointer transition-all whitespace-nowrap ${getLevelColorClass(
+                lvl.id,
+                selectedLevel === lvl.id
+              )}`}
               onClick={() => onSelectLevel(lvl.id)}
             >
               {lvl.label}
             </button>
           ))}
         </div>
-
-
       </div>
 
       {/* Horizontal Scroll Topics Row with Navigation Controls */}
-      <div className="topics-carousel-container">
+      <div className="relative w-full flex items-center">
         {canScrollLeft && (
           <button
             type="button"
-            className="carousel-arrow-btn arrow-left"
+            className="absolute -left-2.5 sm:-left-3 z-10 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white border border-notion-border-medium text-notion-secondary hover:text-notion-text hover:bg-notion-surface flex items-center justify-center cursor-pointer shadow-[0_2px_6px_rgba(0,0,0,0.08)] hover:shadow-[0_3px_8px_rgba(0,0,0,0.12)] hover:scale-105 transition-all"
             onClick={() => handleScroll('left')}
             title="Cuộn sang trái"
           >
-            <ChevronLeft size={16} />
+            <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </button>
         )}
 
@@ -127,16 +144,26 @@ export const TopicFilterBar: React.FC<TopicFilterBarProps> = ({
           ref={scrollRef}
           onScroll={checkScrollBounds}
           onWheel={handleWheel}
-          className="topics-scroll-row"
+          className="flex gap-1 sm:gap-1.5 overflow-x-auto scroll-smooth py-0.5 sm:py-1 px-0.5 w-full items-center [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           <button
             type="button"
-            className={`topic-pill ${selectedTopicId === 'ALL' ? 'active' : ''}`}
+            className={`inline-flex items-center gap-1 sm:gap-1.5 py-1 sm:py-1.5 px-2.5 sm:px-3 rounded-full text-[0.74rem] sm:text-[0.8rem] font-medium whitespace-nowrap cursor-pointer transition-all select-none border shadow-[0_1px_2px_rgba(0,0,0,0.02)] ${
+              selectedTopicId === 'ALL'
+                ? 'bg-notion-blue-bg border-notion-primary text-notion-blue-text font-semibold shadow-[0_1px_3px_rgba(35,131,226,0.15)]'
+                : 'bg-white border-notion-border text-notion-secondary hover:bg-notion-surface-subtle hover:text-notion-text hover:border-notion-border-medium'
+            }`}
             onClick={() => onSelectTopic('ALL')}
           >
-            <span className="topic-emoji">✨</span>
-            <span className="topic-name">Tất cả chủ đề</span>
-            <span className="topic-count">
+            <span className="text-[0.82rem] sm:text-[0.92rem] leading-none">✨</span>
+            <span>Tất cả chủ đề</span>
+            <span
+              className={`text-[0.62rem] sm:text-[0.68rem] font-bold py-0.2 px-1.5 rounded-full leading-tight ${
+                selectedTopicId === 'ALL'
+                  ? 'bg-notion-blue-bg text-notion-blue-text'
+                  : 'bg-notion-hover text-notion-secondary'
+              }`}
+            >
               {totalChunksCount !== undefined
                 ? totalChunksCount
                 : topics
@@ -149,12 +176,24 @@ export const TopicFilterBar: React.FC<TopicFilterBarProps> = ({
             <button
               key={t.topicId}
               type="button"
-              className={`topic-pill ${selectedTopicId === t.topicId ? 'active' : ''}`}
+              className={`inline-flex items-center gap-1 sm:gap-1.5 py-1 sm:py-1.5 px-2.5 sm:px-3 rounded-full text-[0.74rem] sm:text-[0.8rem] font-medium whitespace-nowrap cursor-pointer transition-all select-none border shadow-[0_1px_2px_rgba(0,0,0,0.02)] ${
+                selectedTopicId === t.topicId
+                  ? 'bg-notion-blue-bg border-notion-primary text-notion-blue-text font-semibold shadow-[0_1px_3px_rgba(35,131,226,0.15)]'
+                  : 'bg-white border-notion-border text-notion-secondary hover:bg-notion-surface-subtle hover:text-notion-text hover:border-notion-border-medium'
+              }`}
               onClick={() => onSelectTopic(t.topicId)}
             >
-              <span className="topic-emoji">{t.icon}</span>
-              <span className="topic-name">{t.topicName}</span>
-              <span className="topic-count">{t.chunkCount}</span>
+              <span className="text-[0.82rem] sm:text-[0.92rem] leading-none">{t.icon}</span>
+              <span>{t.topicName}</span>
+              <span
+                className={`text-[0.62rem] sm:text-[0.68rem] font-bold py-0.2 px-1.5 rounded-full leading-tight ${
+                  selectedTopicId === t.topicId
+                    ? 'bg-notion-blue-bg text-notion-blue-text'
+                    : 'bg-notion-hover text-notion-secondary'
+                }`}
+              >
+                {t.chunkCount}
+              </span>
             </button>
           ))}
         </div>
@@ -162,14 +201,14 @@ export const TopicFilterBar: React.FC<TopicFilterBarProps> = ({
         {canScrollRight && (
           <button
             type="button"
-            className="carousel-arrow-btn arrow-right"
+            className="absolute -right-2.5 sm:-right-3 z-10 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white border border-notion-border-medium text-notion-secondary hover:text-notion-text hover:bg-notion-surface flex items-center justify-center cursor-pointer shadow-[0_2px_6px_rgba(0,0,0,0.08)] hover:shadow-[0_3px_8px_rgba(0,0,0,0.12)] hover:scale-105 transition-all"
             onClick={() => handleScroll('right')}
             title="Cuộn sang phải"
           >
-            <ChevronRight size={16} />
+            <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </button>
         )}
       </div>
     </div>
   );
-};
+}

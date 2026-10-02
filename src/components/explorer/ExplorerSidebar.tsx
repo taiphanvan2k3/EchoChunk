@@ -1,11 +1,10 @@
 "use client";
 
-import React from "react";
 import { TopicMeta, SpeakingChunk } from "@/types";
-import { Brain, Clock, Star, BookOpen } from "lucide-react";
+import { Brain, Clock, Star } from "lucide-react";
 import { ExplorerNavItem, SidebarSection } from "./ExplorerNavItem";
 
-interface ExplorerSidebarProps {
+export interface ExplorerSidebarProps {
   topics: TopicMeta[];
   chunks: SpeakingChunk[];
   activeSection: SidebarSection;
@@ -15,7 +14,7 @@ interface ExplorerSidebarProps {
   onSelect: (id: SidebarSection) => void;
 }
 
-export const ExplorerSidebar: React.FC<ExplorerSidebarProps> = ({
+export function ExplorerSidebar({
   topics,
   chunks,
   activeSection,
@@ -23,7 +22,7 @@ export const ExplorerSidebar: React.FC<ExplorerSidebarProps> = ({
   dueCount,
   customCount,
   onSelect
-}) => {
+}: ExplorerSidebarProps) {
   const regularTopics = topics.filter((t) => t.topicId !== "CUSTOM" && t.topicId !== "STUDIED");
 
   return (
@@ -86,48 +85,5 @@ export const ExplorerSidebar: React.FC<ExplorerSidebarProps> = ({
       </div>
     </div>
   );
-};
-
-interface ExplorerSidebarShellProps extends ExplorerSidebarProps {
-  totalChunks: number;
-  isMobileOpen: boolean;
-  onCloseMobile: () => void;
 }
 
-export const ExplorerSidebarShell: React.FC<ExplorerSidebarShellProps> = ({
-  totalChunks,
-  isMobileOpen,
-  onCloseMobile,
-  ...sidebarProps
-}) => {
-  return (
-    <>
-      {/* Mobile drawer overlay */}
-      {isMobileOpen && (
-        <div className="fixed inset-0 z-30 lg:hidden">
-          <div className="absolute inset-0 bg-black/30" onClick={onCloseMobile} />
-          <div className="mobile-sidebar-panel absolute left-0 top-0 bottom-0 w-72 bg-white shadow-xl overflow-y-auto">
-            <div className="p-4 border-b border-gray-100 flex items-center justify-between">
-              <span className="font-bold text-gray-800 text-sm">📚 Kho Từ Vựng</span>
-              <button onClick={onCloseMobile} className="p-1 rounded hover:bg-gray-100">
-                <BookOpen size={18} className="text-gray-500" />
-              </button>
-            </div>
-            <ExplorerSidebar {...sidebarProps} />
-          </div>
-        </div>
-      )}
-
-      {/* Desktop sidebar */}
-      <aside className="hidden lg:flex flex-col w-60 xl:w-64 flex-shrink-0 border-r border-gray-200 bg-white overflow-y-auto">
-        <div className="px-4 pt-4 pb-2">
-          <p className="text-xs font-bold text-gray-800 flex items-center gap-1.5">
-            <BookOpen size={13} className="text-blue-500" />
-            Kho Từ Vựng · {totalChunks} cụm
-          </p>
-        </div>
-        <ExplorerSidebar {...sidebarProps} />
-      </aside>
-    </>
-  );
-};

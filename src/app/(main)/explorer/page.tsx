@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { usePractice } from '@/context/PracticeContext';
 import { TopicExplorerMode } from '@/components/TopicExplorerMode';
 
@@ -19,15 +18,15 @@ export default function ExplorerPage() {
 
   if (!isClient && allChunks.length === 0) {
     return (
-      <div className="notion-skeleton-container">
-        <div className="skeleton-filter-bar" />
-        <div className="notion-skeleton-card">
-          <div className="skeleton-line skeleton-badge" />
-          <div className="skeleton-line skeleton-title" />
-          <div className="skeleton-line skeleton-ipa" />
-          <div className="skeleton-box skeleton-sentence" />
-          <div className="skeleton-row">
-            <div className="skeleton-actions" />
+      <div className="flex flex-col gap-5 w-full m-0 p-0">
+        <div className="w-full h-20 bg-notion-surface-subtle rounded-xl border border-notion-border animate-pulse" />
+        <div className="w-full bg-notion-surface border border-notion-border rounded-xl p-6 sm:p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex flex-col gap-5 min-h-[380px] animate-pulse">
+          <div className="w-32 h-6 bg-notion-active rounded-md" />
+          <div className="w-[45%] h-9 bg-notion-active rounded-md mx-auto" />
+          <div className="w-1/4 h-[18px] bg-notion-active rounded mx-auto" />
+          <div className="w-full h-28 bg-notion-surface-subtle rounded-lg" />
+          <div className="flex gap-3 mt-3">
+            <div className="h-12 w-full bg-notion-active rounded-lg" />
           </div>
         </div>
       </div>
@@ -35,7 +34,7 @@ export default function ExplorerPage() {
   }
 
   return (
-    <div className="mode-view-container">
+    <div className="w-full">
       <TopicExplorerMode
         topics={dynamicTopics}
         chunks={allChunks}
@@ -49,3 +48,4 @@ export default function ExplorerPage() {
     </div>
   );
 }
+

@@ -14,7 +14,7 @@ const ChunkModal = dynamic(
   { ssr: false }
 );
 
-export const PracticeModals: React.FC = () => {
+export function PracticeModals() {
   const {
     isAnalyticsOpen,
     closeAnalytics,
@@ -55,4 +55,4 @@ export const PracticeModals: React.FC = () => {
       )}
     </>
   );
-};
+}

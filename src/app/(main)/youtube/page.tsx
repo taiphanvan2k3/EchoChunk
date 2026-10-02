@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 
 export default function YouTubePage() {
   return (
-    <div className="yt-page-wrapper">
+    <div className="w-full">
       <YouTubeStudyRoom />
     </div>
   );

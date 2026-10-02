@@ -94,3 +94,55 @@
   - `J` / `L`: Lùi lại 5s / Tiến 5s.
   - `↑` / `↓`: Nhảy sang câu trước / câu kế tiếp.
   - `R`: Lặp lại câu hiện tại (Replay sentence).
+
+---
+
+## 🎨 III. Kế Hoạch Refactor CSS Sang Tailwind 100% (Giải Phóng globals.css)
+
+> **Mục tiêu:** Chuyển đổi toàn bộ 8.148 dòng (~166 KB) CSS tĩnh trong `globals.css` sang Tailwind CSS tiện ích, giảm kích thước bundle CSS xuống < 15 KB, loại bỏ hoàn toàn Dead CSS và giúp code dễ bảo trì theo từng component.
+> **Nguyên tắc:** Thực hiện từng phần độc lập (Phase-by-Phase), kiểm thử ngay sau mỗi phần để không làm xô lệch 1 pixel giao diện.
+
+### 🏁 Phase 0: Cấu Hình Nền Tảng (Foundation)
+- [x] Ánh xạ đầy đủ Design Tokens Notion Clean vào `tailwind.config.js` (`colors.notion.*`, `fontFamily.*`, `boxShadow.notion-*`).
+- [x] Xác thực Type check hệ thống `pnpm tsc --noEmit` đạt 0 lỗi.
+
+### 🧭 Phase 1: Thanh Điều Hướng Toàn Cục & Tài Khoản (Navbar & Auth)
+- [x] **Refactor `src/components/Navbar.tsx` sang Tailwind:**
+  - [x] Logo thương hiệu & Tagline (`brand-text`, `brand-name`, `brand-tagline`).
+  - [x] Segmented Tabs điều hướng 5 chế độ (`nav-tabs`, `nav-tab-btn`, trạng thái `active`).
+  - [x] Viên con nhộng thống kê nhanh (`stats-capsule`, `capsule-item`, goal, streak, reviews).
+  - [x] Avatar người dùng & Menu tài khoản (`user-avatar-img`, `user-dropdown-menu`, `user-avatar-skeleton`).
+  - [x] Nút bật/tắt âm thanh, thêm chunk, xem analytics.
+- [x] **Dọn dẹp `globals.css`:** Xóa bỏ toàn bộ 568 dòng selector liên quan đến Navbar trong `globals.css`.
+- [x] **Checklist kiểm thử (Test Step):** Type check `tsc --noEmit` đạt 0 lỗi, lint check `eslint` đạt 0 lỗi.
+
+### 🪟 Phase 2: Hệ Thống Hộp Thoại Chung (Common Modals & Overlays)
+- [x] **Refactor `src/components/ChunkModal.tsx` & subcomponents:** Form thêm/sửa cụm chunk, TopicDropdown, ExampleCard (Soạn thảo / Xem chi tiết, highlight cụm, tự sinh IPA).
+- [x] **Refactor `src/components/AnalyticsModal.tsx`:** Modal thống kê học tập, thanh tiến độ và sao lưu/khôi phục dữ liệu JSON.
+- [x] **Dọn dẹp `globals.css`:** Xóa bỏ toàn bộ ~900 dòng CSS liên quan đến Modal & Chunk Editor trong `globals.css`.
+- [x] **UX Hardening:** Vô hiệu hóa đóng khi click nhầm ra ngoài overlay (chống mất dữ liệu đang gõ). Hỗ trợ đóng chuẩn xác bằng phím **`ESC`** và nút **`X`** (hoặc nút `Đóng`). Nếu đang mở dropdown chủ đề, bấm `ESC` sẽ ưu tiên đóng dropdown trước.
+- [x] **Checklist kiểm thử (Test Step):** Type check `tsc --noEmit` đạt 0 lỗi, lint check `eslint` đạt 0 lỗi.
+
+### 🎬 Phase 3: YouTube Study Suite (`src/components/youtube/`)
+- [x] **Refactor `YouTubePlayer.tsx` & `SentenceList.tsx`:**
+  - [x] Khung phát video 16:9, thanh breadcrumb điều hướng.
+  - [x] Hiệu ứng phát sáng từ theo thời gian thực (Karaoke Word Highlighting).
+  - [x] Danh sách câu cuộn mượt và trạng thái câu đang chọn.
+- [x] **Refactor `YouTubeRecentVideos.tsx`, `PracticeModeCards.tsx`, `YouTubeStudyRoom.tsx`, `APIKeySettingsModal.tsx`:** Toàn bộ component YouTube suite và modal API Key đã chuyển sang pure Tailwind CSS & function component.
+- [x] **Dọn dẹp `globals.css`:** Đã xóa bỏ sạch sẽ toàn bộ khối CSS YouTube (2.168 dòng).
+- [x] **Checklist kiểm thử (Test Step):** Type check `tsc --noEmit` đạt 0 lỗi, lint check `eslint` đạt 0 lỗi. Layout 1440px chuẩn Shadowing English được bảo toàn trọn vẹn.
+
+### 🎙️ Phase 4: Các Phòng Luyện Tập Cốt Lõi (Practice Modes)
+- [x] **Refactor `/shadowing`:** Phòng luyện phát âm, Word Inspector Bar, thẻ từ vựng đúng/sai (xanh/đỏ/vàng), nút mic ghi âm.
+- [x] **Refactor `/dien-tu` (Chunk Blanks):** Ô đục lỗ che từ, gợi ý ngữ cảnh, bàn phím trả lời, confetti, audio Duolingo controls.
+- [x] **Refactor `/phan-xa` (Reflex Translation):** Đồng hồ đếm ngược 5s/10s/Zen, 4 nút đánh giá SRS, đối chiếu song ngữ Việt - Anh.
+- [x] **Refactor `/kho-tu-vung` (Explorer):** ExplorerSidebarShell riêng biệt, bảng tra cứu từ vựng lọc SRS, responsive drawer mobile.
+- [x] **Dọn dẹp `globals.css`:** Xóa bỏ toàn bộ khối CSS phòng luyện tập (~4.360 dòng).
+- [x] **Checklist kiểm thử (Test Step):** `pnpm tsc --noEmit` đạt 0 lỗi, `pnpm lint` đạt 0 lỗi, toàn bộ function components và 1 component / file.
+
+### 🧹 Phase 5: Tối Ưu Hóa & Đóng Gói (Final Polish)
+- [x] Rút gọn `globals.css` từ **8.148 dòng (166 KB)** xuống còn **146 dòng (3.8 KB)** (giảm **98% dung lượng**).
+- [x] Chạy `pnpm build` & `pnpm lint` toàn dự án kiểm tra 0 lỗi, 15/15 routes biên dịch thành công.
+- [x] Chuẩn hóa toàn bộ component sang Function Component syntax và direct named imports theo `.agents/rules/react-code-style.md`.
+
+
