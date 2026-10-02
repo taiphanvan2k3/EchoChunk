@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { getYouTubeTranscript } from '@/server/services/youtube.service';
 
 export async function GET(request: NextRequest) {

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { BookOpen } from "lucide-react";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";

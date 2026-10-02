@@ -1,4 +1,4 @@
-export interface YouTubeWord {
+﻿export interface YouTubeWord {
   word: string;
   start: number; // Thời điểm bắt đầu của từ (giây)
   end: number;   // Thời điểm kết thúc của từ (giây)

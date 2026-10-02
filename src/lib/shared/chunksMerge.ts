@@ -1,4 +1,4 @@
-import { SpeakingChunk } from '@/types';
+﻿import { SpeakingChunk } from '@/types';
 
 /**
  * Pure function: Hợp nhất danh sách Base Chunks mặc định với Custom Chunks (được sửa hoặc tạo mới bởi user).
@@ -17,7 +17,7 @@ export function mergeCustomChunksWithBase(
   const result: SpeakingChunk[] = [];
   for (const base of baseChunks) {
     if (deletedIds.has(base.id)) continue;
-    // Nếu user đã sửa từ gốc này, ưu tiên lấy bản ghi của user
+    // Nếu user đã sửa hoặc tùy biến từ này: LUÔN ƯU TIÊN 100% DATA TỪ USER
     if (customMap.has(base.id)) {
       result.push(customMap.get(base.id)!);
       customMap.delete(base.id);
@@ -35,3 +35,4 @@ export function mergeCustomChunksWithBase(
 
   return result;
 }
+

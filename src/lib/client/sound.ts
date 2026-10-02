@@ -1,4 +1,4 @@
-// Web Audio API pure synthesized sound effects
+﻿// Web Audio API pure synthesized sound effects
 // Zero external files, zero latency, works offline everywhere
 
 class SoundManager {

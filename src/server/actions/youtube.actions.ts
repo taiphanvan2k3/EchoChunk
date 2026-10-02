@@ -1,4 +1,4 @@
-'use server';
+﻿'use server';
 
 import { getYouTubeTranscript } from '@/server/services/youtube.service';
 import { GetTranscriptResponse } from '@/types/youtube';

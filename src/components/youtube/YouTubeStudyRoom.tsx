@@ -23,9 +23,8 @@ import { ChevronRight, AlertCircle, Clock, Sparkles } from "lucide-react";
 
 export function YouTubeStudyRoom() {
   const { user } = useAuth();
-  const historyItems = useYouTubeHistory(user?.uid);
-  const [selectedTab, setSelectedTab] = useState<'recent' | 'explore' | null>(null);
-  const activeTab = selectedTab ?? (historyItems.length > 0 ? 'recent' : 'explore');
+  const { historyItems } = useYouTubeHistory(user?.uid);
+  const [activeTab, setActiveTab] = useState<'recent' | 'explore'>('recent');
 
   const [inputUrl, setInputUrl] = useState("");
   const [isKeyModalOpen, setIsKeyModalOpen] = useState(false);
@@ -256,7 +255,7 @@ export function YouTubeStudyRoom() {
                     ? "border-blue-600 text-blue-600 font-bold"
                     : "border-transparent text-gray-500 hover:text-gray-900 hover:border-gray-300"
                 }`}
-                onClick={() => setSelectedTab("recent")}
+                onClick={() => setActiveTab("recent")}
               >
                 <Clock size={16} className="shrink-0" />
                 <span>Video đã học</span>
@@ -282,7 +281,7 @@ export function YouTubeStudyRoom() {
                     ? "border-blue-600 text-blue-600 font-bold"
                     : "border-transparent text-gray-500 hover:text-gray-900 hover:border-gray-300"
                 }`}
-                onClick={() => setSelectedTab("explore")}
+                onClick={() => setActiveTab("explore")}
               >
                 <Sparkles size={16} className="shrink-0" />
                 <span>Kho bài học gợi ý</span>
@@ -298,7 +297,7 @@ export function YouTubeStudyRoom() {
                   setInputUrl(url);
                   handleLoadVideo(url);
                 }}
-                onSwitchToExplore={() => setSelectedTab("explore")}
+                onSwitchToExplore={() => setActiveTab("explore")}
                 isLoading={isLoading}
               />
             )}

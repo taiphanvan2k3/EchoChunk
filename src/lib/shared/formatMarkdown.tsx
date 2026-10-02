@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+﻿import type { ReactNode } from 'react';
 
 /**
  * Parses markdown inline syntax (**bold**, `code`) into React nodes.

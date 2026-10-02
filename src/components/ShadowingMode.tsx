@@ -1,9 +1,9 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+﻿import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import Image from "next/image";
 import { ChunkProgress, SpeakingChunk, SpeechEvalResult, SRSRating } from "@/types";
 import { speechService } from "@/lib/client/speech";
 import { soundManager } from "@/lib/client/sound";
-import { getAmericanIpa, getPhraseIpa, resolveChunkIpas } from "@/lib/shared/ipa";
+import { getAmericanIpa, getPhraseIpa, resolveChunkIpas, normalizeFriendlyIpa } from "@/lib/shared/ipa";
 import { Volume2, Mic, MicOff, CheckCircle2, Eye, EyeOff, Edit2, RotateCcw, Shuffle } from "lucide-react";
 import confetti from "canvas-confetti";
 import { formatMarkdown } from "@/lib/shared/formatMarkdown";
@@ -69,12 +69,12 @@ export function ShadowingMode({
       return chunk.examples[idx] || chunk.examples[0];
     }
     return {
-      id: 'primary',
-      sentence: chunk.exampleSentence || chunk.cleanExample || '',
-      cleanSentence: chunk.cleanExample || chunk.exampleSentence || '',
-      sentenceIpa: chunk.sentenceIpa || '',
-      translation: chunk.translation || '',
-      context: chunk.context || '',
+      id: "primary",
+      sentence: chunk.exampleSentence || chunk.cleanExample || "",
+      cleanSentence: chunk.cleanExample || chunk.exampleSentence || "",
+      sentenceIpa: chunk.sentenceIpa || "",
+      translation: chunk.translation || "",
+      context: chunk.context || ""
     };
   }, [chunk, activeExampleIndex]);
 
@@ -82,20 +82,32 @@ export function ShadowingMode({
   const { chunkIpa, sentenceIpa: defaultSentenceIpa } = useMemo(() => resolveChunkIpas(chunk), [chunk]);
 
   const currentSentenceIpa = useMemo(() => {
-    if (activeExample.sentenceIpa) return activeExample.sentenceIpa;
-    if (activeExample.cleanSentence || activeExample.sentence) {
-      return getPhraseIpa(activeExample.cleanSentence || activeExample.sentence);
+    let raw = "";
+    if (activeExample.sentenceIpa) {
+      raw = activeExample.sentenceIpa;
+    } else if (defaultSentenceIpa && (!activeExample.id || activeExample.id === "primary")) {
+      raw = defaultSentenceIpa;
+    } else if (activeExample.cleanSentence || activeExample.sentence) {
+      raw = getPhraseIpa(activeExample.cleanSentence || activeExample.sentence);
+    } else {
+      raw = defaultSentenceIpa;
     }
-    return defaultSentenceIpa;
+    return normalizeFriendlyIpa(raw);
   }, [activeExample, defaultSentenceIpa]);
 
   const currentCleanSentence = useMemo(() => {
     const s = activeExample.cleanSentence || activeExample.sentence || chunk.cleanExample || chunk.chunk;
-    return s.replace(/[*_`]/g, '');
+    return s.replace(/[*_`]/g, "");
   }, [activeExample, chunk.cleanExample, chunk.chunk]);
 
   const currentRawSentence = useMemo(() => {
-    return activeExample.sentence || activeExample.cleanSentence || chunk.exampleSentence || chunk.cleanExample || chunk.chunk;
+    return (
+      activeExample.sentence ||
+      activeExample.cleanSentence ||
+      chunk.exampleSentence ||
+      chunk.cleanExample ||
+      chunk.chunk
+    );
   }, [activeExample, chunk.exampleSentence, chunk.cleanExample, chunk.chunk]);
 
   const currentTranslation = activeExample.translation || chunk.translation;
@@ -295,17 +307,20 @@ export function ShadowingMode({
       <div className="flex items-center justify-between gap-2 mb-3 pb-2.5 border-b border-notion-border/60">
         <div className="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-lg bg-notion-surface-subtle border border-notion-border text-notion-text min-w-0 max-w-[62%] sm:max-w-none shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
           <span className="shrink-0 text-xs sm:text-sm leading-none">{chunk.topicIcon}</span>
-          <span className="text-[0.74rem] sm:text-xs font-semibold text-notion-text truncate max-w-[130px] xs:max-w-[190px] sm:max-w-none" title={chunk.topicName}>
+          <span
+            className="text-[0.74rem] sm:text-xs font-semibold text-notion-text truncate max-w-[130px] xs:max-w-[190px] sm:max-w-none"
+            title={chunk.topicName}
+          >
             {chunk.topicName}
           </span>
           <span className="w-px h-3 bg-notion-border shrink-0" />
           <span
             className={`text-[0.66rem] sm:text-[0.7rem] font-bold tracking-wider uppercase shrink-0 font-mono ${
-              chunk.level === 'A2'
-                ? 'text-notion-green-text'
-                : chunk.level === 'B2'
-                ? 'text-notion-purple-text'
-                : 'text-notion-blue-text'
+              chunk.level === "A2"
+                ? "text-notion-green-text"
+                : chunk.level === "B2"
+                  ? "text-notion-purple-text"
+                  : "text-notion-blue-text"
             }`}
           >
             {chunk.level}
@@ -376,7 +391,9 @@ export function ShadowingMode({
         {/* Multi-example switcher if chunk has multiple examples */}
         {chunk.examples && chunk.examples.length > 1 && (
           <div className="flex items-center gap-2 p-1.5 px-2 bg-notion-blue-bg/40 border border-notion-blue-border rounded-md mb-2.5 flex-wrap">
-            <span className="text-[0.72rem] sm:text-xs font-bold text-notion-blue-text">Ngữ cảnh ví dụ ({chunk.examples.length}):</span>
+            <span className="text-[0.72rem] sm:text-xs font-bold text-notion-blue-text">
+              Ngữ cảnh ví dụ ({chunk.examples.length}):
+            </span>
             <div className="inline-flex gap-1 flex-wrap">
               {chunk.examples.map((ex, idx) => (
                 <button
@@ -390,7 +407,7 @@ export function ShadowingMode({
                   onClick={() => {
                     setActiveExampleIndex(idx);
                     setEvalResult(null);
-                    setSpokenTranscript('');
+                    setSpokenTranscript("");
                     soundManager.playClick();
                   }}
                 >
@@ -401,8 +418,7 @@ export function ShadowingMode({
           </div>
         )}
 
-        <div className="flex items-center justify-between mb-2.5 text-[0.72rem] sm:text-xs font-semibold text-notion-blue-text">
-          <span>Câu ví dụ thực chiến (Shadowing Target):</span>
+        <div className="flex items-center justify-end mb-2.5 text-[0.72rem] sm:text-xs font-semibold text-notion-blue-text">
           <div className="flex items-center gap-2">
             {/* 1. Loa phát âm tốc độ bình thường (Duolingo Style Speaker) */}
             <button
@@ -410,15 +426,15 @@ export function ShadowingMode({
               className={`inline-flex items-center justify-center cursor-pointer select-none bg-duo hover:bg-duo-hover active:bg-duo-active w-9 h-9 sm:w-11 sm:h-11 rounded-[10px] sm:rounded-[14px] shadow-[0_3px_0_theme(colors.duo.dark)] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-[0_1px_0_theme(colors.duo.dark)] transition-all ${
                 playingAudioType === "normal" ? "animate-pulse bg-duo-dark" : ""
               }`}
-              onClick={() => playAudio(1.0)}
+              onClick={() => playAudio(0.9)}
               title="Phát âm tốc độ bình thường (Phím tắt: Space)"
               aria-label="Phát âm tốc độ bình thường (Space)"
             >
               <Image
                 src="/icons/duo-speaker.png"
                 alt="Phát âm bình thường"
-                width={22}
-                height={18}
+                width={101}
+                height={80}
                 className="w-[19px] sm:w-[24px] h-auto object-contain pointer-events-none select-none"
                 priority
               />
@@ -437,10 +453,9 @@ export function ShadowingMode({
               <Image
                 src="/icons/duo-turtle.png"
                 alt="Phát âm chậm"
-                width={20}
-                height={12}
+                width={95}
+                height={54}
                 className="w-[17px] sm:w-[22px] h-auto object-contain pointer-events-none select-none"
-                style={{ height: "auto" }}
                 priority
               />
             </button>
@@ -453,8 +468,13 @@ export function ShadowingMode({
 
         {/* Full Sentence IPA cleanly structured as a responsive phonetic block (handles long sentences smoothly) */}
         {currentSentenceIpa && (
-          <div className="block bg-notion-surface-subtle border border-notion-border border-l-[3px] border-l-notion-primary rounded-md py-1.5 px-3 mb-2.5 sm:mb-3.5 w-full box-border" title="Phiên âm ngữ âm của câu ví dụ thực chiến">
-            <p className="font-ipa text-xs sm:text-sm leading-relaxed text-notion-text tracking-wide m-0 break-words">{currentSentenceIpa}</p>
+          <div
+            className="block bg-notion-surface-subtle border border-notion-border border-l-[3px] border-l-notion-primary rounded-md py-1.5 px-3 mb-2.5 sm:mb-3.5 w-full box-border"
+            title="Phiên âm ngữ âm của câu ví dụ thực chiến"
+          >
+            <p className="font-ipa text-xs sm:text-sm leading-relaxed text-notion-text tracking-wide m-0 break-words">
+              {currentSentenceIpa}
+            </p>
           </div>
         )}
 
@@ -553,7 +573,9 @@ export function ShadowingMode({
             <div className="flex items-center justify-between mb-2.5 flex-wrap gap-2">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-xs font-bold text-notion-secondary">Kết quả giọng nói của bạn:</span>
-                <span className="text-[0.75rem] text-notion-muted font-normal">(💡 Bấm vào từ bất kỳ để nghe phát âm &amp; xem IPA)</span>
+                <span className="text-[0.75rem] text-notion-muted font-normal">
+                  (💡 Bấm vào từ bất kỳ để nghe phát âm &amp; xem IPA)
+                </span>
               </div>
               <span
                 className={`text-xs font-bold py-1 px-2 rounded ${
@@ -615,7 +637,10 @@ export function ShadowingMode({
                   <span className="text-xs font-medium text-notion-secondary">Từ đang chọn:</span>
                   <strong className="text-base font-bold text-notion-text">{activeInspectToken.cleanWord}</strong>
                   {activeInspectToken.ipa && (
-                    <span className="font-ipa text-xs font-semibold text-notion-blue-text bg-notion-blue-bg border border-notion-blue-border py-0.5 px-2 rounded tracking-wide" title="Phiên âm chuẩn Anh - Mỹ (General American IPA)">
+                    <span
+                      className="font-ipa text-xs font-semibold text-notion-blue-text bg-notion-blue-bg border border-notion-blue-border py-0.5 px-2 rounded tracking-wide"
+                      title="Phiên âm chuẩn Anh - Mỹ (General American IPA)"
+                    >
                       🇺🇸 {activeInspectToken.ipa}
                     </span>
                   )}
@@ -720,11 +745,16 @@ export function ShadowingMode({
                   >
                     <div className="flex items-center gap-2.5">
                       <div className="flex items-center gap-2">
-                        <span className={`text-lg font-extrabold tracking-tight ${isFixed ? "text-notion-green-text" : "text-notion-red-text"}`}>
+                        <span
+                          className={`text-lg font-extrabold tracking-tight ${isFixed ? "text-notion-green-text" : "text-notion-red-text"}`}
+                        >
                           {tok.word}
                         </span>
                         {americanIpa && (
-                          <span className="font-ipa text-xs font-semibold text-notion-blue-text bg-notion-blue-bg border border-notion-blue-border py-0.5 px-2 rounded" title="Phiên âm chuẩn Anh - Mỹ (General American IPA)">
+                          <span
+                            className="font-ipa text-xs font-semibold text-notion-blue-text bg-notion-blue-bg border border-notion-blue-border py-0.5 px-2 rounded"
+                            title="Phiên âm chuẩn Anh - Mỹ (General American IPA)"
+                          >
                             🇺🇸 {americanIpa}
                           </span>
                         )}
@@ -828,8 +858,12 @@ export function ShadowingMode({
             title="Đánh dấu cần ôn lại sớm (Phím tắt: 1)"
           >
             <div className="flex items-center justify-between w-full mb-0.5">
-              <span className="font-bold text-sm sm:text-base text-notion-text hover:text-notion-red-text transition-colors">Chưa thuộc</span>
-              <span className="font-mono text-[0.66rem] font-semibold py-0.5 px-1.5 rounded bg-notion-surface-subtle text-notion-secondary">Phím 1</span>
+              <span className="font-bold text-sm sm:text-base text-notion-text hover:text-notion-red-text transition-colors">
+                Chưa thuộc
+              </span>
+              <span className="font-mono text-[0.66rem] font-semibold py-0.5 px-1.5 rounded bg-notion-surface-subtle text-notion-secondary">
+                Phím 1
+              </span>
             </div>
             <span className="text-[0.72rem] sm:text-xs text-notion-muted">Ôn lại sớm (&lt; 1 ngày)</span>
           </button>
@@ -842,7 +876,9 @@ export function ShadowingMode({
           >
             <div className="flex items-center justify-between w-full mb-0.5">
               <span className="font-bold text-sm sm:text-base text-white">Tiếp tục ➔</span>
-              <span className="font-mono text-[0.66rem] font-semibold py-0.5 px-1.5 rounded bg-white/20 text-white border border-white/30">Enter ↵</span>
+              <span className="font-mono text-[0.66rem] font-semibold py-0.5 px-1.5 rounded bg-white/20 text-white border border-white/30">
+                Enter ↵
+              </span>
             </div>
             <span className="text-[0.72rem] sm:text-xs text-white/90">Đã nhớ tốt • Tự động tăng chu kỳ SRS</span>
           </button>

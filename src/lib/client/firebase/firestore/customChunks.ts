@@ -1,4 +1,12 @@
-import { doc, setDoc, deleteDoc, collection, getDocs, serverTimestamp } from "firebase/firestore";
+import {
+  doc,
+  collection,
+  getDocs,
+  serverTimestamp,
+  writeBatch,
+  arrayUnion,
+  arrayRemove
+} from "firebase/firestore";
 import { db } from "../config";
 import { SpeakingChunk } from "@/types";
 
@@ -8,7 +16,10 @@ import { SpeakingChunk } from "@/types";
 export async function syncCustomChunk(uid: string, chunk: SpeakingChunk): Promise<void> {
   try {
     const ref = doc(db, "users", uid, "customChunks", chunk.id);
-    await setDoc(
+    const statsRef = doc(db, "users", uid, "stats", "current");
+    const batch = writeBatch(db);
+
+    batch.set(
       ref,
       {
         ...chunk,
@@ -17,18 +28,43 @@ export async function syncCustomChunk(uid: string, chunk: SpeakingChunk): Promis
       },
       { merge: true }
     );
+
+    // Gỡ khỏi deletedChunkIds nếu tạo/sửa lại và cập nhật timestamp
+    batch.set(
+      statsRef,
+      {
+        deletedChunkIds: arrayRemove(chunk.id),
+        lastCustomChunksUpdatedAt: Date.now()
+      },
+      { merge: true }
+    );
+
+    await batch.commit();
   } catch (error) {
     console.error(`Failed to sync custom chunk ${chunk.id}:`, error);
   }
 }
 
 /**
- * Xóa từ vựng tự tạo khỏi Cloud Firestore.
+ * Xóa từ vựng tự tạo khỏi Cloud Firestore và lưu Tombstone vào stats/current.
  */
 export async function deleteCustomChunk(uid: string, chunkId: string): Promise<void> {
   try {
     const ref = doc(db, "users", uid, "customChunks", chunkId);
-    await deleteDoc(ref);
+    const statsRef = doc(db, "users", uid, "stats", "current");
+    const batch = writeBatch(db);
+
+    batch.delete(ref);
+    batch.set(
+      statsRef,
+      {
+        deletedChunkIds: arrayUnion(chunkId),
+        lastCustomChunksUpdatedAt: Date.now()
+      },
+      { merge: true }
+    );
+
+    await batch.commit();
   } catch (error) {
     console.error(`Failed to delete custom chunk ${chunkId}:`, error);
   }

@@ -1,8 +1,7 @@
 # ERRORS.md — Nhật ký Lỗi, Nguyên nhân Gốc rễ & Giải pháp (EchoChunk)
 
 > **Dự án:** EchoChunk  
-> **Cập nhật lần cuối:** 2026-10-02  
-> **Phạm vi:** YouTube Transcript, Player, React 19 Lifecycle, SSR Hydration, ESLint Rules, TTS Audio Engine, Phonetics IPA, Webshare Rotating Proxy, Firestore Quota Optimization, NoSQL Data Modeling, Next.js 16 Auth & Jose Overrides, Modal UX & Body Scroll Lock, Next.js Image Optimization, Form Typography & Line Wrap
+> **Cập nhật lần cuối:** 2026-10-03  
 
 ---
 
@@ -26,6 +25,13 @@
 17. [Google Search Console báo 'URL không xác định' do Trang chủ thiếu trong Sitemap & bị Redirect 307](#17-google-search-console-báo-url-không-xác-định-do-trang-chủ-thiếu-trong-sitemap--bị-redirect-307)
 18. [Lỗi cuộn ngầm (Scroll Leaking) & Thanh cuộn xấu khi Modal mở trên Desktop/Mobile](#18-lỗi-cuộn-ngầm-scroll-leaking--thanh-cuộn-xấu-khi-modal-mở-trên-desktopmobile)
 19. [Cảnh báo Next.js `next/image` về Aspect Ratio khi dùng Tailwind resize ảnh (`/icons/duo-turtle.png`)](#19-cảnh-báo-nextjs-nextimage-về-aspect-ratio-khi-dùng-tailwind-resize-ảnh-iconsduo-turtlepng)
+20. [Lỗi Crash `IllegalStateException` khi mở Google OAuth Popup trong Android WebView](#20-lỗi-crash-illegalstateexception-khi-mở-google-oauth-popup-trong-android-webview)
+21. [Lỗi Firebase Auth trắng màn hình & "missing initial state" do thiếu Multi-window & chặn Third-party Cookies trong Android WebView](#21-lỗi-firebase-auth-trắng-màn-hình--missing-initial-state-do-thiếu-multi-window--chặn-third-party-cookies-trong-android-webview)
+22. [Lỗi Gradle Build fail với `Unsupported class file major version 69` khi build APK bằng Java 25](#22-lỗi-gradle-build-fail-với-unsupported-class-file-major-version-69-khi-build-apk-bằng-java-25)
+23. [Lỗi Modal `position: fixed` bị cắt cụt do lồng bên trong thẻ cha có `backdrop-filter` hoặc `transform` (CSS Containing Block Gotcha)](#23-lỗi-modal-position-fixed-bị-cắt-cụt-do-lồng-bên-trong-thẻ-cha-có-backdrop-filter-hoặc-transform-css-containing-block-gotcha)
+24. [Lỗi Flash/Nhấp nháy phiên âm IPA (hiển thị câu tiếng Anh thô rồi đổi sang IPA) & Cụt âm vị từ ghép có gạch nối](#24-lỗi-flashnhấp-nháy-phiên-âm-ipa-hiển-thị-câu-tiếng-anh-thô-rồi-đổi-sang-ipa--cụt-âm-vị-từ-ghép-có-gạch-nối)
+25. [Lỗi lệch số lượng chunk giữa SSR và Client: Nhảy số 'Từ vựng của tôi' (244 -> 242) và Topic gốc bị trừ hụt (Work & Business 58 -> 57)](#25-lỗi-lệch-số-lượng-chunk-giữa-ssr-và-client-nhảy-số-từ-vựng-của-tôi-244---242-và-topic-gốc-bị-trừ-hụt-work--business-58---57)
+26. [Lỗi bất đồng bộ dữ liệu giữa nhiều thiết bị/môi trường (Localhost vs Web Deployed): Hiện tượng 'Zombie Data' hồi sinh video/chunk đã xóa & Cache cũ đè dữ liệu mới](#26-lỗi-bất-đồng-bộ-dữ-liệu-giữa-nhiều-thiết-bịmôi-trường-localhost-vs-web-deployed-hiện-tượng-zombie-data-hồi-sinh-videochunk-đã-xóa--cache-cũ-đè-dữ-liệu-mới)
 
 ---
 
@@ -901,40 +907,468 @@ Trong tài liệu chính thức của Google Firebase, Firestore định nghĩa 
 ## 19. Cảnh báo Next.js `next/image` về Aspect Ratio khi dùng Tailwind resize ảnh (`/icons/duo-turtle.png`)
 
 ### Triệu chứng
-Console trình duyệt hiển thị cảnh báo từ Next.js Image component khi truy cập các trang luyện tập (`/luyen-noi`, `/dien-tu`):
+Console trình duyệt hiển thị cảnh báo từ Next.js Image component khi truy cập các trang luyện tập (`/shadowing`, `/blanks`):
 ```text
 [browser] Image with src "/icons/duo-turtle.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
 ```
 
 ### Nguyên nhân gốc rễ
-1. Component `next/image` có các thuộc tính kích thước tĩnh (`width={20} height={12}`).
-2. Khi can thiệp kích thước bằng class Tailwind `w-[17px] sm:w-[22px] h-auto`, runtime validator của Next.js trong môi trường Client/Dev chỉ phân tích inline style hoặc thuộc tính DOM trực tiếp. Do `h-auto` nằm trong CSS class ngoại vi, Next.js hiểu lầm rằng chỉ có chiều ngang (`width`) bị thay đổi bằng CSS trong khi chiều dọc (`height`) giữ nguyên giá trị tĩnh, có nguy cơ gây méo tỷ lệ ảnh hoặc nhảy layout (CLS).
+1. **Cơ chế kiểm tra nội bộ của Next.js (`node_modules/next/dist/esm/client/image-component.js`):**
+   ```js
+   const heightModified = img.height.toString() !== img.getAttribute('height');
+   const widthModified = img.width.toString() !== img.getAttribute('width');
+   if ((heightModified && !widthModified) || (!heightModified && widthModified)) {
+     warnOnce(
+       `Image with src "${origSrc}" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.`
+     );
+   }
+   ```
+   - Next.js **hoàn toàn không kiểm tra thuộc tính inline `style`** để quyết định tắt warning này! Câu thông báo *"also include the styles 'width: auto' or 'height: auto'"* chỉ là văn bản hướng dẫn tĩnh chung của Next.js khi phát hiện một chiều bị biến đổi độc lập.
+   - Next.js so sánh trực tiếp kích thước thực tế hiển thị trên DOM (`img.width`, `img.height`) với giá trị thuộc tính HTML (`getAttribute('width')`, `getAttribute('height')`).
+   - Cảnh báo **chỉ xuất hiện** khi toán tử logic kích hoạt: **MỘT TRONG HAI** chiều bị coi là "được sửa đổi bởi CSS" trong khi chiều còn lại vô tình trùng khớp hoàn toàn với thuộc tính HTML khai báo.
+2. **Sai lầm cốt lõi: Coi `width`/`height` là kích thước hiển thị mong muốn thay vì kích thước gốc:**
+   - Kích thước pixel gốc thực tế của file ảnh [`/public/icons/duo-turtle.png`](file:///d:/SelfLearning/EchoChunk/public/icons/duo-turtle.png) là **95 × 54** (tỉ lệ ~1.759).
+   - Code cũ điền kích thước hiển thị mong muốn `width={19} height={11}` (tỉ lệ 19/11 ≈ 1.727) kèm CSS `className="w-[19px] h-auto"`.
+   - Khi trình duyệt vẽ ảnh với `w-[19px]`:
+     - Chiều rộng `img.width` là `19`, khớp chính xác với `getAttribute('width') = "19"` $\rightarrow$ `widthModified = false`.
+     - Chiều cao được trình duyệt tính theo tỉ lệ file ảnh gốc: `19 * 54 / 95 = 10.79px ≈ 10px`, khác với `getAttribute('height') = "11"` $\rightarrow$ `heightModified = true`.
+     - Điều kiện `(heightModified && !widthModified)` trả về `true` $\rightarrow$ Next.js nghi ngờ lập trình viên đổi kích thước làm méo tỉ lệ khung hình và bắn cảnh báo!
+   - Tương tự trên desktop (`sm:w-[22px]` và `width={20} height={12}`):
+     - `img.width = 22` lệch `20` $\rightarrow$ `widthModified = true`.
+     - Chiều cao `22 * 54 / 95 = 12.48px ≈ 12px`, vô tình trùng khớp với `getAttribute('height') = "12"` $\rightarrow$ `heightModified = false`.
+     - Điều kiện `(!heightModified && widthModified)` trả về `true` $\rightarrow$ Next.js tiếp tục bắn cảnh báo.
 
-### Cách khắc phục
-Bổ sung tường minh thuộc tính inline `style={{ height: "auto" }}` trực tiếp vào component `<Image>` theo đúng khuyến cáo kỹ thuật của Next.js:
-- Trong [`ShadowingMode.tsx`](file:///d:/SelfLearning/EchoChunk/src/components/ShadowingMode.tsx#L443):
-  ```tsx
-  <Image
-    src="/icons/duo-turtle.png"
-    alt="Phát âm chậm"
-    width={20}
-    height={12}
-    className="w-[17px] sm:w-[22px] h-auto object-contain pointer-events-none select-none"
-    style={{ height: "auto" }}
-    priority
-  />
-  ```
-- Trong [`ChunkBlanksMode.tsx`](file:///d:/SelfLearning/EchoChunk/src/components/ChunkBlanksMode.tsx#L390):
-  ```tsx
-  <Image
-    src="/icons/duo-turtle.png"
-    alt="Phát âm chậm"
-    width={19}
-    height={11}
-    className="w-[19px] h-auto object-contain pointer-events-none select-none"
-    style={{ height: "auto" }}
-    priority
-  />
-  ```
+### Bản chất & Giải pháp triệt để
+1. **Nguyên tắc vàng của Next.js `<Image>`:**
+   - **`width` & `height` props:** Đại diện cho **Kích thước gốc (Intrinsic Dimensions)** của file ảnh (hoặc tỉ lệ gốc nguyên vẹn). Next.js dùng 2 số này để tính `aspect-ratio` dự trữ khung chỗ trên màn hình, triệt tiêu hoàn toàn hiện tượng giật trang (Cumulative Layout Shift - CLS) trong lúc ảnh đang tải.
+   - **CSS (`className`):** Đại diện cho **Kích thước hiển thị thực tế** trên giao diện (`w-[17px] sm:w-[22px] h-auto`).
+2. **Khai báo chuẩn xác kích thước gốc:**
+   - [`/icons/duo-turtle.png`](file:///d:/SelfLearning/EchoChunk/public/icons/duo-turtle.png): Kích thước gốc **95 × 54** $\rightarrow$ khai báo `width={95}` và `height={54}`.
+   - [`/icons/duo-speaker.png`](file:///d:/SelfLearning/EchoChunk/public/icons/duo-speaker.png): Kích thước gốc **101 × 80** $\rightarrow$ khai báo `width={101}` và `height={80}`.
+3. **Thực thi trong mã nguồn:**
+   - Trong [`src/components/ShadowingMode.tsx`](file:///d:/SelfLearning/EchoChunk/src/components/ShadowingMode.tsx#L433-L462):
+     ```tsx
+     <Image
+       src="/icons/duo-speaker.png"
+       alt="Phát âm bình thường"
+       width={101}
+       height={80}
+       className="w-[19px] sm:w-[24px] h-auto object-contain pointer-events-none select-none"
+       priority
+     />
+
+     <Image
+       src="/icons/duo-turtle.png"
+       alt="Phát âm chậm"
+       width={95}
+       height={54}
+       className="w-[17px] sm:w-[22px] h-auto object-contain pointer-events-none select-none"
+       priority
+     />
+     ```
+   - Trong [`src/components/ChunkBlanksMode.tsx`](file:///d:/SelfLearning/EchoChunk/src/components/ChunkBlanksMode.tsx#L365-L393):
+     ```tsx
+     <Image
+       src="/icons/duo-speaker.png"
+       alt="Phát âm chuẩn"
+       width={101}
+       height={80}
+       className="w-[20px] h-auto object-contain pointer-events-none select-none"
+       priority
+     />
+
+     <Image
+       src="/icons/duo-turtle.png"
+       alt="Phát âm chậm"
+       width={95}
+       height={54}
+       className="w-[19px] h-auto object-contain pointer-events-none select-none"
+       priority
+     />
+     ```
+   - Khi đó, cả hai chiều trên DOM đều được CSS điều chỉnh tương ứng (`widthModified = true` và `heightModified = true`), biểu thức kiểm tra của Next.js trả về `false`, xóa sạch 100% cảnh báo trên console ở mọi kích thước màn hình mà không cần các mẹo inline style dư thừa.
 
 ---
+
+## 20. Lỗi Crash `IllegalStateException` khi mở Google OAuth Popup trong Android WebView
+
+### Triệu chứng
+Khi người dùng bấm vào biểu tượng hoặc nút Đăng nhập Google trên ứng dụng Android (`com.echochunk.app`), ứng dụng bị văng (crash) và đóng đột ngột. Kiểm tra Logcat hệ thống hiển thị stack trace:
+```text
+FATAL EXCEPTION: main
+Process: com.echochunk.app, PID: 3328
+Caused by: java.lang.IllegalStateException: LifecycleOwner com.echochunk.app.MainActivity is attempting to register while current state is RESUMED. LifecycleOwners must call register before they are STARTED.
+	at androidx.activity.result.ActivityResultRegistry.register(ActivityResultRegistry.kt:88)
+	at androidx.activity.ComponentActivity.registerForActivityResult(ComponentActivity.kt:799)
+	at com.getcapacitor.Bridge.registerForActivityResult(Bridge.java:1015)
+	at com.getcapacitor.BridgeWebChromeClient.<init>(BridgeWebChromeClient.java:69)
+	at com.echochunk.app.MainActivity$1.onCreateWindow(MainActivity.java:54)
+```
+
+### Nguyên nhân gốc rễ
+1. Trong phương thức `onCreateWindow` của `WebChromeClient` trong `MainActivity.java`, khi tạo `popupWebView` để hiển thị cửa sổ Google Login, code đã gán:
+   ```java
+   popupWebView.setWebChromeClient(new BridgeWebChromeClient(getBridge()) { ... });
+   ```
+2. Trong hàm khởi tạo của `BridgeWebChromeClient`, Capacitor luôn tự động đăng ký:
+   ```java
+   permissionLauncher = bridge.registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), permissionCallback);
+   activityLauncher = bridge.registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), ...);
+   ```
+3. Theo nguyên tắc vòng đời của **Android Jetpack Lifecycle** (`ActivityResultRegistry`), việc đăng ký `registerForActivityResult` **bắt buộc phải được gọi khi Activity còn ở trạng thái `INITIALIZED` / `CREATED` (trước khi `STARTED`)**.
+4. Sự kiện `onCreateWindow` chỉ diễn ra khi người dùng bấm vào nút đăng nhập trên giao diện web (tức là Activity đã ở trạng thái `RESUMED`). Việc khởi tạo `new BridgeWebChromeClient` tại thời điểm này vi phạm vòng đời Android, khiến hệ điều hành ném ngay `IllegalStateException` và crash ứng dụng.
+
+### Cách khắc phục
+Cửa sổ popup Google OAuth (`popupWebView`) chỉ đóng vai trò là một container hiển thị trang web chọn tài khoản Google của Google Identity, nó hoàn toàn không cần tương tác với bất kỳ native plugin nào của Capacitor.
+Thay thế `BridgeWebChromeClient` bằng lớp `android.webkit.WebChromeClient` chuẩn của Android SDK trong [`MainActivity.java`](file:///d:/SelfLearning/EchoChunk/android/app/src/main/java/com/echochunk/app/MainActivity.java):
+```java
+// ✅ ĐÚNG: Dùng WebChromeClient chuẩn của Android cho popup, không kích hoạt registerForActivityResult
+popupWebView.setWebChromeClient(new android.webkit.WebChromeClient() {
+    @Override
+    public void onCloseWindow(WebView window) {
+        dialog.dismiss();
+        window.destroy();
+    }
+});
+```
+
+---
+
+## 21. Lỗi Firebase Auth trắng màn hình & "missing initial state" do thiếu Multi-window & chặn Third-party Cookies trong Android WebView
+
+### Triệu chứng
+Sau khi bấm Đăng nhập Google và chọn tài khoản xong, màn hình bị chuyển hướng đến một trang trắng xóa không tải tiếp. Nếu kiểm tra console hoặc log có thể xuất hiện lỗi:
+```text
+Unable to process request due to missing initial state. This may happen if browser sessionStorage is inaccessible or accidentally cleared. Some specific scenarios are - 1) Using IDP-Initiated SAML SSO. 2) Using signInWithRedirect in a storage-partitioned browser environment.
+```
+Người dùng buộc phải tắt app hoặc vuốt reload lại thì tài khoản mới hiển thị đã đăng nhập.
+
+### Nguyên nhân gốc rễ
+1. **WebView không hỗ trợ đa cửa sổ theo mặc định:** Trong kiến trúc web desktop, `signInWithPopup` mở ra một popup riêng biệt (`window.open`). Khi hoàn tất, popup gọi `window.opener.postMessage(...)` rồi tự đóng (`window.close()`). Khi chạy trên Android WebView mà chưa kích hoạt `setSupportMultipleWindows(true)`, `window.open` bị ép chuyển hướng đè lên chính WebView hiện tại. Điều này làm mất ngữ cảnh `sessionStorage` của cửa sổ cha (gây ra lỗi `missing initial state`). Khi đăng nhập xong, trang xác thực cố gắng gọi `window.close()` nhưng WebView không đóng được dẫn đến treo ở màn hình trắng.
+2. **Android WebView mặc định chặn Third-Party Cookies:** Khi diễn ra luồng chuyển hướng giữa domain ứng dụng (`speaking-english.taiphanvan.id.vn`), `accounts.google.com` và Firebase Auth handler (`echo-chunk.firebaseapp.com`), Android WebView áp dụng cơ chế Storage Partitioning (cách ly lưu trữ), khiến `sessionStorage` và session cookie giữa các domain bị chặn.
+
+### Cách khắc phục
+1. Trong [`MainActivity.java`](file:///d:/SelfLearning/EchoChunk/android/app/src/main/java/com/echochunk/app/MainActivity.java):
+   - Kích hoạt `CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true)` cho cả WebView chính và popup WebView.
+   - Bật `settings.setSupportMultipleWindows(true)` và override `onCreateWindow` để mở Google Login trong một Dialog Native riêng biệt với layout tràn màn hình.
+   - Khi Google xác thực xong, `window.opener.postMessage(...)` gửi token về WebView chính thành công, và `onCloseWindow` của `WebChromeClient` sẽ tự động đóng Dialog, đưa người dùng trở lại màn hình chính của ứng dụng mà không cần reload.
+2. Trong [`capacitor.config.ts`](file:///d:/SelfLearning/EchoChunk/capacitor.config.ts):
+   - Bổ sung cấu hình `server.allowNavigation` cho các domain Google OAuth:
+     ```typescript
+     allowNavigation: [
+       'speaking-english.taiphanvan.id.vn',
+       '*.firebaseapp.com',
+       'accounts.google.com',
+       '*.google.com',
+       '*.googleusercontent.com',
+     ],
+     ```
+
+---
+
+## 22. Lỗi Gradle Build fail với `Unsupported class file major version 69` khi build APK bằng Java 25
+
+### Triệu chứng
+Chạy `./gradlew assembleDebug` thất bại ngay trong giai đoạn phân tích script build:
+```text
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+BUG! exception in phase 'semantic analysis' in source unit '_BuildScript_' Unsupported class file major version 69
+> Unsupported class file major version 69
+```
+
+### Nguyên nhân gốc rễ
+1. Phiên bản bytecode `69` tương ứng với **Java 25**.
+2. Gradle 8.14 và Android Gradle Plugin (AGP 8.13) hiện tại chỉ hỗ trợ chính thức tối đa đến Java 21 / 22. Java 25 là phiên bản thử nghiệm/tương lai, chưa tương thích với parser Groovy/ASM của Gradle.
+3. Khi chạy lệnh qua PowerShell mà chưa gán biến môi trường `JAVA_HOME` đúng cú pháp, Gradle tự động dò theo lệnh `java` mặc định trong biến PATH của hệ điều hành (vốn đang trỏ tới OpenJDK 25).
+
+### Cách khắc phục
+1. Gán biến môi trường `JAVA_HOME` trỏ tường minh tới phiên bản JDK 21 LTS trên máy:
+   ```powershell
+   $env:JAVA_HOME = "C:\Users\Lenovo\AppData\Local\Programs\Eclipse Adoptium\jdk-21.0.11.10-hotspot"
+   $env:PATH = "$env:JAVA_HOME\bin;$env:PATH"
+   ```
+2. Tạo file [`android/local.properties`](file:///d:/SelfLearning/EchoChunk/android/local.properties) để khai báo SDK Android:
+   ```properties
+   sdk.dir=D\:\\AndroidStudio\\Sdk
+   ```
+3. Thực thi build bằng `./gradlew.bat assembleDebug`, quá trình biên dịch hoàn tất thành công 100% trong 2-4 giây.
+
+---
+
+## 23. Lỗi Modal `position: fixed` bị cắt cụt do lồng bên trong thẻ cha có `backdrop-filter` hoặc `transform` (CSS Containing Block Gotcha)
+
+### Triệu chứng
+Khi mở `NotificationSettingsModal` từ nút Chuông trên thanh Navbar, toàn bộ nửa trên của Modal (Tiêu đề, icon Chuông, nút đóng `X`, và thanh trạng thái cấp quyền) bị đẩy vọt lên phía trên mép màn hình trình duyệt (tọa độ `Y < 0`) và biến mất khỏi tầm mắt người dùng. Chỉ có nửa dưới của modal (chọn giờ nhắc, nút thử nghiệm thông báo, nút lưu/hủy) hiển thị lơ lửng ở đỉnh trang.
+
+### Nguyên nhân gốc rễ
+1. **Lồng Modal vào thẻ cha có `backdrop-filter`:** Component `NotificationSettingsModal` được đặt bên trong thẻ `<header className="sticky top-0 z-[100] backdrop-blur-[20px] ...">` của [`Navbar.tsx`](file:///d:/SelfLearning/EchoChunk/src/components/Navbar.tsx). Class `backdrop-blur-[20px]` sinh ra thuộc tính CSS `backdrop-filter: blur(20px)`.
+2. **Quy chuẩn W3C về Containing Block:** Theo đặc tả của CSS Transforms Module và CSS Filter Effects Module, bất kỳ giá trị nào khác `none` cho các thuộc tính `backdrop-filter`, `filter`, `transform`, hoặc `perspective` trên một thẻ cha sẽ biến thẻ cha đó thành một **Containing Block (khung tọa độ cha)** cho tất cả các phần tử con có `position: fixed`.
+3. **Mất tọa độ Viewport toàn màn hình:** Lớp phủ backdrop `fixed inset-0` của modal thay vì bám vào toàn bộ cửa sổ trình duyệt (100vw × 100vh), nó bị thu hẹp và chỉ được ăn theo kích thước của thẻ `<header>` (vốn chỉ cao khoảng 50px ở đỉnh trang).
+4. **Lệch tâm khi căn giữa:** Modal cao ~450px sử dụng `flex items-center justify-center` để căn giữa theo chiều dọc. Trình duyệt đã lấy tâm của Header (tọa độ `Y = 25px`) làm tâm của Modal. Hậu quả là nửa trên của Modal (~225px) bị đẩy ngược lên tọa độ âm `Y = -200px` (vượt khỏi mép trên trình duyệt), mắt người dùng hoàn toàn không nhìn thấy được.
+
+### Cách khắc phục
+1. **Nguyên tắc kiến trúc vàng:** Tuyệt đối không lồng Modal/Popup có `position: fixed` vào bên trong một thẻ cha có `backdrop-filter`, `filter` hoặc `transform`.
+2. **Di chuyển Modal ra ngoài thẻ `<header>`:** Trong [`src/components/Navbar.tsx`](file:///d:/SelfLearning/EchoChunk/src/components/Navbar.tsx), bọc Navbar trong React Fragment `<>` và đưa modal ra ngoài phạm vi thẻ `<header>`:
+   ```tsx
+   return (
+     <>
+       <header className="sticky top-0 z-[100] backdrop-blur-[20px] ...">
+         ...
+       </header>
+
+       {/* Notification Settings Modal - Mount ngoài header */}
+       {isNotificationModalOpen && (
+         <NotificationSettingsModal onClose={() => setIsNotificationModalOpen(false)} />
+       )}
+     </>
+   );
+   ```
+3. **Đồng bộ kiến trúc Modal chuẩn với `ChunkModal`:**
+   - Thay vì lạm dụng `createPortal`, áp dụng cơ chế conditional rendering `{isOpen && <Modal />}` để component unmount sạch sẽ khi đóng.
+   - Sử dụng hook [`useBodyScrollLock()`](file:///d:/SelfLearning/EchoChunk/src/hooks/useBodyScrollLock.ts) để khóa cuộn trang nền và [`useEscapeKey(onClose)`](file:///d:/SelfLearning/EchoChunk/src/hooks/useEscapeKey.ts) để đóng modal bằng phím ESC.
+   - Chuẩn hóa CSS Wrapper tương thích hoàn hảo mọi kích thước màn hình (kể cả mobile 320px):
+     ```tsx
+     <div className="fixed inset-0 bg-black/50 sm:backdrop-blur-[4px] z-[5000] flex sm:items-center sm:justify-center sm:p-4" onClick={onClose}>
+       <div className="bg-white sm:border sm:border-gray-200 w-full h-[100dvh] sm:h-auto sm:max-h-[90vh] sm:max-w-[480px] sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-[fadeIn_0.15s_ease]" onClick={(e) => e.stopPropagation()}>
+         {/* Sticky Header */}
+         ...
+         {/* Scrollable Body */}
+         <div className="flex-1 overflow-y-auto scrollbar-thin p-4 sm:p-6 flex flex-col gap-4">...</div>
+         {/* Sticky Footer */}
+         ...
+       </div>
+     </div>
+     ```
+
+---
+
+## 24. Lỗi Flash/Nhấp nháy phiên âm IPA (hiển thị câu tiếng Anh thô rồi đổi sang IPA) & Cụt âm vị từ ghép có gạch nối
+
+### Triệu chứng
+1. Khi người dùng mở một bài học (ví dụ: chunk *"Problem-solving skills"* trong Shadowing Mode), tại vị trí hiển thị phiên âm IPA của câu ví dụ:
+   - Ban đầu hiển thị nguyên văn câu tiếng Anh thô: `"/i leveraged my problem-solving skills to identify the memory leak and boost app performance by 30%/"`.
+   - Khoảng 1–2 giây sau, giao diện bị giật (flash) và đổi sang một phiên âm IPA khác do máy sinh: `"/ aɪ ˈlevərɪdʒ ˈmaɪ ˈprɑːbləm ˈsɑːlvɪŋ ˈskɪlz ... /"`.
+2. Tại vị trí phiên âm IPA của chính cụm từ (Chunk Title):
+   - Cụm từ là *"Problem-solving skills"* (3 từ ngữ), nhưng phiên âm chỉ hiển thị: `"/ ˈprɑːbləm ˈsɑːlvɪŋ /"` (bị mất âm vị của từ `"skills"`).
+
+### Nguyên nhân gốc rễ
+1. **Lỗi ưu tiên sai nhánh trong [`ShadowingMode.tsx`](file:///d:/SelfLearning/EchoChunk/src/components/ShadowingMode.tsx):**
+   - Trong `ShadowingMode`:
+     ```ts
+     const currentSentenceIpa = useMemo(() => {
+       if (activeExample.sentenceIpa) return activeExample.sentenceIpa;
+       if (activeExample.cleanSentence || activeExample.sentence) {
+         return getPhraseIpa(activeExample.cleanSentence || activeExample.sentence); // <-- LUÔN CHẠY NHÁNH NÀY!
+       }
+       return defaultSentenceIpa;
+     }, [activeExample, defaultSentenceIpa]);
+     ```
+   - Trong dataset [`speaking-chunks.json`](file:///d:/SelfLearning/EchoChunk/src/data/speaking-chunks.json), toàn bộ 545 câu đều ĐÃ CÓ phiên âm chuẩn của câu lưu trong trường `ipa`. Hàm `resolveChunkIpas` đã trích xuất sẵn ra biến `defaultSentenceIpa` chuẩn xác 100%.
+   - Tuy nhiên, điều kiện `if (activeExample.cleanSentence || activeExample.sentence)` luôn luôn `true`, khiến code **hoàn toàn bỏ qua `defaultSentenceIpa`** và ép gọi `getPhraseIpa(...)` để sinh lại từ đầu qua từ điển CMU!
+2. **Cơ chế Lazy-Load từ điển IPA & Fallback sai trong [`ipa.ts`](file:///d:/SelfLearning/EchoChunk/src/lib/shared/ipa.ts):**
+   - File từ điển `american-ipa.json` (3.26MB) được tải lười (lazy load) qua hàm `ensureIpaDict()` để tránh phình bundle ban đầu.
+   - Khi component mới mount (hoặc SSR), `ipaDict` vẫn đang là `null`.
+   - Trong hàm `getPhraseIpa(phrase)`:
+     ```ts
+     for (const token of tokens) {
+       const rawIpa = getAmericanIpa(token);
+       if (rawIpa) {
+         ipaParts.push(rawIpa...);
+       } else {
+         ipaParts.push(token.toLowerCase()); // <-- Lấy chính từ tiếng Anh đẩy vào mảng!
+       }
+     }
+     ```
+   - Khi `ipaDict === null`, không từ nào tìm thấy IPA -> Hàm lấy nguyên văn toàn bộ câu tiếng Anh ghép lại bọc giữa 2 dấu gạch `/ ... /` và trả về như thể đó là IPA!
+   - 1–2 giây sau, trình duyệt rảnh hoặc Firebase Auth hoàn tất nạp dữ liệu gọi `setStoreVersion` -> Component re-render lần 2. Lúc này `ipaDict` đã nạp xong -> `getPhraseIpa` sinh ra phiên âm CMU mới, gây ra hiện tượng giật màn hình và đổi phiên âm.
+3. **Lỗi Regex không tách dấu gạch nối trong [`extractChunkIpaFromSentenceIpa`](file:///d:/SelfLearning/EchoChunk/src/lib/shared/ipa.ts):**
+   - Regex tách từ cũ: `.replace(/[^a-z0-9\s'-]/g, " ")` giữ lại dấu gạch nối `-`.
+   - Khiến từ ghép `"problem-solving"` bị tính là **1 từ** (`cleanChunkWords.length` = 2 gồm `["problem-solving", "skills"]`).
+   - Nhưng trong chuỗi `sentenceIpa`, `"ˈprɑːbləm"` và `"ˈsɑːlvɪŋ"` là **2 âm vị tách biệt** bởi khoảng trắng.
+   - Khi cắt âm vị: `ipaTokens.slice(matchIndex, matchIndex + cleanChunkWords.length)` -> Cắt đúng 2 token -> Chỉ lấy `["ˈprɑːbləm", "ˈsɑːlvɪŋ"]` và bỏ quên token `"skɪlz"` phía sau!
+
+### Giải pháp triệt để
+1. **Ưu tiên `defaultSentenceIpa` cho câu ví dụ chính trong [`ShadowingMode.tsx`](file:///d:/SelfLearning/EchoChunk/src/components/ShadowingMode.tsx):**
+   ```ts
+   const currentSentenceIpa = useMemo(() => {
+     if (activeExample.sentenceIpa) return activeExample.sentenceIpa;
+     // Ưu tiên dùng phiên âm đã biên tập sẵn trong dataset (0ms delay, SSR khớp 100%, không bị flash)
+     if (defaultSentenceIpa && (!activeExample.id || activeExample.id === "primary")) {
+       return defaultSentenceIpa;
+     }
+     // Chỉ fallback sang getPhraseIpa khi là ví dụ phụ tự tạo chưa có sentenceIpa
+     if (activeExample.cleanSentence || activeExample.sentence) {
+       const generated = getPhraseIpa(activeExample.cleanSentence || activeExample.sentence);
+       if (generated) return generated;
+     }
+     return defaultSentenceIpa;
+   }, [activeExample, defaultSentenceIpa]);
+   ```
+2. **Ngăn chặn `getPhraseIpa` trả về câu tiếng Anh khi từ điển chưa sẵn sàng:**
+   - Trong [`src/lib/shared/ipa.ts`](file:///d:/SelfLearning/EchoChunk/src/lib/shared/ipa.ts), đếm số lượng từ phân giải thành công `resolvedCount`.
+   - Nếu `resolvedCount === 0` (từ điển chưa nạp xong), trả về chuỗi rỗng `""` thay vì trả về câu tiếng Anh thô.
+3. **Tách dấu gạch nối `-` khi trích xuất IPA cụm từ trong `extractChunkIpaFromSentenceIpa`:**
+   - Chuẩn hóa: `.replace(/[-–—/]/g, " ").replace(/[^a-z0-9\s']/g, " ")`.
+   - Cả `"problem-solving"` và câu ví dụ đều được tách thành `"problem"` và `"solving"`, đảm bảo tỉ lệ ánh xạ 1:1 với các tokens âm vị trong chuỗi `sentenceIpa`.
+   - Kết quả trích xuất đầy đủ 100% âm vị của cụm từ: `"/ˈprɑːbləm ˈsɑːlvɪŋ skɪlz/"`.
+
+4. **Nguyên tắc "Luôn ưu tiên 100% dữ liệu User" trong [`chunksMerge.ts`](file:///d:/SelfLearning/EchoChunk/src/lib/shared/chunksMerge.ts):**
+   - Khi hợp nhất giữa Base Chunks và Custom Chunks, nếu người dùng đã tùy biến hoặc chỉnh sửa một câu (`customMap.has(base.id)`), hệ thống lấy nguyên vẹn 100% bản ghi của User (`customMap.get(base.id)`), không cho phép dữ liệu mặc định của hệ thống can thiệp đè lên.
+5. **Kỹ thuật Client Hydration Gate trong các trang luyện tập (`shadowing`, `blanks`, `reflex`):**
+   - Thay vì điều kiện `if (!isClient && !currentChunk)` (vốn làm Server SSR render ra dữ liệu tĩnh của BE trước, rồi 1 giây sau Client nạp dữ liệu User tráo đổi gây nhấp nháy), chuyển thành:
+     ```ts
+     if (!isClient) {
+       return <PracticeSkeleton />;
+     }
+     ```
+   - Phía Server chỉ trả về Skeleton animate mượt mà trong lúc tải trang (~100ms). Ngay khi Client hydrate và nạp xong dữ liệu cá nhân của User, bài học xuất hiện tức thì với đúng 100% phiên âm và nội dung của User. Người dùng không bao giờ nhìn thấy dữ liệu tĩnh của BE xuất hiện rồi biến mất nữa!
+
+
+---
+
+## 25. Lỗi lệch số lượng chunk giữa SSR và Client: Nhảy số 'Từ vựng của tôi' (244 -> 242) và Topic gốc bị trừ hụt (Work & Business 58 -> 57)
+
+### Triệu chứng
+- Khi truy cập trang, SSR trả về ban đầu hiển thị:
+  - "Từ vựng của tôi": **244** chunks
+  - "Work & Business": **58** chunks
+- Nhưng ngay khi Client hydrate và rerender xong:
+  - "Từ vựng của tôi" đột ngột giảm xuống còn **242** chunks (-2)
+  - "Work & Business" đột ngột giảm xuống còn **57** chunks (-1)
+  - Khi người dùng click chọn chủ đề "Work & Business", danh sách bài học bên trong vẫn hiển thị đủ **58** câu!
+
+### Nguyên nhân gốc rễ
+Sự cố phát sinh từ 2 nguyên nhân độc lập kết hợp:
+
+1. **Bug logic `if ... else` trong việc tính đếm số lượng topic (`computeDynamicTopics` & `dynamicTopics`):**
+   - Đoạn code cũ khi duyệt `allChunks`:
+     ```ts
+     // ❌ SAI: Nếu chunk được user tùy biến (isCustom = true), nó nhảy vào if và BỎ QUA else
+     allChunks.forEach((c) => {
+       if (c.isCustom || c.topicId === "CUSTOM") {
+         customCount += 1;
+       } else {
+         counts[c.topicId] = (counts[c.topicId] || 0) + 1;
+       }
+     });
+     ```
+   - User `3Nk6gLosFYNFTPzjqr9Jtq54e2f1` đã tùy biến/sửa câu `work-006` (`Call it a day`). Do đó, bản ghi `work-006` trong `customChunks` có `isCustom: true` và `topicId: "work"`.
+   - Phía **Server (SSR)**: `allChunks` chỉ chứa 361 Base Chunks tĩnh từ file JSON (chưa có cờ `isCustom: true`). Vì thế toàn bộ 58 câu của chủ đề `work` đều rơi vào nhánh `else` -> Server tính ra `work = 58`.
+   - Phía **Client (FE)**: `allChunks` được gộp với `customChunks` của User. `work-006` có `isCustom: true` nên thỏa mãn nhánh `if`, tăng `customCount` và **bị nuốt mất, không được cộng vào `counts['work']`**.
+   - Kết quả: `work` chỉ còn 57 câu (tương tự 10 chủ đề khác có câu bị sửa cũng bị hụt số đếm trên badge). Trong khi logic filter hiển thị câu (`chunk.topicId === selectedTopicId`) vẫn hiển thị đủ 58 câu, tạo ra sự mâu thuẫn giữa số lượng trên badge và nội dung thực tế!
+
+2. **Lệch bộ đếm tổng `userStats.customChunksCount` (244) so với dữ liệu thực tế (242) trong Firestore:**
+   - Trong Firestore subcollection `users/{uid}/customChunks`, User thực tế chỉ có đúng **242 documents** (gồm 227 chunk tạo mới + 15 chunk gốc được chỉnh sửa).
+   - Tuy nhiên, trong document `users/{uid}/stats/current`, trường `customChunksCount` lại lưu giá trị **244**.
+   - Phía **Server (SSR)**: Nhằm tối ưu hóa Quota đọc Firestore và tránh độ trễ TTFB, Server không đọc toàn bộ 242 docs của collection `customChunks`, mà chỉ đọc `stats/current`. Server lấy trực tiếp `userStats.customChunksCount = 244` làm số lượng ban đầu của "Từ vựng của tôi".
+   - Phía **Client (FE)**: Client duyệt qua mảng `allChunks` thực tế trong LocalStorage/State (có đúng 242 chunks có `isCustom: true`), đếm ra `customCount = 242` và render lại UI, làm số đếm bị giật từ 244 về 242.
+   - Nguyên nhân bộ đếm Firestore bị lệch +2: Trong các hàm `handleSaveChunk` và `handleDeleteChunk`, số lượng `customChunksCount` được cập nhật theo cơ chế cộng trừ tương đối `(userStats.customChunksCount ?? ...) ± 1` thay vì đo trực tiếp từ độ dài thực tế của danh sách `loadCustomChunks(uid).length`. Khi xảy ra việc xoá/sáp nhập dữ liệu nhiều lần hoặc mất đồng bộ tab/offline, biến đếm bị trôi (drift).
+
+### Cách khắc phục triệt để
+1. **Tách biệt logic đếm Topic và Custom trong [`PracticeContext.tsx`](file:///d:/SelfLearning/EchoChunk/src/context/PracticeContext.tsx) & [`practiceData.ts`](file:///d:/SelfLearning/EchoChunk/src/lib/server/practiceData.ts):**
+   - Một câu thuộc chủ đề `work` dù được user sửa lại phiên âm hay ví dụ (`isCustom: true`) thì nó vẫn thuộc chủ đề `work`.
+   - Loại bỏ `else`, đếm đồng thời cho cả hai mục tiêu:
+     ```ts
+     // ✅ ĐÚNG: Luôn cộng dồn cho topic gốc, và cộng dồn vào Từ vựng của tôi nếu là câu tùy biến
+     allChunks.forEach((c) => {
+       if (c.topicId && c.topicId !== "CUSTOM" && c.topicId !== "STUDIED") {
+         counts[c.topicId] = (counts[c.topicId] || 0) + 1;
+       }
+       if (c.isCustom || c.topicId === "CUSTOM") {
+         customCount += 1;
+       }
+     });
+     ```
+2. **Cập nhật `customChunksCount` theo độ dài thực tế (Absolute Length) thay vì ±1:**
+   - Trong `handleSaveChunk` và `handleDeleteChunk`:
+     ```ts
+     const currentCustom = loadCustomChunks(user.uid);
+     const updatedStats = {
+       ...userStats,
+       customChunksCount: currentCustom.length, // Luôn chính xác 100%
+       ...
+     };
+     ```
+3. **Cơ chế Tự phục hồi (Self-healing) khi Client Sync:**
+   - Khi Client nạp xong dữ liệu từ Cloud trong `syncUserData`, đối chiếu độ dài thực tế với `cloudStats.customChunksCount`. Nếu phát hiện Firestore bị lệch (ví dụ 244 vs 242), Client tự động cập nhật lại document `stats/current` trên Cloud để đưa về giá trị chuẩn 242.
+4. **Dọn dẹp và chuẩn hóa document `stats/current` cho user `3Nk6gLosFYNFTPzjqr9Jtq54e2f1` trên Firestore:**
+   - Đã cập nhật trực tiếp `customChunksCount: 242` trên Firestore cho user, đảm bảo lần truy cập SSR tiếp theo trả về đúng 242 ngay từ đầu, triệt tiêu hoàn toàn hiện tượng lệch số và giật giao diện!
+5. **Triệt tiêu hiện tượng nhảy số hàng đợi totalInQueue (361 -> 588) mà không cần Skeleton:**
+   - Trong các trang luyện tập (`shadowing`, `reflex`, `blanks`), thay vì truyền độ dài mảng in-memory trên server `totalInQueue={practiceQueue.length}` (chỉ có 361 câu gốc), chuyển sang:
+     ```tsx
+     totalInQueue={isClient ? practiceQueue.length : totalChunksCount}
+     ```
+   - Phía SSR lấy thẳng con số `totalChunksCount = 588` (đã có sẵn trong `stats/current` từ 1 lượt đọc duy nhất), vẽ ngay `1 / 588` từ HTML ban đầu.
+   - Khi Client hydrate xong, `practiceQueue.length` đạt 588 -> Giữ nguyên `1 / 588`.
+   - **0 thêm lượt đọc Firestore nào, 0 độ trễ TTFB, và toàn bộ UI hiển thị tức thì (không phải che bằng Skeleton)!**
+
+---
+
+## 26. Lỗi bất đồng bộ dữ liệu giữa nhiều thiết bị/môi trường (Localhost vs Web Deployed): Hiện tượng 'Zombie Data' hồi sinh video/chunk đã xóa & Cache cũ đè dữ liệu mới
+
+### Triệu chứng
+1. Người dùng đăng nhập cùng một tài khoản trên 2 môi trường hoặc thiết bị khác nhau (ví dụ: `localhost:3000` và `echochunk.vercel.app`, hoặc máy tính công ty và điện thoại cá nhân).
+2. Trên Thiết bị A (localhost), người dùng xóa 1 video khỏi lịch sử xem YouTube hoặc xóa 1 từ vựng tùy biến (custom chunk). Thao tác xóa trên Firestore document thành công.
+3. Sau đó, người dùng mở Thiết bị B (web deployed). Thiết bị B vẫn còn bản ghi cũ trong `localStorage`.
+4. Khi cơ chế đồng bộ `mergeYouTubeHistoryLocalAndCloud` chạy:
+   - Thuật toán nhận thấy video/chunk này có trong `localStorage` nhưng **không tìm thấy trên Cloud Firestore**.
+   - Nó ngây thơ giả định: *"Đây là dữ liệu mới được tạo offline ở thiết bị này chưa kịp đẩy lên"* $\rightarrow$ Tự động batch write đẩy ngược video/chunk đó lên lại Cloud!
+   - Kết quả: Video hoặc từ vựng vừa xóa trên Thiết bị A lại **tự động hồi sinh (Zombie Data Resurrection)** trên cả hai thiết bị.
+5. Ngược lại, khi Thiết bị A tạo hoặc sửa từ vựng mới, Thiết bị B không biết để nạp lại vì bộ nhớ đệm `localStorage` ở Thiết bị B vẫn còn dữ liệu cũ (`cleanLocalCustom.length > 0`), dẫn đến cache cũ đè lên dữ liệu mới.
+
+### Nguyên nhân gốc rễ
+1. **Bản chất của Distributed State & Thiếu Tombstones (Bia mộ dữ liệu):**
+   - Khi xóa một document trong Cloud Firestore bằng `deleteDoc()`, document đó biến mất hoàn toàn.
+   - Khi một thiết bị khác truy vấn danh sách (`fetchYouTubeHistoryFromCloud`), Firestore chỉ trả về các document đang tồn tại. Thiết bị đó không có cách nào phân biệt được giữa:
+     - *(a)* Document vừa mới tạo offline ở local chưa kịp sync lên Cloud.
+     - *(b)* Document đã từng tồn tại nhưng vừa bị một thiết bị khác xóa đi.
+   - Thuật toán hợp nhất (Set-union merge) đối chiếu `localItems` và `cloudItems` mà không có danh sách đã xóa (Tombstones), dẫn đến việc biến thao tác xóa thành thao tác tạo mới dữ liệu.
+2. **Thiếu cơ chế Timestamp Epoch khi "Xóa toàn bộ":**
+   - Khi người dùng bấm "Xóa toàn bộ lịch sử", nếu chỉ xóa các document trong collection thì Thiết bị B khi mở lên sẽ đẩy toàn bộ lịch sử local của nó lên lại Cloud, gây phục hồi toàn bộ danh sách cũ.
+   - Nếu nhét toàn bộ ID của các video đã xóa vào mảng Tombstone thì mảng sẽ phình to vượt giới hạn 1MB của Firestore Document.
+3. **Bài toán Quota Firestore (Ràng buộc Zero Extra Reads):**
+   - Không thể tạo thêm một subcollection riêng (như `deletedItems`) hoặc truy vấn Firestore liên tục vì sẽ làm tiêu tốn Quota đọc/ghi và tăng chi phí Firestore đáng kể.
+
+### Cách khắc phục triệt để (Kiến trúc Tombstone & Timestamp-based Epoch Sync — SPEC-06)
+1. **Nhúng Tombstone và Timestamp vào Document `stats/current` (0 Extra Firestore Reads):**
+   - Tận dụng document `users/{uid}/stats/current` (vốn đã luôn được nạp duy nhất 1 lần lúc SSR hoặc app load ban đầu) để lưu trữ metadata đồng bộ:
+     ```ts
+     interface UserStats {
+       // ...
+       deletedVideoIds?: string[];           // Danh sách tối đa 100 ID video đã xóa gần nhất (FIFO)
+       deletedChunkIds?: string[];           // Danh sách tối đa 100 ID chunk đã xóa gần nhất (FIFO)
+       lastVideoHistoryUpdatedAt?: number;   // Timestamp mốc cập nhật lịch sử video mới nhất
+       lastCustomChunksUpdatedAt?: number;   // Timestamp mốc tạo/sửa/xóa chunk tùy biến mới nhất
+       videoHistoryClearedAt?: number;       // Timestamp mốc reset "Xóa toàn bộ lịch sử video"
+     }
+     ```
+2. **Triệt tiêu Zombie Data trước khi Merge (`mergeYouTubeHistoryLocalAndCloud`):**
+   - Trước khi hợp nhất `localItems` với `cloudItems`, tiến hành lọc sạch `localItems` qua 2 tầng bảo vệ:
+     ```ts
+     const validLocalItems = localItems.filter((local) => {
+       // 1. Bị loại nếu ID nằm trong mảng Tombstones (Set lookup O(1))
+       if (deletedSet.has(local.videoId)) return false;
+       // 2. Bị loại nếu thời điểm học <= mốc videoHistoryClearedAt
+       if (clearedAt > 0 && (local.lastStudiedAt || 0) <= clearedAt) return false;
+       return true;
+     });
+     ```
+   - Nhờ đó, bất kỳ item nào đã bị xóa ở Thiết bị A sẽ bị gạch bỏ ngay lập tức ở Thiết bị B và `localStorage` của Thiết bị B được cập nhật sạch sẽ, không còn cơ hội đẩy lên Cloud nữa.
+3. **Cơ chế Epoch Reset khi "Xóa toàn bộ lịch sử video" (`clearAllYouTubeHistoryOnCloud`):**
+   - Thiết lập `videoHistoryClearedAt: Date.now()`. Bất kỳ video nào trên bất kỳ thiết bị nào có `lastStudiedAt <= videoHistoryClearedAt` đều tự động bị loại bỏ vĩnh viễn.
+   - Đồng thời reset `deletedVideoIds: []` về rỗng để giải phóng bộ nhớ, giữ cho document `stats/current` luôn siêu nhẹ (< 1 KB) mà vẫn đảm bảo tính đúng đắn 100%.
+4. **Cơ chế Hồi sinh chủ động (Atomic Un-tombstone):**
+   - Nếu người dùng chủ động vào xem lại một video đã từng xóa, hàm `syncYouTubeHistoryToCloud` dùng `arrayRemove(videoId)` để gỡ ID đó ra khỏi danh sách `deletedVideoIds`, cho phép video xuất hiện trở lại bình thường.
+5. **Đồng bộ Custom Chunks theo Timestamp (`lastCustomChunksUpdatedAt`):**
+   - Lưu `LAST_SYNCED_CHUNKS_AT_KEY` trong `localStorage`.
+   - Trong [`PracticeContext.tsx`](file:///d:/SelfLearning/EchoChunk/src/context/PracticeContext.tsx), khi app khởi động:
+     ```ts
+     const hasNewerCloudChunks = (cloudStats?.lastCustomChunksUpdatedAt || 0) > localLastSyncedAt;
+     const countMismatch = cloudStats?.customChunksCount !== undefined && cloudStats.customChunksCount !== cleanLocalCustom.length;
+     const shouldFetchCustomFromCloud = cleanLocalCustom.length === 0 || hasNewerCloudChunks || countMismatch;
+     ```
+   - Nếu Thiết bị A thêm/sửa câu mới (`lastCustomChunksUpdatedAt` tăng), Thiết bị B khi mở lên sẽ phát hiện `hasNewerCloudChunks = true` và tự động kéo dữ liệu mới nhất về, tránh triệt để tình trạng cache cũ đè dữ liệu mới.
+6. **Không tốn thêm bất kỳ lượt đọc Firestore nào:** Toàn bộ metadata được đóng gói trong lượt đọc duy nhất của document `stats/current` ban đầu.
+

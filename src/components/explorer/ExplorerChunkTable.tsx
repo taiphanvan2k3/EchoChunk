@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { SpeakingChunk, ChunkProgress } from "@/types";
@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { ExplorerSRSBadge } from "./ExplorerSRSBadge";
 import { SidebarSection } from "./ExplorerNavItem";
+import { getChunkKind } from "@/lib/shared/chunkClassification";
 
 const LEVEL_COLOR: Record<string, string> = {
   A2: "bg-notion-green-bg text-notion-green-text border-notion-green-border",
@@ -262,11 +263,24 @@ export function ExplorerChunkTable({
                         <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${levelCls}`}>
                           {chunk.level}
                         </span>
-                        {chunk.isCustom && (
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded border bg-notion-yellow-bg text-notion-yellow-text border-notion-yellow-border">
-                            Tự tạo
-                          </span>
-                        )}
+                        {(() => {
+                          const kind = getChunkKind(chunk);
+                          if (kind === "USER_CREATED") {
+                            return (
+                              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded border bg-notion-yellow-bg text-notion-yellow-text border-notion-yellow-border">
+                                Tự tạo
+                              </span>
+                            );
+                          }
+                          if (kind === "USER_EDITED") {
+                            return (
+                              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded border bg-notion-blue-bg text-notion-blue-text border-notion-blue-border">
+                                Đã tùy chỉnh
+                              </span>
+                            );
+                          }
+                          return null;
+                        })()}
                       </div>
                       <p className="text-xs text-notion-green-text sm:hidden">➜ {chunk.meaning}</p>
                     </div>

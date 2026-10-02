@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { SpeakingChunk, ChunkProgress } from "@/types";
 import { Clock, Sparkles, RotateCcw } from "lucide-react";

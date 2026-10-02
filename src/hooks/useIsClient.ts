@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useSyncExternalStore } from 'react';
 
@@ -14,6 +14,8 @@ export function useIsClient(): boolean {
   return useSyncExternalStore(
     emptySubscribe,
     () => true,
+
+    // getServerSnapshot: It will be used only during server rendering and during hydration
     () => false
   );
 }

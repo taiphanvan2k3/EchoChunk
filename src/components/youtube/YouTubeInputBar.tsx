@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { Video as VideoIcon, X, Play, Loader2, KeyRound } from 'lucide-react';
 

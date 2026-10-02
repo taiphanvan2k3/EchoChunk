@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useMemo, useRef, useEffect } from "react";
 import { SpeakingChunk, TopicMeta, ChunkProgress } from "@/types";
@@ -7,6 +7,7 @@ import { Play, Plus, Search, X, Menu } from "lucide-react";
 import { SidebarSection } from "./explorer/ExplorerNavItem";
 import { ExplorerSidebarShell } from "./explorer/ExplorerSidebarShell";
 import { ExplorerChunkTable } from "./explorer/ExplorerChunkTable";
+import { isUserOwnedChunk } from "@/lib/shared/chunkClassification";
 
 export type SRSFilter = "ALL" | "DUE" | "LEARNING" | "MASTERED";
 
@@ -47,7 +48,7 @@ export function TopicExplorerMode({
     () => studiedChunks.filter((c) => new Date(progressMap[c.id]?.dueDate || "").getTime() <= now),
     [studiedChunks, progressMap, now]
   );
-  const customChunks = useMemo(() => chunks.filter((c) => c.isCustom || c.topicId === "CUSTOM"), [chunks]);
+  const customChunks = useMemo(() => chunks.filter((c) => isUserOwnedChunk(c)), [chunks]);
 
   const baseChunks = useMemo(() => {
     if (activeSection === "ALL") return studiedChunks;

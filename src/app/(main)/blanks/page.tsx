@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { usePractice } from "@/context/PracticeContext";
 import { TopicFilterBar } from "@/components/TopicFilterBar";
@@ -109,7 +109,7 @@ export default function BlanksPage() {
             onRate={handleRateChunk}
             onShuffle={handleShuffle}
             currentIndex={queueIndex}
-            totalInQueue={practiceQueue.length}
+            totalInQueue={isClient ? practiceQueue.length : totalChunksCount}
             onEditChunk={openEditChunk}
           />
         )}

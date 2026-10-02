@@ -2,8 +2,10 @@
 
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useIsClient } from '@/hooks/useIsClient';
 import { useYouTubeHistory } from '@/hooks/useYouTubeHistory';
 import { youtubeHistoryStore } from '@/stores/youtubeHistoryStore';
+import { YouTubeRecentVideosSkeleton } from './YouTubeRecentVideosSkeleton';
 import { Play, Trash2, Clock, CheckCircle2, Search, Sparkles, ChevronDown } from 'lucide-react';
 
 const PAGE_SIZE = 6;
@@ -38,13 +40,14 @@ export function YouTubeRecentVideos({
   onSwitchToExplore,
   isLoading,
 }: YouTubeRecentVideosProps) {
+  const isClient = useIsClient();
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
-  // Subscribe this component to the store through useExternalStore
-  const historyItems = useYouTubeHistory(user?.uid);
+  // Subscribe this component to the store (Cloud-First)
+  const { historyItems, isLoading: isHistoryLoading } = useYouTubeHistory(user?.uid);
 
   const filteredItems = useMemo(() => {
     if (!searchQuery.trim()) return historyItems;
@@ -82,7 +85,12 @@ export function YouTubeRecentVideos({
     };
   }, [hasMore]);
 
-  // Trạng thái khi chưa có video nào trong lịch sử
+  // Hiển thị Skeleton nếu đang SSR hoặc đang nạp từ Cloud Firestore
+  if (!isClient || isHistoryLoading) {
+    return <YouTubeRecentVideosSkeleton />;
+  }
+
+  // Trạng thái khi chưa có video nào trong lịch sử (sau khi đã nạp xong từ Cloud)
   if (!historyItems || historyItems.length === 0) {
     return (
       <section className="bg-notion-surface border border-notion-border rounded-2xl p-6 shadow-sm" aria-label="Video đã học gần đây">

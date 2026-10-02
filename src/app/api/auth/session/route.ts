@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { getAdminInstances } from "@/lib/server/admin";
 
 // 14 days in milliseconds (Firebase maximum session cookie duration)

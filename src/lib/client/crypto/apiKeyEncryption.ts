@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Client-side AES-GCM 256-bit encryption for ytranscript API keys.
  *
  * Master key = random 256-bit key generated once, stored in localStorage.

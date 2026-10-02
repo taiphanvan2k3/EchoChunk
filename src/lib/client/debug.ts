@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Tự động trích xuất tên component React gọi hàm/hook từ Call Stack.
  * Tự động bỏ qua các hook nội bộ (bắt đầu bằng 'use' hoặc nằm trong thư mục /hooks/).
  */

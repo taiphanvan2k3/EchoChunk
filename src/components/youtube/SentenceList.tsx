@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useMemo } from "react";
 import { YouTubeSentence } from "@/types/youtube";

@@ -1,26 +1,11 @@
-'use client';
+"use client";
 
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useMemo,
-  useCallback,
-  useEffect,
-  useRef,
-} from 'react';
-import { useRouter } from 'next/navigation';
-import { useIsClient } from '@/hooks/useIsClient';
-import dataset from '@/data/speaking-chunks.json';
-import {
-  ChunksDataset,
-  SpeakingChunk,
-  SRSRating,
-  ChunkProgress,
-  UserStats,
-  TopicMeta,
-} from '@/types';
-import { calculateNextReview, sortQueue, shuffleWithSeed } from '@/lib/shared/srs';
+import React, { createContext, useContext, useState, useMemo, useCallback, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { useIsClient } from "@/hooks/useIsClient";
+import dataset from "@/data/speaking-chunks.json";
+import { ChunksDataset, SpeakingChunk, SRSRating, ChunkProgress, UserStats, TopicMeta } from "@/types";
+import { calculateNextReview, sortQueue, shuffleWithSeed } from "@/lib/shared/srs";
 import {
   loadProgressMap,
   saveProgressMap,
@@ -33,8 +18,12 @@ import {
   saveChunk,
   removeChunk,
   clearGuestStorage,
-} from '@/lib/client/storage';
-import { useAuth } from '@/context/AuthContext';
+  loadLastSyncedChunksAt,
+  saveLastSyncedChunksAt
+} from "@/lib/client/storage";
+import { mergeCustomChunksWithBase } from "@/lib/shared/chunksMerge";
+import { isBaseChunkId, isUserOwnedChunk, BASE_CHUNKS_COUNT } from "@/lib/shared/chunkClassification";
+import { useAuth } from "@/context/AuthContext";
 import {
   syncChunkProgress,
   syncUserStats,
@@ -43,10 +32,10 @@ import {
   batchMergeLocalToCloud,
   fetchUserProgressMap,
   fetchUserStats,
-  fetchCustomChunks,
-} from '@/lib/client/firebase/firestore';
-import { soundManager } from '@/lib/client/sound';
-import confetti from 'canvas-confetti';
+  fetchCustomChunks
+} from "@/lib/client/firebase/firestore";
+import { soundManager } from "@/lib/client/sound";
+import confetti from "canvas-confetti";
 
 const data = dataset as unknown as ChunksDataset;
 
@@ -99,7 +88,7 @@ interface PracticeContextType {
 
 const PracticeContext = createContext<PracticeContextType | undefined>(undefined);
 
-import { InitialPracticeData } from '@/lib/server/practiceData';
+import { InitialPracticeData } from "@/lib/server/practiceData";
 
 export const PracticeProvider: React.FC<{
   initialData?: InitialPracticeData;
@@ -109,9 +98,9 @@ export const PracticeProvider: React.FC<{
   const { user } = useAuth();
   const isClient = useIsClient();
 
-  const [selectedTopicId, setSelectedTopicId] = useState<string>('ALL');
-  const [selectedLevel, setSelectedLevel] = useState<string>('ALL');
-  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [selectedTopicId, setSelectedTopicId] = useState<string>("ALL");
+  const [selectedLevel, setSelectedLevel] = useState<string>("ALL");
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [storeVersion, setStoreVersion] = useState(0);
   const [todayTimestamp] = useState(() => Date.now());
   const [soundEnabled, setSoundEnabled] = useState(true);
@@ -125,10 +114,14 @@ export const PracticeProvider: React.FC<{
   const [isChunkModalOpen, setIsChunkModalOpen] = useState(false);
   const [chunkToEdit, setChunkToEdit] = useState<SpeakingChunk | null>(null);
 
-  // Data loaded from storage or SSR initialData (partitioned by current user's UID)
   const allChunks = useMemo<SpeakingChunk[]>(() => {
     void storeVersion;
-    if (!isClient) return initialData?.allChunks ?? data.chunks;
+    if (!isClient) {
+      if (initialData?.firstChunk) {
+        return mergeCustomChunksWithBase(data.chunks, [initialData.firstChunk]);
+      }
+      return data.chunks;
+    }
     return getMergedChunks(data.chunks, user?.uid);
   }, [isClient, storeVersion, user?.uid, initialData]);
 
@@ -146,14 +139,14 @@ export const PracticeProvider: React.FC<{
       return (
         initialData?.userStats ?? {
           streakDays: 1,
-          lastActiveDate: '',
+          lastActiveDate: "",
           todayReviewedCount: 0,
           totalPracticedCount: 0,
-          dailyGoal: 20,
+          dailyGoal: 20
         }
       );
     }
- 
+
     const local = loadUserStats(user?.uid);
     if (local.totalPracticedCount > 0) return local;
     return initialData?.userStats ?? local;
@@ -201,21 +194,59 @@ export const PracticeProvider: React.FC<{
         }
       } else {
         // Normal login / account switch: fetch this user's OWN cloud data
-        // Kiểm tra LocalStorage: Nếu thiết bị đã có sẵn danh sách customChunks, dùng luôn và KHÔNG gọi Cloud (0 Read)
         const existingLocalCustom = loadCustomChunks(user.uid);
-        const shouldFetchCustomFromCloud = existingLocalCustom.length === 0;
+        const localLastSyncedAt = loadLastSyncedChunksAt(user.uid);
 
-        const [cloudProgress, cloudStats, cloudCustom] = await Promise.all([
+        // Fetch cloudProgress & cloudStats trước để lấy tombstone và mốc thời gian cập nhật
+        const [cloudProgress, cloudStats] = await Promise.all([
           fetchUserProgressMap(user.uid),
-          fetchUserStats(user.uid),
-          shouldFetchCustomFromCloud ? fetchCustomChunks(user.uid) : Promise.resolve(null),
+          fetchUserStats(user.uid)
         ]);
+
+        // Dọn sạch tombstone nếu máy này còn chứa chunk đã bị xóa ở máy khác (chống Zombie Data)
+        let cleanLocalCustom = existingLocalCustom;
+        if (Array.isArray(cloudStats?.deletedChunkIds) && cloudStats.deletedChunkIds.length > 0) {
+          const deletedSet = new Set(cloudStats.deletedChunkIds);
+          cleanLocalCustom = existingLocalCustom.filter((c) => !deletedSet.has(c.id));
+          if (cleanLocalCustom.length !== existingLocalCustom.length) {
+            saveCustomChunks(cleanLocalCustom, user.uid);
+          }
+        }
+
+        // Kiểm tra xem có cần nạp lại từ Cloud không (nếu local rỗng hoặc cloud có timestamp mới hơn hoặc lệch số lượng)
+        const hasNewerCloudChunks = (cloudStats?.lastCustomChunksUpdatedAt || 0) > localLastSyncedAt;
+        const countMismatch =
+          cloudStats?.customChunksCount !== undefined && cloudStats.customChunksCount !== cleanLocalCustom.length;
+        const shouldFetchCustomFromCloud = cleanLocalCustom.length === 0 || hasNewerCloudChunks || countMismatch;
+
+        const cloudCustom = shouldFetchCustomFromCloud ? await fetchCustomChunks(user.uid) : null;
 
         if (isMounted) {
           saveProgressMap(cloudProgress, user.uid);
-          if (cloudStats) saveUserStats(cloudStats, user.uid);
           if (cloudCustom !== null) {
             saveCustomChunks(cloudCustom, user.uid);
+            saveLastSyncedChunksAt(cloudStats?.lastCustomChunksUpdatedAt || Date.now(), user.uid);
+          }
+
+          const currentCustom = loadCustomChunks(user.uid);
+          const actualCustomChunks = cloudCustom !== null ? cloudCustom : currentCustom;
+          const actualCustomCount = actualCustomChunks.length;
+          const userCreatedCount = actualCustomChunks.filter((c) => !isBaseChunkId(c.id)).length;
+          const expectedTotal = BASE_CHUNKS_COUNT + userCreatedCount;
+
+          if (cloudStats) {
+            const isOutOfSync =
+              cloudStats.customChunksCount !== actualCustomCount || cloudStats.totalChunksCount !== expectedTotal;
+
+            const alignedStats: UserStats = {
+              ...cloudStats,
+              customChunksCount: actualCustomCount,
+              totalChunksCount: expectedTotal
+            };
+            saveUserStats(alignedStats, user.uid);
+            if (isOutOfSync) {
+              syncUserStats(user.uid, alignedStats);
+            }
           }
           setStoreVersion((v) => v + 1);
         }
@@ -227,6 +258,9 @@ export const PracticeProvider: React.FC<{
     return () => {
       isMounted = false;
     };
+    // Dùng user?.uid thay vì user object để tránh re-sync khi Firebase token refresh
+    // recreate object user mới với cùng uid (không cần sync lại trong trường hợp đó).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isClient, user?.uid]);
 
   const toggleSound = useCallback(() => {
@@ -234,14 +268,13 @@ export const PracticeProvider: React.FC<{
   }, []);
 
   const resetFilters = useCallback(() => {
-    setSelectedTopicId('ALL');
-    setSelectedLevel('ALL');
-    setSearchQuery('');
+    setSelectedTopicId("ALL");
+    setSelectedLevel("ALL");
+    setSearchQuery("");
     setShuffleSeed(0);
     setQueueIndex(0);
   }, []);
 
-  // Compute Dynamic Topics
   const dynamicTopics = useMemo<TopicMeta[]>(() => {
     // Khi đang SSR hoặc trước khi client hydrate xong, dùng trực tiếp dynamicTopics từ server để tránh nhảy layout
     if (!isClient && initialData?.dynamicTopics && initialData.dynamicTopics.length > 0) {
@@ -252,10 +285,11 @@ export const PracticeProvider: React.FC<{
     let customCount = 0;
 
     allChunks.forEach((c) => {
-      if (c.isCustom || c.topicId === 'CUSTOM') {
-        customCount += 1;
-      } else {
+      if (c.topicId && c.topicId !== "CUSTOM" && c.topicId !== "STUDIED") {
         counts[c.topicId] = (counts[c.topicId] || 0) + 1;
+      }
+      if (isUserOwnedChunk(c)) {
+        customCount += 1;
       }
     });
 
@@ -263,30 +297,28 @@ export const PracticeProvider: React.FC<{
       customCount = userStats.customChunksCount ?? initialData?.userStats?.customChunksCount ?? 0;
     }
 
-    const studiedCount = Object.values(progressMap).filter(
-      (p) => p && p.repetitions > 0
-    ).length;
+    const studiedCount = Object.values(progressMap).filter((p) => p && p.repetitions > 0).length;
 
     const list = data.topics.map((t) => ({
       ...t,
-      chunkCount: counts[t.topicId] || 0,
+      chunkCount: counts[t.topicId] || 0
     }));
 
     if (customCount > 0) {
       list.unshift({
-        topicId: 'CUSTOM',
-        topicName: 'Từ vựng của tôi',
-        icon: '⭐',
-        chunkCount: customCount,
+        topicId: "CUSTOM",
+        topicName: "Từ vựng của tôi",
+        icon: "⭐",
+        chunkCount: customCount
       });
     }
 
     if (studiedCount > 0) {
       list.unshift({
-        topicId: 'STUDIED',
-        topicName: 'Đã luyện tập',
-        icon: '🧠',
-        chunkCount: studiedCount,
+        topicId: "STUDIED",
+        topicName: "Đã luyện tập",
+        icon: "🧠",
+        chunkCount: studiedCount
       });
     }
 
@@ -296,17 +328,17 @@ export const PracticeProvider: React.FC<{
   // Filter chunks
   const filteredChunks = useMemo(() => {
     return allChunks.filter((chunk) => {
-      if (selectedTopicId === 'STUDIED') {
+      if (selectedTopicId === "STUDIED") {
         const prog = progressMap[chunk.id];
         if (!prog || prog.repetitions === 0) return false;
-      } else if (selectedTopicId === 'CUSTOM') {
-        if (!chunk.isCustom && chunk.topicId !== 'CUSTOM') return false;
-      } else if (selectedTopicId !== 'ALL' && chunk.topicId !== selectedTopicId) {
+      } else if (selectedTopicId === "CUSTOM") {
+        if (!isUserOwnedChunk(chunk)) return false;
+      } else if (selectedTopicId !== "ALL" && chunk.topicId !== selectedTopicId) {
         return false;
       }
 
-      if (selectedLevel !== 'ALL') {
-        const lvl = chunk.level || '';
+      if (selectedLevel !== "ALL") {
+        const lvl = chunk.level || "";
         if (!lvl.includes(selectedLevel)) return false;
       }
 
@@ -314,7 +346,7 @@ export const PracticeProvider: React.FC<{
         const q = searchQuery.toLowerCase();
         const matchChunk = chunk.chunk.toLowerCase().includes(q);
         const matchMeaning = chunk.meaning.toLowerCase().includes(q);
-        const matchExample = (chunk.exampleSentence || chunk.cleanExample || '').toLowerCase().includes(q);
+        const matchExample = (chunk.exampleSentence || chunk.cleanExample || "").toLowerCase().includes(q);
         const matchTags = chunk.tags ? chunk.tags.some((t) => t.toLowerCase().includes(q)) : false;
         if (!matchChunk && !matchMeaning && !matchExample && !matchTags) return false;
       }
@@ -409,7 +441,7 @@ export const PracticeProvider: React.FC<{
         confetti({
           particleCount: 100,
           spread: 80,
-          origin: { y: 0.6 },
+          origin: { y: 0.6 }
         });
       }
 
@@ -420,7 +452,7 @@ export const PracticeProvider: React.FC<{
         confetti({
           particleCount: 60,
           spread: 70,
-          origin: { y: 0.6 },
+          origin: { y: 0.6 }
         });
       }
     },
@@ -445,12 +477,12 @@ export const PracticeProvider: React.FC<{
   const handleStartPracticeTopic = useCallback(
     (topicId: string) => {
       setSelectedTopicId(topicId);
-      setSelectedLevel('ALL');
-      setSearchQuery('');
+      setSelectedLevel("ALL");
+      setSearchQuery("");
       setShuffleSeed(0);
       setQueueIndex(0);
       soundManager.playSuccess();
-      router.push('/shadowing');
+      router.push("/shadowing");
     },
     [router]
   );
@@ -459,18 +491,18 @@ export const PracticeProvider: React.FC<{
     (chunk: SpeakingChunk, topicIdOverride?: string) => {
       const targetTopicId = topicIdOverride || chunk.topicId;
       setSelectedTopicId(targetTopicId);
-      setSelectedLevel('ALL');
-      setSearchQuery('');
+      setSelectedLevel("ALL");
+      setSearchQuery("");
       setShuffleSeed(0);
 
       const candidateList = allChunks.filter((c) => {
-        if (targetTopicId === 'STUDIED') {
+        if (targetTopicId === "STUDIED") {
           return progressMap[c.id] && progressMap[c.id].repetitions > 0;
         }
-        if (targetTopicId === 'CUSTOM') {
-          return c.isCustom || c.topicId === 'CUSTOM';
+        if (targetTopicId === "CUSTOM") {
+          return isUserOwnedChunk(c);
         }
-        if (targetTopicId !== 'ALL') {
+        if (targetTopicId !== "ALL") {
           return c.topicId === targetTopicId;
         }
         return true;
@@ -484,7 +516,7 @@ export const PracticeProvider: React.FC<{
         setQueueIndex(0);
       }
       soundManager.playSuccess();
-      router.push('/shadowing');
+      router.push("/shadowing");
     },
     [allChunks, progressMap, router]
   );
@@ -518,42 +550,37 @@ export const PracticeProvider: React.FC<{
     (chunk: SpeakingChunk) => {
       const chunkWithUser: SpeakingChunk = {
         ...chunk,
-        userId: user ? user.uid : 'guest',
+        userId: user ? user.uid : "guest"
       };
-
-      const existingChunks = loadCustomChunks(user?.uid);
-      const isNew = !existingChunks.some((c) => c.id === chunk.id);
 
       saveChunk(chunkWithUser, user?.uid);
       setStoreVersion((v) => v + 1);
       if (user) {
         syncCustomChunk(user.uid, chunkWithUser);
 
-        if (isNew) {
-          const isBaseChunk = data.chunks.some((c) => c.id === chunk.id);
-          const nextTotal = isBaseChunk
-            ? (userStats.totalChunksCount ?? allChunks.length)
-            : (userStats.totalChunksCount ?? allChunks.length) + 1;
+        const currentCustom = loadCustomChunks(user.uid);
+        const userCreatedCount = currentCustom.filter((c) => !isBaseChunkId(c.id)).length;
+        const totalChunksCount = BASE_CHUNKS_COUNT + userCreatedCount;
+        const now = Date.now();
+        saveLastSyncedChunksAt(now, user.uid);
 
-          const updatedStats = {
-            ...userStats,
-            customChunksCount: (userStats.customChunksCount ?? existingChunks.length) + 1,
-            totalChunksCount: nextTotal,
-          };
+        const updatedStats: UserStats = {
+          ...userStats,
+          customChunksCount: currentCustom.length,
+          totalChunksCount,
+          lastCustomChunksUpdatedAt: now
+        };
 
-          saveUserStats(updatedStats, user.uid);
-          syncUserStats(user.uid, updatedStats);
-        }
+        saveUserStats(updatedStats, user.uid);
+        syncUserStats(user.uid, updatedStats);
       }
       setIsChunkModalOpen(false);
     },
-    [allChunks.length, user, userStats]
+    [user, userStats]
   );
 
   const handleDeleteChunk = useCallback(
     (chunkId: string) => {
-      const existingChunks = loadCustomChunks(user?.uid);
-
       removeChunk(chunkId, user?.uid);
       setStoreVersion((v) => v + 1);
       if (queueIndex > 0) {
@@ -562,10 +589,21 @@ export const PracticeProvider: React.FC<{
       if (user) {
         deleteCustomChunk(user.uid, chunkId);
 
-        const updatedStats = {
+        const currentCustom = loadCustomChunks(user.uid);
+        const userCreatedCount = currentCustom.filter((c) => !isBaseChunkId(c.id)).length;
+        const totalChunksCount = BASE_CHUNKS_COUNT + userCreatedCount;
+        const now = Date.now();
+        saveLastSyncedChunksAt(now, user.uid);
+
+        const currentDeleted = Array.isArray(userStats.deletedChunkIds) ? userStats.deletedChunkIds : [];
+        const nextDeleted = [chunkId, ...currentDeleted.filter((id) => id !== chunkId)].slice(0, 100);
+
+        const updatedStats: UserStats = {
           ...userStats,
-          customChunksCount: Math.max(0, (userStats.customChunksCount ?? existingChunks.length) - 1),
-          totalChunksCount: Math.max(0, (userStats.totalChunksCount ?? allChunks.length) - 1),
+          customChunksCount: currentCustom.length,
+          totalChunksCount,
+          deletedChunkIds: nextDeleted,
+          lastCustomChunksUpdatedAt: now
         };
 
         saveUserStats(updatedStats, user.uid);
@@ -573,7 +611,7 @@ export const PracticeProvider: React.FC<{
       }
       setIsChunkModalOpen(false);
     },
-    [allChunks.length, queueIndex, user, userStats]
+    [queueIndex, user, userStats]
   );
 
   const reloadStore = useCallback(() => {
@@ -621,7 +659,7 @@ export const PracticeProvider: React.FC<{
       chunkToEdit,
       handleSaveChunk,
       handleDeleteChunk,
-      reloadStore,
+      reloadStore
     }),
     [
       isClient,
@@ -660,7 +698,7 @@ export const PracticeProvider: React.FC<{
       chunkToEdit,
       handleSaveChunk,
       handleDeleteChunk,
-      reloadStore,
+      reloadStore
     ]
   );
 
@@ -670,7 +708,7 @@ export const PracticeProvider: React.FC<{
 export function usePractice(): PracticeContextType {
   const context = useContext(PracticeContext);
   if (!context) {
-    throw new Error('usePractice must be used within a PracticeProvider');
+    throw new Error("usePractice must be used within a PracticeProvider");
   }
   return context;
 }

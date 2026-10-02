@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useMemo, useEffect, useCallback } from "react";
 import Image from "next/image";
@@ -365,8 +365,8 @@ export function ChunkBlanksMode({
               <Image
                 src="/icons/duo-speaker.png"
                 alt="Phát âm chuẩn"
-                width={20}
-                height={16}
+                width={101}
+                height={80}
                 className="w-[20px] h-auto object-contain pointer-events-none select-none"
                 priority
               />
@@ -384,10 +384,9 @@ export function ChunkBlanksMode({
               <Image
                 src="/icons/duo-turtle.png"
                 alt="Phát âm chậm"
-                width={19}
-                height={11}
+                width={95}
+                height={54}
                 className="w-[19px] h-auto object-contain pointer-events-none select-none"
-                style={{ height: "auto" }}
                 priority
               />
             </button>

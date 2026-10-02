@@ -1,4 +1,4 @@
-/**
+﻿/**
  * General American IPA Transcription Engine
  *
  * Core offline dictionary source:
@@ -283,6 +283,17 @@ export async function fetchMissingAmericanIpa(rawWord: string): Promise<string> 
 }
 
 /**
+ * Chuẩn hóa các ký tự IPA đặc thù của Mỹ (như ɝ, ɚ) về dạng quen thuộc dễ đọc (ɜːr, ər)
+ * phù hợp với thói quen học tiếng Anh của người Việt Nam.
+ */
+export function normalizeFriendlyIpa(ipa: string): string {
+  if (!ipa) return "";
+  return ipa
+    .replace(/ɝː?/g, "ɜːr")
+    .replace(/ɚ/g, "ər");
+}
+
+/**
  * Returns American English (General American) IPA for a full phrase/chunk or sentence,
  * e.g. "Hands-on experience with" -> "/ˈhændz ˈɑn ɪkspˈɪriəns ˈwɪð/"
  */
@@ -292,19 +303,28 @@ export function getPhraseIpa(phrase: string): string {
   const normalized = clean.replace(/[–—/]/g, " ").replace(/[^a-zA-Z0-9\s'-]/g, " ");
 
   const tokens = normalized.split(/\s+/).filter(Boolean);
+  if (tokens.length === 0) return "";
+
   const ipaParts: string[] = [];
+  let resolvedCount = 0;
 
   for (const token of tokens) {
     const rawIpa = getAmericanIpa(token);
     if (rawIpa) {
       ipaParts.push(rawIpa.replace(/^\/|\/$/g, "").replace(/'/g, "ˈ"));
+      resolvedCount++;
     } else {
       ipaParts.push(token.toLowerCase());
     }
   }
 
-  if (ipaParts.length === 0) return "";
-  return `/${ipaParts.join(" ")}/`;
+  // Nếu từ điển chưa tải xong (hoặc không tra được từ nào trong câu),
+  // không trả về câu tiếng Anh thô để tránh hiển thị nhầm vào vị trí phiên âm IPA
+  if (resolvedCount === 0 || (tokens.length > 2 && resolvedCount / tokens.length < 0.35)) {
+    return "";
+  }
+
+  return normalizeFriendlyIpa(`/${ipaParts.join(" ")}/`);
 }
 
 /**
@@ -313,15 +333,19 @@ export function getPhraseIpa(phrase: string): string {
 function extractChunkIpaFromSentenceIpa(chunkText: string, exampleText: string, sentenceIpa: string): string {
   if (!chunkText || !exampleText || !sentenceIpa) return "";
 
+  // Chuẩn hóa dấu gạch ngang/nối thành khoảng trắng để các từ ghép như "problem-solving"
+  // tách thành "problem" và "solving", khớp 1:1 với các âm vị trong sentenceIpa
   const cleanChunkWords = chunkText
     .toLowerCase()
-    .replace(/[^a-z0-9\s'-]/g, " ")
+    .replace(/[-–—/]/g, " ")
+    .replace(/[^a-z0-9\s']/g, " ")
     .split(/\s+/)
     .filter(Boolean);
 
   const cleanExampleWords = exampleText
     .toLowerCase()
-    .replace(/[^a-z0-9\s'-]/g, " ")
+    .replace(/[-–—/]/g, " ")
+    .replace(/[^a-z0-9\s']/g, " ")
     .split(/\s+/)
     .filter(Boolean);
 
@@ -347,7 +371,7 @@ function extractChunkIpaFromSentenceIpa(chunkText: string, exampleText: string, 
     }
   }
 
-  if (matchIndex !== -1 && Math.abs(ipaTokens.length - cleanExampleWords.length) <= 2) {
+  if (matchIndex !== -1 && matchIndex + cleanChunkWords.length <= ipaTokens.length) {
     const extracted = ipaTokens.slice(matchIndex, matchIndex + cleanChunkWords.length);
     if (extracted.length === cleanChunkWords.length) {
       return `/${extracted.join(" ").replace(/[,;.]/g, "")}/`;
@@ -411,5 +435,8 @@ export function resolveChunkIpas(
     }
   }
 
-  return { chunkIpa, sentenceIpa };
+  return {
+    chunkIpa: normalizeFriendlyIpa(chunkIpa),
+    sentenceIpa: normalizeFriendlyIpa(sentenceIpa),
+  };
 }
