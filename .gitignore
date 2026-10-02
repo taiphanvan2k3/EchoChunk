@@ -45,3 +45,11 @@ next-env.d.ts
 # Antigravity AI Session Logs & Scratch (Sensitive Transcripts)
 .docs/logs/
 .docs/scratch/
+
+# Android build artifacts
+/android/app/build/
+/android/build/
+/android/.gradle/
+/android/local.properties
+/android/app/src/main/assets/public/
+/android/app/src/main/assets/capacitor.config.json
