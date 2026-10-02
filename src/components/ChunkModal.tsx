@@ -106,8 +106,8 @@ export function ChunkModal({ onClose, onSave, onDelete, chunkToEdit, existingTop
           }}
           className="flex flex-col flex-1 overflow-hidden"
         >
-          {/* Scrollable Form Body */}
-          <div className="flex-1 overflow-y-auto p-4 sm:p-6 flex flex-col gap-4">
+          {/* Scrollable Form Body with generous bottom padding */}
+          <div className="flex-1 overflow-y-auto scrollbar-thin p-4 sm:p-6 pb-14 sm:pb-16 flex flex-col gap-4">
             {/* Error banner */}
             {errorMessage && (
               <div className="flex items-center gap-2 p-2.5 px-3.5 bg-red-50 border border-red-200 text-red-700 rounded-lg text-xs shrink-0">
@@ -116,24 +116,27 @@ export function ChunkModal({ onClose, onSave, onDelete, chunkToEdit, existingTop
               </div>
             )}
 
-            {/* Chunk title (Hero input) */}
-            <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
+            {/* Chunk title */}
+            <div className="flex flex-col sm:grid sm:grid-cols-[170px_1fr] sm:items-center gap-1 sm:gap-3">
+              <div className="text-[0.78rem] sm:text-[0.82rem] text-gray-700 flex items-center gap-1.5 font-bold select-none whitespace-nowrap shrink-0">
+                <span>🔤</span>
+                <span>
+                  Cụm từ tiếng Anh <span className="text-red-500 font-bold text-xs">*</span>
+                </span>
+              </div>
               <input
                 type="text"
-                className="text-lg sm:text-2xl font-bold text-gray-900 w-full border-0 outline-none bg-transparent py-1 tracking-tight placeholder:text-gray-300 placeholder:font-normal focus:ring-0"
-                placeholder="Nhập cụm từ tiếng Anh (VD: touch base with)"
+                className="w-full h-9 px-3 bg-gray-50/80 hover:bg-gray-50 focus:bg-white border border-gray-200 focus:border-blue-500 rounded-lg text-sm sm:text-[0.95rem] font-semibold text-gray-900 outline-none focus:ring-2 focus:ring-blue-500/10 placeholder:text-gray-400 placeholder:font-normal transition-all"
+                placeholder="Ví dụ: problem-solving skills"
                 value={chunkText}
                 onChange={(e) => handleChunkTextChange(e.target.value)}
                 autoFocus
               />
-              <span className="text-red-500 font-bold text-sm select-none" title="Trường bắt buộc">
-                *
-              </span>
             </div>
 
             {/* Core Property: Meaning */}
-            <div className="flex flex-col sm:grid sm:grid-cols-[130px_1fr] sm:items-center gap-1 sm:gap-3">
-              <div className="text-[0.78rem] sm:text-[0.82rem] text-gray-600 flex items-center gap-1.5 font-semibold select-none">
+            <div className="flex flex-col sm:grid sm:grid-cols-[170px_1fr] sm:items-center gap-1 sm:gap-3">
+              <div className="text-[0.78rem] sm:text-[0.82rem] text-gray-600 flex items-center gap-1.5 font-semibold select-none whitespace-nowrap shrink-0">
                 <span>🎯</span>
                 <span>
                   Nghĩa cốt lõi <span className="text-red-500 font-bold text-xs">*</span>
@@ -141,8 +144,8 @@ export function ChunkModal({ onClose, onSave, onDelete, chunkToEdit, existingTop
               </div>
               <input
                 type="text"
-                className="w-full py-2 px-3 bg-gray-50/80 hover:bg-gray-50 focus:bg-white border border-gray-200 focus:border-blue-500 rounded-lg text-sm text-gray-900 outline-none focus:ring-2 focus:ring-blue-500/10 placeholder:text-gray-400 transition-all"
-                placeholder="Nghĩa tiếng Việt (VD: liên hệ ngắn gọn, trao đổi nhanh...)"
+                className="w-full h-9 px-3 bg-gray-50/80 hover:bg-gray-50 focus:bg-white border border-gray-200 focus:border-blue-500 rounded-lg text-sm text-gray-900 outline-none focus:ring-2 focus:ring-blue-500/10 placeholder:text-gray-400 transition-all"
+                placeholder="Nghĩa tiếng Việt (VD: kỹ năng giải quyết vấn đề)"
                 value={meaning}
                 onChange={(e) => setMeaning(e.target.value)}
               />
@@ -183,15 +186,15 @@ export function ChunkModal({ onClose, onSave, onDelete, chunkToEdit, existingTop
                 />
 
                 {/* Chunk IPA */}
-                <div className="flex flex-col sm:grid sm:grid-cols-[130px_1fr] sm:items-center gap-1 sm:gap-3">
-                  <div className="text-[0.78rem] sm:text-[0.82rem] text-gray-600 flex items-center gap-1.5 font-semibold select-none">
+                <div className="flex flex-col sm:grid sm:grid-cols-[170px_1fr] sm:items-center gap-1 sm:gap-3">
+                  <div className="text-[0.78rem] sm:text-[0.82rem] text-gray-600 flex items-center gap-1.5 font-semibold select-none whitespace-nowrap shrink-0">
                     <span>🔤</span>
                     <span>IPA Cụm từ</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <input
                       type="text"
-                      className="flex-1 py-2 px-3 bg-gray-50/80 hover:bg-gray-50 focus:bg-white border border-gray-200 focus:border-blue-500 rounded-lg font-mono text-xs sm:text-sm text-gray-800 outline-none focus:ring-2 focus:ring-blue-500/10 placeholder:text-gray-400 transition-all"
+                      className="flex-1 h-9 px-3 bg-gray-50/80 hover:bg-gray-50 focus:bg-white border border-gray-200 focus:border-blue-500 rounded-lg font-ipa text-sm text-gray-900 outline-none focus:ring-2 focus:ring-blue-500/10 placeholder:text-gray-400 transition-all"
                       placeholder="Tự động sinh khi gõ cụm từ... (hoặc tự chỉnh sửa)"
                       value={chunkIpa}
                       onChange={(e) => handleChunkIpaChange(e.target.value)}
@@ -200,7 +203,7 @@ export function ChunkModal({ onClose, onSave, onDelete, chunkToEdit, existingTop
                       <button
                         type="button"
                         onClick={handleForceGenerateChunkIpa}
-                        className="inline-flex items-center gap-1 py-2 px-2.5 rounded-lg border border-blue-200 bg-blue-50 text-blue-700 text-xs font-semibold hover:bg-blue-100 transition-colors cursor-pointer shrink-0"
+                        className="inline-flex items-center gap-1 h-9 px-3 rounded-lg border border-blue-200 bg-blue-50 text-blue-700 text-xs font-semibold hover:bg-blue-100 transition-colors cursor-pointer shrink-0"
                         title="Tự động đồng bộ lại phiên âm chuẩn Mỹ cho cụm từ này"
                       >
                         <Wand2 size={13} />
@@ -257,11 +260,11 @@ export function ChunkModal({ onClose, onSave, onDelete, chunkToEdit, existingTop
           </div>
 
           {/* Sticky Action Footer */}
-          <div className="shrink-0 flex items-center justify-between px-4 py-3 sm:px-6 sm:py-3.5 border-t border-gray-100 bg-white/95 backdrop-blur gap-3 z-10">
+          <div className="shrink-0 flex items-center justify-between px-4 py-3 sm:px-6 sm:py-3.5 border-t border-gray-100 bg-white/95 backdrop-blur shadow-[0_-4px_16px_rgba(0,0,0,0.03)] gap-3 z-10">
             {isEditing && onDelete ? (
               <button
                 type="button"
-                className="inline-flex items-center gap-1.5 py-2 px-3 rounded-lg border border-red-200 bg-red-50 text-red-600 text-xs sm:text-sm font-semibold hover:bg-red-100 transition-all cursor-pointer"
+                className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg border border-red-200 bg-red-50 text-red-600 text-xs sm:text-sm font-semibold hover:bg-red-100 transition-all cursor-pointer"
                 onClick={handleDelete}
                 title="Xóa chunk này"
               >
@@ -272,14 +275,14 @@ export function ChunkModal({ onClose, onSave, onDelete, chunkToEdit, existingTop
             <div className="flex items-center gap-2.5 ml-auto">
               <button
                 type="button"
-                className="inline-flex items-center justify-center py-2 px-4 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 text-xs sm:text-sm font-semibold transition-all cursor-pointer"
+                className="inline-flex items-center justify-center h-9 px-4 rounded-lg border border-gray-200 bg-white hover:bg-gray-100 text-gray-700 text-xs sm:text-sm font-semibold transition-all cursor-pointer"
                 onClick={onClose}
               >
                 Đóng
               </button>
               <button
                 type="submit"
-                className="inline-flex items-center justify-center gap-1.5 py-2 px-4.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-semibold shadow-sm transition-all cursor-pointer active:scale-[0.99]"
+                className="inline-flex items-center justify-center gap-1.5 h-9 px-5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-semibold shadow-sm transition-all cursor-pointer active:scale-[0.99]"
               >
                 <Save size={15} />
                 <span>{isEditing ? "Cập Nhật Thay Đổi" : "Lưu Vào Kho Chunks"}</span>

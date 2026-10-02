@@ -244,31 +244,28 @@ export function YouTubeStudyRoom() {
       {/* 4. Trạng thái khám phá & video đã học khi chưa nạp video */}
       {!activeVideoId && !isLoading && (
         <div className="w-full">
-          {/* Segmented Pill Tabs */}
-          <div className="flex justify-center mb-6 w-full">
-            <div
-              className="w-full sm:w-auto max-w-md sm:max-w-none grid grid-cols-2 sm:inline-flex items-center gap-1 sm:gap-[0.35rem] bg-notion-surface-subtle p-1 sm:p-[0.3rem] rounded-xl sm:rounded-full border border-notion-border shadow-inner"
-              role="tablist"
-            >
+          {/* Modern Underline Tab Navigation */}
+          <div className="flex items-center justify-between border-b border-gray-200 mb-6 w-full">
+            <div className="flex items-center gap-3 sm:gap-6 -mb-px" role="tablist">
               <button
                 type="button"
                 role="tab"
                 aria-selected={activeTab === "recent"}
-                className={`inline-flex items-center justify-center gap-1.5 sm:gap-2 py-2 sm:py-[0.55rem] px-2.5 sm:px-[1.15rem] rounded-lg sm:rounded-full text-xs sm:text-[0.88rem] font-semibold cursor-pointer transition-all duration-200 select-none border-none text-center ${
+                className={`inline-flex items-center gap-2 pb-3 pt-1 px-1 sm:px-1.5 text-sm font-semibold border-b-2 transition-all cursor-pointer select-none ${
                   activeTab === "recent"
-                    ? "bg-white text-notion-primary shadow-sm"
-                    : "bg-transparent text-notion-secondary hover:text-notion-text hover:bg-white/60"
+                    ? "border-blue-600 text-blue-600 font-bold"
+                    : "border-transparent text-gray-500 hover:text-gray-900 hover:border-gray-300"
                 }`}
                 onClick={() => setSelectedTab("recent")}
               >
-                <Clock size={15} className="shrink-0" />
+                <Clock size={16} className="shrink-0" />
                 <span>Video đã học</span>
                 {historyItems.length > 0 && (
                   <span
-                    className={`text-[0.7rem] sm:text-[0.72rem] font-bold px-1.5 sm:px-2 py-0.5 rounded-full leading-tight ml-0.5 shrink-0 ${
+                    className={`text-[0.72rem] font-bold px-2 py-0.5 rounded-full leading-tight shrink-0 transition-colors ${
                       activeTab === "recent"
-                        ? "bg-notion-primary text-white"
-                        : "bg-notion-blue-bg text-notion-blue-text border border-notion-blue-border"
+                        ? "bg-blue-100 text-blue-700"
+                        : "bg-gray-100 text-gray-600"
                     }`}
                   >
                     {historyItems.length}
@@ -280,15 +277,15 @@ export function YouTubeStudyRoom() {
                 type="button"
                 role="tab"
                 aria-selected={activeTab === "explore"}
-                className={`inline-flex items-center justify-center gap-1.5 sm:gap-2 py-2 sm:py-[0.55rem] px-2.5 sm:px-[1.15rem] rounded-lg sm:rounded-full text-xs sm:text-[0.88rem] font-semibold cursor-pointer transition-all duration-200 select-none border-none text-center ${
+                className={`inline-flex items-center gap-2 pb-3 pt-1 px-1 sm:px-1.5 text-sm font-semibold border-b-2 transition-all cursor-pointer select-none ${
                   activeTab === "explore"
-                    ? "bg-white text-notion-primary shadow-sm"
-                    : "bg-transparent text-notion-secondary hover:text-notion-text hover:bg-white/60"
+                    ? "border-blue-600 text-blue-600 font-bold"
+                    : "border-transparent text-gray-500 hover:text-gray-900 hover:border-gray-300"
                 }`}
                 onClick={() => setSelectedTab("explore")}
               >
-                <Sparkles size={15} className="shrink-0" />
-                <span>Bài học gợi ý</span>
+                <Sparkles size={16} className="shrink-0" />
+                <span>Kho bài học gợi ý</span>
               </button>
             </div>
           </div>

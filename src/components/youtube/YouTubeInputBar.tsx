@@ -20,13 +20,13 @@ export function YouTubeInputBar({
   onOpenKeySettings,
 }: YouTubeInputBarProps) {
   return (
-    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-[0.85rem] mb-5 sm:mb-6 w-full">
-      <div className="flex-1 flex items-center gap-2 sm:gap-[0.65rem] bg-notion-surface border border-notion-border rounded-lg py-2 sm:py-[0.65rem] px-3 sm:px-4 transition-all duration-200 shadow-sm focus-within:border-notion-primary focus-within:ring-2 focus-within:ring-notion-primary/15 min-w-0">
-        <VideoIcon size={18} className="shrink-0 text-notion-red" />
+    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 mb-5 w-full">
+      <div className="flex-1 h-11 flex items-center gap-2.5 bg-white border border-gray-200 rounded-xl px-3.5 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.04)] focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/10 min-w-0">
+        <VideoIcon size={18} className="shrink-0 text-red-500" />
         <input
           type="text"
-          className="flex-1 border-0 outline-none bg-transparent text-[0.92rem] text-notion-text placeholder:text-notion-muted"
-          placeholder="Dán link YouTube (ví dụ: https://www.youtube.com/watch?v=... hoặc youtu.be/...)"
+          className="flex-1 border-0 outline-none bg-transparent text-sm sm:text-[0.92rem] text-gray-900 placeholder:text-gray-400"
+          placeholder="Dán link YouTube (VD: https://www.youtube.com/watch?v=... hoặc youtu.be/...)"
           value={inputUrl}
           onChange={(e) => onChangeUrl(e.target.value)}
           onKeyDown={(e) => {
@@ -38,7 +38,7 @@ export function YouTubeInputBar({
         {inputUrl && (
           <button
             type="button"
-            className="border-0 bg-transparent text-notion-muted cursor-pointer flex items-center justify-center p-[3px] rounded-full hover:bg-notion-hover hover:text-notion-text transition-colors shrink-0"
+            className="border-0 bg-transparent text-gray-400 cursor-pointer flex items-center justify-center p-1 rounded-full hover:bg-gray-100 hover:text-gray-700 transition-colors shrink-0"
             onClick={() => onChangeUrl('')}
             title="Xóa link"
           >
@@ -50,7 +50,7 @@ export function YouTubeInputBar({
       <div className="flex items-center gap-2 shrink-0">
         <button
           type="button"
-          className="flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-notion-primary text-white border-0 rounded-lg py-2 sm:py-[0.65rem] px-3.5 sm:px-[1.35rem] text-sm sm:text-[0.92rem] font-semibold cursor-pointer transition-all duration-150 shadow-sm whitespace-nowrap hover:not(:disabled):bg-notion-primary-hover hover:not(:disabled):-translate-y-[1px] disabled:opacity-55 disabled:cursor-not-allowed"
+          className="h-11 flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-blue-600 text-white border-0 rounded-xl px-5 text-sm font-semibold cursor-pointer transition-all shadow-sm hover:not(:disabled):bg-blue-700 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
           disabled={!inputUrl.trim() || isLoading}
           onClick={() => onLoadVideo()}
         >
@@ -61,7 +61,7 @@ export function YouTubeInputBar({
             </>
           ) : (
             <>
-              <Play size={15} fill="currentColor" />
+              <Play size={14} fill="currentColor" />
               <span>Load Video</span>
             </>
           )}
@@ -71,15 +71,15 @@ export function YouTubeInputBar({
         {onOpenKeySettings && (
           <button
             type="button"
-            className={`flex items-center justify-center gap-[0.3rem] rounded-lg py-2 sm:py-[0.4rem] px-2.5 sm:px-[0.7rem] text-xs sm:text-[0.78rem] font-semibold cursor-pointer transition-all duration-150 whitespace-nowrap ${
+            className={`h-11 flex items-center justify-center gap-1.5 rounded-xl px-3.5 text-xs sm:text-sm font-semibold cursor-pointer transition-all border whitespace-nowrap ${
               hasUserKeys
-                ? 'border border-notion-green-border bg-notion-green-bg text-notion-green-text'
-                : 'bg-notion-hover border border-notion-border text-notion-text hover:bg-notion-blue-bg hover:border-notion-blue-border hover:text-notion-blue-text'
+                ? 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                : 'border-gray-200 bg-white hover:bg-gray-50 text-gray-700 hover:text-gray-900 shadow-sm'
             }`}
             onClick={onOpenKeySettings}
             title={hasUserKeys ? 'Bạn đang dùng API key riêng' : 'Cài đặt API key riêng'}
           >
-            <KeyRound size={14} />
+            <KeyRound size={15} className={hasUserKeys ? 'text-emerald-600' : 'text-gray-500'} />
             <span>{hasUserKeys ? 'My Keys' : 'API Key'}</span>
           </button>
         )}
