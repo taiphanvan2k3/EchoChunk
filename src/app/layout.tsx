@@ -6,6 +6,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { Navbar } from "@/components/Navbar";
 import { PracticeModals } from "@/components/PracticeModals";
 import { FirestoreQuotaTracer } from "@/components/dev/FirestoreQuotaTracer";
+import { PullToRefresh } from "@/components/common/PullToRefresh";
 import { getBaseUrl } from "@/lib/shared/site";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -147,7 +148,9 @@ export default async function RootLayout({
             <div className="flex flex-col min-h-screen bg-white">
               <Navbar />
               <main className="flex-1 w-full max-w-[1120px] mx-auto px-3 sm:px-6 pt-3.5 sm:pt-4 pb-5 has-[.yt-study-room-container]:max-w-[1440px] has-[.yt-study-room-container]:px-3 sm:has-[.yt-study-room-container]:px-8 has-[.yt-study-room-container]:pt-4 sm:has-[.yt-study-room-container]:pt-5 has-[.yt-study-room-container]:pb-16 has-[.yt-page-wrapper]:max-w-[1440px] has-[.yt-page-wrapper]:px-3 sm:has-[.yt-page-wrapper]:px-8 has-[.yt-page-wrapper]:pt-4 sm:has-[.yt-page-wrapper]:pt-5 has-[.yt-page-wrapper]:pb-16 has-[.explorer-fullwidth-wrapper]:max-w-none has-[.explorer-fullwidth-wrapper]:p-0">
-                {children}
+                <PullToRefresh>
+                  {children}
+                </PullToRefresh>
               </main>
               <PracticeModals />
               <FirestoreQuotaTracer />

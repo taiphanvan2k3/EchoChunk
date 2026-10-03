@@ -42,3 +42,5 @@ docs/specs/<feature-folder>/
 | **SPEC-06** | **Multi-Device Sync & Tombstone Architecture (Chống Zombie Data)** | 🟢 Approved / Ready | [06-multi-device-sync-tombstone/spec.md](06-multi-device-sync-tombstone/spec.md) |
 | **SPEC-07** | **Firestore Bucket Sharding Single-Document Summary for `customChunks` (Tối ưu Quota Read)** | 🟢 Approved / Ready | [Spec](07-custom-chunks-bucket-sharding/spec.md) • [Kế hoạch triển khai](07-custom-chunks-bucket-sharding/plan.md) |
 | **SPEC-08** | **Firestore Dev Tracing & Quota Observability Suite (Minh Bạch Hóa & Giám Sát Quota)** | 🟢 Approved / In-Planning | [Spec](08-firestore-dev-tracer/spec.md) • [Kế hoạch triển khai](08-firestore-dev-tracer/plan.md) |
+| **SPEC-09** | **Mobile Web/Capacitor Pull-to-Refresh Gesture Engine (Kéo Vuốt Làm Mới)** | 🟢 Approved / Implemented | [Spec](09-mobile-pull-to-refresh/spec.md) • [Kế hoạch triển khai](09-mobile-pull-to-refresh/plan.md) |
+

@@ -36,8 +36,8 @@ export function getIsLoading(): boolean {
 }
 
 export function isStoreLoading(uid?: string | null): boolean {
-  if (uid === undefined) return true; // Auth đang khởi tạo
-  if (!uid || uid === "guest") return false; // Guest không fetch cloud
+  // Người dùng chưa đăng nhập hoặc là guest -> Không có dữ liệu Cloud để nạp -> Không loading
+  if (!uid || uid === "guest") return false;
   if (loadedUid !== uid) return true; // Chưa hoàn tất nạp cho user này
   return isLoading;
 }
