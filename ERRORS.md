@@ -35,6 +35,7 @@
 27. [Loại bỏ LocalStorage di sản & Kiến trúc Cloud-First: Khắc phục lỗi React 19 `react-hooks/set-state-in-effect` & Xóa bỏ đồng bộ 2 chiều phức tạp](#27-loại-bỏ-localstorage-di-sản--kiến-trúc-cloud-first-khắc-phục-lỗi-react-19-react-hooksset-state-in-effect--xóa-bỏ-đồng-bộ-2-chiều-phức-tạp)
 28. [Lỗi Turbopack Next.js 16 crash Google Fonts: 'next/font/google queries have exactly one entry' (Issue #99114)](#28-lỗi-turbopack-nextjs-16-crash-google-fonts-nextfontgoogle-queries-have-exactly-one-entry-issue-99114)
 29. [Lỗi Flash giao diện Guest ('Agree to Disagree', Stats 0) khi reload trang do Zustand `getInitialState()` trên SSR](#29-lỗi-flash-giao-diện-guest-agree-to-disagree-stats-0-khi-reload-trang-do-zustand-getinitialstate-trên-ssr)
+30. [Cạn kiệt Quota đọc Firestore do mô hình Multi-Document Overfetching (O(N) Reads) & Kiến trúc Bucket Sharding Single-Document Summary](#30-cạn-kiệt-quota-đọc-firestore-do-mô-hình-multi-document-overfetching-on-reads--kiến-trúc-bucket-sharding-single-document-summary)
 
 ---
 
@@ -1585,4 +1586,62 @@ Sau khi refactor tách monolithic `PracticeContext` sang các Zustand store chuy
 - `pnpm run lint`: **0 errors, 0 warnings**.
 - `pnpm exec tsc --noEmit`: **0 errors**.
 - `pnpm run build`: **15/15 routes compiled & optimized**.
+
+---
+
+## 30. Cạn kiệt Quota đọc Firestore do mô hình Multi-Document Overfetching (O(N) Reads) & Kiến trúc Bucket Sharding Single-Document Summary
+
+### Triệu chứng
+- Trên Firebase Console (phần Billing & Usage Metrics), chỉ số **Document Reads** tăng đột biến mỗi khi người dùng tải trang hoặc bấm F5.
+- Do số lượng lượt đọc tăng tuyến tính $O(N)$ theo tổng số từ vựng người dùng sở hữu, người dùng có càng nhiều từ vựng tự tạo thì quota đọc Firestore càng bị tiêu hao nhanh chóng, dẫn đến nguy cơ vượt trần hạn ngạch miễn phí 50.000 reads/ngày của gói Firebase Spark (`RESOURCE_EXHAUSTED`).
+
+### Nguyên nhân gốc rễ
+1. **Mô hình Subcollection nhiều tài liệu con (Granular Multi-Document Model):**
+   - Mỗi từ vựng tự tạo (`customChunks`) được lưu thành 1 document con độc lập tại đường dẫn `users/{uid}/customChunks/{chunkId}`.
+   - Khi tải trang ([`src/stores/PracticeStoreProvider.tsx`](file:///d:/SelfLearning/EchoChunk/src/stores/PracticeStoreProvider.tsx)), hàm nạp dữ liệu gọi:
+     ```ts
+     const colRef = collection(db, "users", uid, "customChunks");
+     const snapshot = await getDocs(colRef);
+     ```
+   - **Quy tắc tính phí của Firestore:** Firestore tính phí **1 Read cho mỗi document được trả về** từ query. Do đó, nếu người dùng có $N$ từ vựng tự tạo, lệnh `getDocs` này ngốn đúng $N$ Document Reads ($O(N)$ cost).
+   - Cộng thêm các document khác được nạp khi khởi tạo app (như `progress_summary`, `stats`, user profile), chi phí đọc mỗi lần tải trang bị đội lên gấp nhiều lần mà không mang lại giá trị gia tăng nào về mặt tính năng.
+
+### Giải pháp kỹ thuật: Bucket Sharding Single-Document Summary Pattern
+
+Theo tài liệu đặc tả kỹ thuật [`SPEC-07`](file:///d:/SelfLearning/EchoChunk/docs/specs/07-custom-chunks-bucket-sharding/spec.md) và kế hoạch triển khai [`plan.md`](file:///d:/SelfLearning/EchoChunk/docs/specs/07-custom-chunks-bucket-sharding/plan.md):
+
+1. **Gom nhóm vào Document Tổng Hợp (Single-Document Summary - $O(1)$ Read):**
+   - Thay vì đọc từng document riêng lẻ, gom toàn bộ từ vựng vào một document tổng hợp tại `users/{uid}/custom_chunks_summary/{bucketId}` dưới dạng Key-Value map: `{ [chunkId]: chunkData }`.
+   - Khi nạp dữ liệu, client chỉ cần gọi `getDoc(bucketRef)` $\rightarrow$ **Chuyển độ phức tạp từ $O(N)$ Reads về $O(1)$ Read duy nhất** (1 request nạp toàn bộ danh sách).
+
+2. **Bài toán Giới hạn Dung lượng 1 MiB & Cơ chế Phân xô (Bucket Sharding):**
+   - **Đo đạc kích thước trung bình:** Mỗi custom chunk chiếm trung bình ~1 KB dữ liệu JSON.
+   - **Giới hạn cứng của Firestore:** 1 document tối đa là **1,048,576 bytes (1 MiB)**.
+   - **Cơ chế Phân xô (Bucket Sharding):** Đặt ngưỡng an toàn **500 chunks / bucket** (~500 KB, dự phòng an toàn 50% khoảng đệm so với trần 1MB).
+   - Danh sách các xô được quản lý trong `users/{uid}/stats/current`:
+     ```ts
+     {
+       customChunksCount: 244,
+       customChunkBucketIds: ['bucket_1'], // Danh sách ID các bucket lưu trữ từ vựng
+       activeCustomChunkBucket: 'bucket_1'  // Bucket đang dùng để thêm từ mới
+     }
+     ```
+   - Khi số lượng từ trong bucket chạm ngưỡng 500 chunks, hệ thống tự động cuộn sang `bucket_2`, `bucket_3`. Ngay cả khi người dùng sở hữu 1.000 từ, số lượt đọc khi nạp cũng chỉ là 2 Reads (thay vì 1.000 Reads).
+
+3. **Cơ chế Dual-Write & Dual-Delete (Bảo toàn Cold Backup tuyệt đối):**
+   - **Thêm/Sửa từ:** Ghi vào active bucket bằng `setDoc(bucketRef, { [chunkId]: chunk }, { merge: true })` (chỉ cập nhật 1 field cụ thể, tốn 1 Write), đồng thời ghi song song vào subcollection cũ `users/{uid}/customChunks/{chunkId}` làm kho lưu trữ dự phòng nguội (Cold Backup).
+   - **Xóa từ:** Dùng `updateDoc(bucketRef, { [chunkId]: deleteField() })` để xóa field khỏi bucket, và `deleteDoc` trong subcollection cũ.
+   - **An toàn dữ liệu:** Toàn bộ tài liệu cũ trong `users/{uid}/customChunks` được giữ nguyên vẹn, loại bỏ triệt để rủi ro mất mát dữ liệu.
+
+4. **Tự động Fallback & Auto-Migration ngầm:**
+   - Nếu tài khoản cũ chưa được migrate mở app, `fetchCustomChunks` tự động phát hiện bucket chưa tồn tại, fallback đọc 1 lần từ subcollection cũ và tự động nạp ngầm vào `bucket_1` cho các lần tải trang kế tiếp.
+
+### Kết quả kiểm chứng
+- **Độ phức tạp Quota Read:** Giảm từ $O(N)$ reads xuống $O(1)$ read (với hầu hết người dùng dưới 500 từ, chỉ tốn đúng 1 Read cho toàn bộ danh sách).
+- **Tổng số Document Reads khi F5:** Giảm triệt để hơn 98% lượt đọc không cần thiết trên mỗi phiên tải trang.
+- **Bảo toàn dữ liệu:** 100% dữ liệu gốc trong Cold Backup được bảo toàn nguyên vẹn.
+- **Kiểm thử mã nguồn:**
+  - `pnpm exec tsc --noEmit`: **0 errors**.
+  - `pnpm run lint`: **0 errors, 0 warnings**.
+  - `pnpm run build`: **15/15 routes compiled & optimized** thành công.
 

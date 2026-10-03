@@ -1,18 +1,16 @@
-﻿import {
+import {
   doc,
-  getDoc,
-  setDoc,
   serverTimestamp,
   collection,
   query,
   orderBy,
   limit,
-  getDocs,
   startAfter,
   Timestamp,
 } from "firebase/firestore";
 import { db } from "../config";
 import { YouTubeLessonData, YouTubeSentence } from "@/types/youtube";
+import { tracedGetDoc, tracedSetDoc, tracedGetDocs } from "./tracer";
 
 const COLLECTION_NAME = "youtube_transcripts";
 
@@ -38,7 +36,7 @@ export interface TranscribedVideosPage {
 export async function getCachedTranscript(videoId: string): Promise<YouTubeLessonData | null> {
   try {
     const docRef = doc(db, COLLECTION_NAME, videoId);
-    const snap = await getDoc(docRef);
+    const snap = await tracedGetDoc(docRef, 'getCachedTranscript');
 
     if (!snap.exists()) {
       return null;
@@ -103,7 +101,7 @@ export async function saveCachedTranscript(
 
     const docRef = doc(db, COLLECTION_NAME, data.videoId);
 
-    await setDoc(
+    await tracedSetDoc(
       docRef,
       {
         videoId: data.videoId,
@@ -114,7 +112,8 @@ export async function saveCachedTranscript(
         updatedAt: serverTimestamp(),
         createdAt: serverTimestamp()
       },
-      { merge: true }
+      { merge: true },
+      'saveTranscriptToCache'
     );
 
     console.log(
@@ -146,19 +145,19 @@ export async function getTranscribedVideosList(
           startAfter(Timestamp.fromMillis(cursor)),
           limit(fetchLimit)
         );
-        snap = await getDocs(q);
+        snap = await tracedGetDocs(q, 'getTranscribedVideosList');
       } else {
         const q = query(
           colRef,
           orderBy("updatedAt", "desc"),
           limit(fetchLimit)
         );
-        snap = await getDocs(q);
+        snap = await tracedGetDocs(q, 'getTranscribedVideosList');
       }
     } catch (err) {
       console.warn("[FirestoreCache] Fallback simple query for explore list:", err);
       const q = query(colRef, limit(fetchLimit));
-      snap = await getDocs(q);
+      snap = await tracedGetDocs(q, 'getTranscribedVideosList:fallback');
     }
 
     const firestoreList: TranscribedVideoSummary[] = [];
