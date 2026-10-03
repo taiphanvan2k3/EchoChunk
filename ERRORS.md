@@ -32,6 +32,9 @@
 24. [Lỗi Flash/Nhấp nháy phiên âm IPA (hiển thị câu tiếng Anh thô rồi đổi sang IPA) & Cụt âm vị từ ghép có gạch nối](#24-lỗi-flashnhấp-nháy-phiên-âm-ipa-hiển-thị-câu-tiếng-anh-thô-rồi-đổi-sang-ipa--cụt-âm-vị-từ-ghép-có-gạch-nối)
 25. [Lỗi lệch số lượng chunk giữa SSR và Client: Nhảy số 'Từ vựng của tôi' (244 -> 242) và Topic gốc bị trừ hụt (Work & Business 58 -> 57)](#25-lỗi-lệch-số-lượng-chunk-giữa-ssr-và-client-nhảy-số-từ-vựng-của-tôi-244---242-và-topic-gốc-bị-trừ-hụt-work--business-58---57)
 26. [Lỗi bất đồng bộ dữ liệu giữa nhiều thiết bị/môi trường (Localhost vs Web Deployed): Hiện tượng 'Zombie Data' hồi sinh video/chunk đã xóa & Cache cũ đè dữ liệu mới](#26-lỗi-bất-đồng-bộ-dữ-liệu-giữa-nhiều-thiết-bịmôi-trường-localhost-vs-web-deployed-hiện-tượng-zombie-data-hồi-sinh-videochunk-đã-xóa--cache-cũ-đè-dữ-liệu-mới)
+27. [Loại bỏ LocalStorage di sản & Kiến trúc Cloud-First: Khắc phục lỗi React 19 `react-hooks/set-state-in-effect` & Xóa bỏ đồng bộ 2 chiều phức tạp](#27-loại-bỏ-localstorage-di-sản--kiến-trúc-cloud-first-khắc-phục-lỗi-react-19-react-hooksset-state-in-effect--xóa-bỏ-đồng-bộ-2-chiều-phức-tạp)
+28. [Lỗi Turbopack Next.js 16 crash Google Fonts: 'next/font/google queries have exactly one entry' (Issue #99114)](#28-lỗi-turbopack-nextjs-16-crash-google-fonts-nextfontgoogle-queries-have-exactly-one-entry-issue-99114)
+29. [Lỗi Flash giao diện Guest ('Agree to Disagree', Stats 0) khi reload trang do Zustand `getInitialState()` trên SSR](#29-lỗi-flash-giao-diện-guest-agree-to-disagree-stats-0-khi-reload-trang-do-zustand-getinitialstate-trên-ssr)
 
 ---
 
@@ -1371,4 +1374,215 @@ Sự cố phát sinh từ 2 nguyên nhân độc lập kết hợp:
      ```
    - Nếu Thiết bị A thêm/sửa câu mới (`lastCustomChunksUpdatedAt` tăng), Thiết bị B khi mở lên sẽ phát hiện `hasNewerCloudChunks = true` và tự động kéo dữ liệu mới nhất về, tránh triệt để tình trạng cache cũ đè dữ liệu mới.
 6. **Không tốn thêm bất kỳ lượt đọc Firestore nào:** Toàn bộ metadata được đóng gói trong lượt đọc duy nhất của document `stats/current` ban đầu.
+
+---
+
+## 27. Loại bỏ LocalStorage di sản & Kiến trúc Cloud-First: Khắc phục lỗi React 19 `react-hooks/set-state-in-effect` & Xóa bỏ đồng bộ 2 chiều phức tạp
+
+### Triệu chứng
+1. Khi người dùng đăng xuất hoặc chuyển đổi tài khoản, việc gọi `setState` đồng bộ bên trong `useEffect` (`setCustomChunks([])`, `setProgressMap({})`, `setUserStats(...)`) khiến React 19 và ESLint báo lỗi chặn build:
+   ```
+   Error: Calling setState synchronously within an effect can trigger cascading renders
+   react-hooks/set-state-in-effect
+   ```
+2. Việc duy trì song song cả LocalStorage và Firestore yêu cầu logic đồng bộ 2 chiều phức tạp (`merge.ts`), tombstone arrays (`deletedChunkIds`, `deletedVideoIds`) và cơ chế xuất/nạp file JSON ngoại tuyến gây rối rắm trải nghiệm người dùng.
+
+### Nguyên nhân gốc rễ
+1. Trong React 19, `useEffect` nghiêm cấm gọi `setState` đồng bộ trong thân effect vì sẽ gây cascading re-renders liên tiếp, làm suy giảm hiệu năng và gây nháy giao diện. React khuyến nghị điều chỉnh state ngay trong render phase (Render-time state adjustment) hoặc đưa logic vào event handlers.
+2. LocalStorage vốn không phải nguồn chân lý (Source of Truth) an toàn khi ứng dụng đã hỗ trợ Cloud Sync bằng Firebase Firestore. Việc giữ lại LocalStorage cho từ vựng và tiến độ học khiến code đồng bộ phình to và vẫn có nguy cơ xung đột dữ liệu giữa các tab hoặc thiết bị.
+
+### Cách khắc phục
+1. **Chuyển dịch sang kiến trúc Zero-LocalStorage cho dữ liệu học tập:**
+   - Xóa bỏ hoàn toàn file [`merge.ts`](file:///d:/SelfLearning/EchoChunk/src/lib/client/firebase/firestore/merge.ts).
+   - Thanh lọc [`storage.ts`](file:///d:/SelfLearning/EchoChunk/src/lib/client/storage.ts): xóa bỏ mọi hàm get/set LocalStorage cho chunks, progress, stats, tombstones. Chỉ giữ lại hàm tự động dọn rác di sản `clearAllLegacyLocalStorage()`.
+   - Khách vãng lai (Guest): Học tập 100% trên bộ nhớ RAM (In-Memory Ephemeral State). Khi mở modal tạo câu từ vựng mới, hiển thị [`AuthPromptModal.tsx`](file:///d:/SelfLearning/EchoChunk/src/components/AuthPromptModal.tsx) giải thích nhẹ nhàng lý do cần đăng nhập Google thay vì bật popup OAuth đột ngột.
+2. **Khắc phục lỗi React 19 `set-state-in-effect` bằng Render-time State Adjustment:**
+   - Thay vì reset state trong `useEffect`, lưu vết `prevUserId` và điều chỉnh state ngay trong quá trình render khi người dùng đăng xuất:
+     ```tsx
+     const currentUserId = user?.uid ?? null;
+     const [prevUserId, setPrevUserId] = useState<string | null>(() => currentUserId);
+     if (currentUserId !== prevUserId) {
+       setPrevUserId(currentUserId);
+       if (!currentUserId) {
+         setCustomChunks([]);
+         setProgressMap({});
+         setUserStats(defaultStats);
+       }
+     }
+     ```
+   - `useEffect` chỉ thực hiện công việc bất đồng bộ thuần túy: fetch dữ liệu từ Cloud Firestore khi có `user`.
+   - **Lưu ý Gotcha quan trọng:** Bắt buộc phải chuẩn hóa `currentUserId = user?.uid ?? null`. Nếu so sánh trực tiếp `if (user?.uid !== prevUserId)`, khi đăng xuất `user?.uid` trả về `undefined`, trong khi `prevUserId` được gán `null`. Vì trong JavaScript `undefined !== null` luôn luôn là `true`, React sẽ bị kẹt vào vòng lặp vô hạn `Too many re-renders`!
+3. **Thanh lọc UI trong [`AnalyticsModal.tsx`](file:///d:/SelfLearning/EchoChunk/src/components/AnalyticsModal.tsx):**
+   - Loại bỏ hoàn toàn khối giao diện "Xuất/Nạp file JSON sao lưu ngoại tuyến" và các hàm xử lý tương ứng (`handleExport`, `handleImport`). Dữ liệu đã được lưu trữ vĩnh viễn trên Cloud Firestore theo tài khoản người dùng.
+
+---
+
+## 28. Lỗi Turbopack Next.js 16 crash Google Fonts: 'next/font/google queries have exactly one entry' (Issue #99114)
+
+### Triệu chứng
+Khi chạy ứng dụng ở chế độ dev (`next dev`) trên Next.js 16 (vốn bật Turbopack làm bundler mặc định), console server bắn lỗi 500 kèm stack trace:
+```
+[next]/internal/font/google/jetbrains_mono_610dee91.module.css:160:8
+Error: Module not found: Can't resolve '@vercel/turbopack-next/internal/font/google/font'
+  src: url(@vercel/turbopack-next/internal/font/google/font?{%22url%22:%22https://fonts.gstatic.com/l/font%3Fkit=...
+next/font/google queries have exactly one entry
+
+Debug info:
+- Execution of <NextFontGoogleFontFileReplacer as ImportMappingReplacement>::result failed
+- next/font/google queries have exactly one entry
+```
+
+### Nguyên nhân gốc rễ
+1. Đây là lỗi upstream đã được ghi nhận của Next.js Turbopack (**GitHub Issue #99114**).
+2. Khi Next.js tải font từ Google Fonts CDN, với một số font có định dạng biến thiên hoặc nhiều weights (cụ thể như `JetBrains Mono`), Google Fonts CDN đôi khi trả về đường dẫn font không có đuôi mở rộng `.woff2` mà dùng URL dạng query string: `https://fonts.gstatic.com/l/font?kit=...&skey=...&v=...`.
+3. Bộ phân tích nội bộ của Turbopack (`NextFontGoogleFontFileReplacer`) mong đợi query string chỉ có duy nhất 1 param. Khi Google Fonts trả về nhiều param nối nhau bằng dấu `&`, Turbopack ném Exception: `next/font/google queries have exactly one entry`.
+
+### Cách khắc phục
+1. **Loại bỏ việc tải remote không cần thiết cho font Monospace:**
+   - Font Monospace trong app chỉ phục vụ hiển thị số streak (`4d`), mục tiêu (`20/20`), phím tắt (`Ctrl+B`) và code badge.
+   - Gỡ bỏ `JetBrains_Mono` khỏi `next/font/google` trong [`src/app/layout.tsx`](file:///d:/SelfLearning/EchoChunk/src/app/layout.tsx).
+2. **Sử dụng System Monospace Font Stack tối ưu:**
+   - Cập nhật biến CSS `--font-mono` trong [`src/app/globals.css`](file:///d:/SelfLearning/EchoChunk/src/app/globals.css):
+     ```css
+     --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+     ```
+   - Nếu máy người dùng đã cài sẵn JetBrains Mono, trình duyệt vẫn render font JetBrains Mono mượt mà. Nếu chưa, nó lập tức dùng font Monospace native siêu đẹp của hệ điều hành (`SFMono` trên macOS/iOS, `Consolas` trên Windows, `Roboto Mono` trên Android).
+   - **Lợi ích kép:**
+     - Triệt tiêu 100% nguy cơ crash Turbopack do lỗi Issue #99114.
+     - Tiết kiệm ~150KB - 300KB dung lượng tải về, FCP/LCP nhanh hơn vì không cần chờ Google Fonts CDN.
+
+---
+
+## 29. Lỗi Flash giao diện Guest ('Agree to Disagree', Stats 0) khi reload trang do Zustand `getInitialState()` trên SSR
+
+### Triệu chứng
+Sau khi refactor tách monolithic `PracticeContext` sang các Zustand store chuyên biệt (`chunkStore`, `progressStore`), khi người dùng đã đăng nhập nhấn F5 reload trang:
+- Ban đầu giao diện hiển thị số liệu thống kê rỗng (Streak: 1, Đã học: 0/20) và cụm từ đầu tiên mặc định của chế độ Guest: `"Agree to Disagree"`.
+- Khoảng 300ms sau, màn hình đột ngột giật/nhảy sang số liệu thật và cụm từ đến hạn ôn tập của người dùng: `"Doctor's note / Medical certificate"`.
+
+### Phân tích Luồng lỗi (Flash Sequence)
+```
+❌ LUỒNG CŨ (BỊ FLASH):
+          SERVER
+             │
+             ▼
+       render HTML
+             │
+    Zustand initialState
+       = dữ liệu rỗng {}
+             │
+             ▼
+        Browser
+             │
+             ▼
+    hydrate với state rỗng
+    (Hiển thị: 'Agree to Disagree', Streak 1, 0/20)  <-- USER THẤY GIAO DIỆN GUEST!
+             │
+             ▼
+         useEffect()
+             │
+             ▼
+      Fetch Firebase Cloud
+             │
+             ▼
+    setProgressMap(cloudProgress)
+             │
+             ▼
+       UI nhảy lần 2
+    (Đột ngột nhảy sang: "Doctor's note", Streak 7, 20/20) <-- GIẬT MÀN HÌNH (FLASH)
+```
+
+### Nguyên nhân gốc rễ
+1. **Cơ chế SSR của React 18/19 & Zustand v5:**
+   - Trong React 18 & 19, các hook lắng nghe external store (`useSyncExternalStore`) nhận 3 đối số: `(subscribe, getSnapshot, getServerSnapshot)`.
+   - Khi chạy Server-Side Rendering (SSR), React **chỉ gọi đối số thứ ba: `getServerSnapshot`** (chứ không gọi `getSnapshot`).
+   - Zustand v5 ánh xạ `getServerSnapshot` thành `() => selector(api.getInitialState())`.
+2. **Khởi tạo Store ở Module-Level Singleton:**
+   - Trước khi sửa, `useProgressStore` và `useChunkStore` được tạo tĩnh tại module-level bằng `create<ProgressState>((set, get) => ({ progressMap: {}, userStats: getDefaultStats(), ... }))`.
+   - Do đó, `api.getInitialState()` của store vĩnh viễn bị đóng băng ở giá trị rỗng `{}`.
+   - Kể cả khi thành phần `PracticeSync` chạy và gọi `useProgressStore.getState().setProgressMap(initialData.progressMap)` thì lệnh này chỉ thay đổi `api.getState()`, hoàn toàn **không thể thay đổi được `api.getInitialState()`** đã đóng băng lúc load file JS.
+   - Hậu quả: Mọi component đọc store (`Navbar`, `ShadowingPage`, `usePracticeQueue`) trên SSR và ở frame đầu tiên của Client Hydration đều nhận `progressMap: {}`, dẫn đến `sortQueue` luôn trả về `"Agree to Disagree"`. Chỉ sau khi `useEffect` kích hoạt thì store mới re-render sang chunk thật.
+
+### Giải pháp Kiến trúc chuẩn (Store Factory + Provider)
+```
+✅ LUỒNG MỚI (0MS FLICKER):
+                 SERVER (Server Component: RootLayout)
+                   │
+                   │ fetch Firestore SSR (verify session cookie)
+                   ▼
+              initialData (91 chunk progress, stats thật)
+                   │
+                   │ truyền qua props
+                   ▼
+        ┌────────────────────────────────────────────────────────┐
+        │ PracticeStoreProvider ("use client")                   │
+        │ ├── useState(() => createChunkStore(initialData))      │
+        │ └── useState(() => createProgressStore(initialData))   │
+        └──────────────────────────┬─────────────────────────────┘
+                                   │
+                                   ▼
+                        Zustand Store Instance
+                        ┌────────────────────────┐
+                        │ progressMap (91 items) │  ← Initial state có sẵn data thật
+                        │ userStats (streak: 7)  │
+                        │ actions                │
+                        └────────────────────────┘
+                                   │
+                                   ▼
+             SSR HTML & Hydration khớp 100% cùng Snapshot
+                   (Hiển thị ngay: "Doctor's note", Streak 7)
+                                   │
+                                   ▼
+                              useEffect()
+                   (Lắng nghe Auth, đồng bộ nền Firebase)
+```
+
+1. **Chuyển Store sang dạng Factory (`createProgressStore`, `createChunkStore`):**
+   - Thay vì export singleton tĩnh, tạo store thông qua factory nhận `initProps`.
+   - Store được tạo với `initialState` chứa sẵn dữ liệu lấy từ SSR (`createProgressStore(initialData)`). Vì vậy trạng thái ban đầu của store — và snapshot dùng trong quá trình SSR/hydration (`getServerSnapshot`) — đã phản ánh dữ liệu thật thay vì state mặc định rỗng.
+2. **Khởi tạo Store Instance ổn định bằng `useState(() => ...)` (React 19 Compliant):**
+   - Trong [`src/stores/PracticeStoreProvider.tsx`](file:///d:/SelfLearning/EchoChunk/src/stores/PracticeStoreProvider.tsx):
+     ```tsx
+     const [chunkStore] = useState(() => {
+       const initCustom = initialData?.firstChunk ? [initialData.firstChunk] : [];
+       return createChunkStore({ customChunks: initCustom });
+     });
+
+     const [progressStore] = useState(() => {
+       return createProgressStore({
+         progressMap: initialData?.progressMap ?? {},
+         userStats: initialData?.userStats,
+         todayTimestamp: Date.now()
+       });
+     });
+     ```
+   - **Mục đích của `useState(() => ...)`:** Đảm bảo Store Instance ổn định qua các lần render của Provider (không bị tạo mới sau mỗi render làm mất state), đồng thời tuân thủ hoàn toàn quy tắc của React 19 Compiler (thay thế cho `useRef` bị linter cảnh báo `react-hooks/refs`).
+3. **Bản chất của Context trong kiến trúc này (Dependency Injection thay vì State Store):**
+   - `<ProgressStoreContext.Provider value={progressStore}>`: Context ở đây **KHÔNG PHẢI NƠI CHỨA STATE** như `PracticeContext` cũ.
+   - Nó chỉ làm nhiệm vụ duy nhất: truyền tham chiếu Store Instance xuống các component con.
+   - Từng component con sử dụng **Zustand selector** (`useProgressStore(s => s.userStats)`). Khi state khác trong store thay đổi (ví dụ cập nhật `progressMap`), component đăng ký `userStats` **hoàn toàn KHÔNG bị re-render thừa**!
+4. **Phân loại rõ ràng các Store (Tránh Over-engineering):**
+   Không phải mọi Zustand store trong Next.js đều cần đưa vào Provider:
+   | Store | Cần Initial Data từ Server (SSR)? | Cần Factory & Provider? | Phân loại |
+   | :--- | :---: | :---: | :--- |
+   | `progressStore` | ✅ (`progressMap`, `userStats`) | ✅ | Data Store (Server Hydrated) |
+   | `chunkStore` | ✅ (`firstChunk` nếu custom) | ✅ | Data Store (Server Hydrated) |
+   | `sessionStore` | ❌ (topic filter, level, search, queue index) | ❌ (Dùng `create()` tĩnh) | Pure Client UI State |
+   | `modalStore` | ❌ (isAnalyticsOpen, isChunkModalOpen...) | ❌ (Dùng `create()` tĩnh) | Pure Client UI State |
+
+5. **Cơ chế bổ trợ 2 lớp giữa `initialData` và `useEffect`:**
+   - **`initialData`:** Giải quyết bài toán: trang vừa mở/F5 là phải hiển thị đúng ngay lập tức, triệt tiêu 100% hiện tượng FOUC/nhảy số.
+   - **`useEffect` trong Provider:** Giải quyết bài toán: sau khi app chạy trên client, tiếp tục đồng bộ Firestore nếu có thay đổi và phản ứng linh hoạt khi user đăng nhập / đăng xuất hoặc đổi tài khoản.
+
+### Kết quả kiểm chứng
+- **SSR HTML Response:**
+  ```
+  Status: 200
+  HTML has Doctor? true
+  HTML has Agree to disagree? false
+  ```
+- Không còn bất kỳ khoảnh khắc flash nào giữa Guest và User có dữ liệu.
+- `pnpm run lint`: **0 errors, 0 warnings**.
+- `pnpm exec tsc --noEmit`: **0 errors**.
+- `pnpm run build`: **15/15 routes compiled & optimized**.
 

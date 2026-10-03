@@ -27,7 +27,8 @@
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "server-only": "^0.0.1",
-    "undici": "^8.10.2"
+    "undici": "^8.10.2",
+    "zustand": "^5.0.15"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.5.2",
