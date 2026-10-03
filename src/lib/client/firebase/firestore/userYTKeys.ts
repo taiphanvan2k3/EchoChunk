@@ -1,6 +1,7 @@
-﻿import { collection, doc, getDocs, setDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
+import { collection, doc, serverTimestamp } from "firebase/firestore";
 import { db } from "../config";
 import { EncryptedKey } from "@/lib/client/crypto/apiKeyEncryption";
+import { tracedGetDocs, tracedSetDoc, tracedDeleteDoc } from "./tracer";
 
 const getUserKeysCol = (uid: string) => collection(db, "users", uid, "yt_api_keys");
 
@@ -16,18 +17,22 @@ export interface StoredYTKey {
 export async function saveUserYTKey(uid: string, label: string, encrypted: EncryptedKey): Promise<string> {
   const colRef = getUserKeysCol(uid);
   const docRef = doc(colRef); // auto-ID
-  await setDoc(docRef, {
-    label,
-    ciphertext: encrypted.ciphertext,
-    iv: encrypted.iv,
-    createdAt: serverTimestamp()
-  });
+  await tracedSetDoc(
+    docRef,
+    {
+      label,
+      ciphertext: encrypted.ciphertext,
+      iv: encrypted.iv,
+      createdAt: serverTimestamp()
+    },
+    'saveUserYTKey'
+  );
   return docRef.id;
 }
 
 /** Lấy toàn bộ encrypted keys của user */
 export async function getUserYTKeys(uid: string): Promise<StoredYTKey[]> {
-  const snap = await getDocs(getUserKeysCol(uid));
+  const snap = await tracedGetDocs(getUserKeysCol(uid), 'getUserYTKeys');
   const list: StoredYTKey[] = [];
   snap.forEach((d) => {
     const data = d.data();
@@ -45,5 +50,5 @@ export async function getUserYTKeys(uid: string): Promise<StoredYTKey[]> {
 
 /** Xóa 1 key */
 export async function deleteUserYTKey(uid: string, keyId: string): Promise<void> {
-  await deleteDoc(doc(getUserKeysCol(uid), keyId));
+  await tracedDeleteDoc(doc(getUserKeysCol(uid), keyId), 'deleteUserYTKey');
 }

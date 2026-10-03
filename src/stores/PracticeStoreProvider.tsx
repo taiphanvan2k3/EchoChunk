@@ -67,25 +67,30 @@ export function PracticeStoreProvider({ initialData, children }: PracticeStorePr
 
     let isMounted = true;
     Promise.all([
-      fetchCustomChunks(user.uid),
-      fetchUserProgressMap(user.uid),
-      fetchUserStats(user.uid)
+      fetchUserStats(user.uid),
+      fetchUserProgressMap(user.uid)
     ])
-      .then(([cloudCustom, cloudProgress, cloudStats]) => {
+      .then(async ([cloudStats, cloudProgress]) => {
         if (!isMounted) return;
-        if (cloudCustom && cloudCustom.length > 0) {
-          chunkStore.getState().setCustomChunks(cloudCustom);
-        }
         if (cloudProgress && Object.keys(cloudProgress).length > 0) {
           progressStore.getState().setProgressMap(cloudProgress);
         }
         if (cloudStats) {
           progressStore.getState().setUserStats(cloudStats);
         }
+
+        // Tải customChunks thông qua Summary Bucket (chỉ tốn đúng 1 Read duy nhất thay vì đọc danh sách nhiều documents)
+        const bucketIds = cloudStats?.customChunkBucketIds;
+        const cloudCustom = await fetchCustomChunks(user.uid, bucketIds);
+        if (!isMounted) return;
+        if (cloudCustom && cloudCustom.length > 0) {
+          chunkStore.getState().setCustomChunks(cloudCustom);
+        }
       })
       .catch((err) => {
         console.warn("[PracticeStoreProvider] Lỗi nạp dữ liệu từ Cloud Firestore:", err);
       });
+
 
     return () => {
       isMounted = false;

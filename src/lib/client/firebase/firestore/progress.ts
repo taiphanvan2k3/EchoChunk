@@ -1,11 +1,10 @@
-﻿import {
+import {
   doc,
-  getDoc,
-  setDoc,
   serverTimestamp,
 } from 'firebase/firestore';
 import { db } from '../config';
 import { ChunkProgress } from '@/types';
+import { tracedGetDoc, tracedSetDoc } from './tracer';
 
 /**
  * Đường dẫn document tổng hợp tiến độ của user (Single Document Pattern)
@@ -26,7 +25,7 @@ export async function syncChunkProgress(
 ): Promise<void> {
   try {
     const summaryRef = getProgressSummaryDocRef(uid);
-    await setDoc(
+    await tracedSetDoc(
       summaryRef,
       {
         [chunkId]: {
@@ -34,7 +33,8 @@ export async function syncChunkProgress(
           updatedAt: serverTimestamp(),
         },
       },
-      { merge: true }
+      { merge: true },
+      'syncChunkProgress'
     );
   } catch (error) {
     console.error(`Failed to sync progress for chunk ${chunkId}:`, error);
@@ -49,7 +49,7 @@ export async function fetchUserProgressMap(
 ): Promise<Record<string, ChunkProgress>> {
   try {
     const summaryRef = getProgressSummaryDocRef(uid);
-    const snap = await getDoc(summaryRef);
+    const snap = await tracedGetDoc(summaryRef, 'fetchUserProgressMap');
 
     if (snap.exists()) {
       const data = snap.data();

@@ -1,11 +1,7 @@
 import {
   doc,
-  setDoc,
-  deleteDoc,
   collection,
-  getDocs,
   serverTimestamp,
-  writeBatch,
   query,
   orderBy,
   limit,
@@ -13,6 +9,12 @@ import {
 } from 'firebase/firestore';
 import { db } from '../config';
 import { YouTubeHistoryItem } from '@/types/youtube';
+import {
+  tracedSetDoc,
+  tracedDeleteDoc,
+  tracedGetDocs,
+  tracedWriteBatch
+} from './tracer';
 
 const MAX_CLOUD_HISTORY = 30;
 
@@ -27,7 +29,7 @@ export async function syncYouTubeHistoryToCloud(
 
   try {
     const ref = doc(db, 'users', uid, 'youtubeHistory', item.videoId);
-    await setDoc(
+    await tracedSetDoc(
       ref,
       {
         videoId: item.videoId,
@@ -39,7 +41,8 @@ export async function syncYouTubeHistoryToCloud(
         lastStudiedAt: item.lastStudiedAt || Date.now(),
         updatedAt: serverTimestamp(),
       },
-      { merge: true }
+      { merge: true },
+      'syncYouTubeHistoryToCloud'
     );
   } catch (error) {
     console.error(`[Firestore] Failed to sync video history ${item.videoId} for user ${uid}:`, error);
@@ -57,7 +60,7 @@ export async function removeYouTubeHistoryFromCloud(
 
   try {
     const ref = doc(db, 'users', uid, 'youtubeHistory', videoId);
-    await deleteDoc(ref);
+    await tracedDeleteDoc(ref, 'removeYouTubeHistoryFromCloud');
   } catch (error) {
     console.error(`[Firestore] Failed to remove video history ${videoId} for user ${uid}:`, error);
   }
@@ -71,8 +74,8 @@ export async function clearAllYouTubeHistoryOnCloud(uid: string): Promise<void> 
 
   try {
     const colRef = collection(db, 'users', uid, 'youtubeHistory');
-    const snapshot = await getDocs(colRef);
-    const batch = writeBatch(db);
+    const snapshot = await tracedGetDocs(colRef, 'clearAllYouTubeHistory:fetch');
+    const batch = tracedWriteBatch(db, 'clearAllYouTubeHistory:batch');
 
     snapshot.forEach((d) => {
       batch.delete(d.ref);
@@ -98,10 +101,10 @@ export async function fetchYouTubeHistoryFromCloud(
     let snapshot;
     try {
       const q = query(colRef, orderBy('lastStudiedAt', 'desc'), limit(limitCount));
-      snapshot = await getDocs(q);
+      snapshot = await tracedGetDocs(q, 'fetchYouTubeHistoryFromCloud');
     } catch {
       const q = query(colRef, limit(limitCount));
-      snapshot = await getDocs(q);
+      snapshot = await tracedGetDocs(q, 'fetchYouTubeHistoryFromCloud:fallback');
     }
 
     const list: YouTubeHistoryItem[] = [];
@@ -155,19 +158,19 @@ export async function fetchYouTubeHistoryPageFromCloud(
           startAfter(cursorTimestamp),
           limit(fetchLimit)
         );
-        snapshot = await getDocs(q);
+        snapshot = await tracedGetDocs(q, 'fetchYouTubeHistoryPageFromCloud');
       } else {
         const q = query(
           colRef,
           orderBy('lastStudiedAt', 'desc'),
           limit(fetchLimit)
         );
-        snapshot = await getDocs(q);
+        snapshot = await tracedGetDocs(q, 'fetchYouTubeHistoryPageFromCloud');
       }
     } catch (err) {
       console.warn('[Firestore] Fallback query for youtubeHistory page:', err);
       const q = query(colRef, limit(fetchLimit));
-      snapshot = await getDocs(q);
+      snapshot = await tracedGetDocs(q, 'fetchYouTubeHistoryPageFromCloud:fallback');
     }
 
     const list: YouTubeHistoryItem[] = [];

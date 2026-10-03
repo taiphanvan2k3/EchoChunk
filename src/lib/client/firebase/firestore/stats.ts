@@ -1,11 +1,10 @@
-﻿import {
+import {
   doc,
-  getDoc,
-  setDoc,
   serverTimestamp,
 } from 'firebase/firestore';
 import { db } from '../config';
 import { UserStats } from '@/types';
+import { tracedGetDoc, tracedSetDoc } from './tracer';
 
 /**
  * Cập nhật thống kê học tập (streak, số câu hôm nay)
@@ -13,10 +12,14 @@ import { UserStats } from '@/types';
 export async function syncUserStats(uid: string, stats: UserStats): Promise<void> {
   try {
     const ref = doc(db, 'users', uid, 'stats', 'current');
-    await setDoc(ref, {
-      ...stats,
-      updatedAt: serverTimestamp(),
-    });
+    await tracedSetDoc(
+      ref,
+      {
+        ...stats,
+        updatedAt: serverTimestamp(),
+      },
+      'syncUserStats'
+    );
   } catch (error) {
     console.error('Failed to sync user stats:', error);
   }
@@ -28,7 +31,7 @@ export async function syncUserStats(uid: string, stats: UserStats): Promise<void
 export async function fetchUserStats(uid: string): Promise<UserStats | null> {
   try {
     const ref = doc(db, 'users', uid, 'stats', 'current');
-    const snap = await getDoc(ref);
+    const snap = await tracedGetDoc(ref, 'fetchUserStats');
     if (snap.exists()) {
       return snap.data() as UserStats;
     }

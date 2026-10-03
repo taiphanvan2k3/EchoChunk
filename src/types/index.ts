@@ -76,7 +76,11 @@ export interface UserStats {
   dailyGoal: number; // default 20
   customChunksCount?: number;
   totalChunksCount?: number;
+  customChunkBucketIds?: string[]; // IDs các document bucket chứa từ vựng tự tạo (VD: ['bucket_1'])
+  activeCustomChunkBucket?: string; // Bucket đang nhận từ vựng mới (VD: 'bucket_1')
+  lastCustomChunksUpdatedAt?: number;
 }
+
 
 export type PracticeMode = "shadowing" | "blanks" | "reflex" | "browse" | "analytics";
 
@@ -90,3 +94,4 @@ export interface SpeechEvalResult {
   accuracy: number;
   tokens: WordMatchToken[];
 }
+

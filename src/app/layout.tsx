@@ -5,6 +5,7 @@ import { AuthProvider } from "@/context/AuthContext";
 
 import { Navbar } from "@/components/Navbar";
 import { PracticeModals } from "@/components/PracticeModals";
+import { FirestoreQuotaTracer } from "@/components/dev/FirestoreQuotaTracer";
 import { getBaseUrl } from "@/lib/shared/site";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -149,6 +150,7 @@ export default async function RootLayout({
                 {children}
               </main>
               <PracticeModals />
+              <FirestoreQuotaTracer />
             </div>
           </PracticeStoreProvider>
         </AuthProvider>

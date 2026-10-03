@@ -1,7 +1,7 @@
-import 'server-only';
+import "server-only";
 
-import { cookies } from 'next/headers';
-import dataset from '@/data/speaking-chunks.json';
+import { cookies } from "next/headers";
+import dataset from "@/data/speaking-chunks.json";
 import {
   ChunksDataset,
   SpeakingChunk,
@@ -9,11 +9,11 @@ import {
   UserStats,
   TopicMeta,
   SRSRating,
-  AuthUser,
-} from '@/types';
-import { sortQueue } from '@/lib/shared/srs';
-import { getAdminInstances, verifyUserSession } from '@/lib/server/admin';
-import { isUserOwnedChunk } from '@/lib/shared/chunkClassification';
+  AuthUser
+} from "@/types";
+import { sortQueue } from "@/lib/shared/srs";
+import { getAdminInstances, verifyUserSession } from "@/lib/server/admin";
+import { isUserOwnedChunk } from "@/lib/shared/chunkClassification";
 
 const data = dataset as unknown as ChunksDataset;
 
@@ -35,7 +35,7 @@ export interface InitialServerResult {
 }
 
 function getTodayDateStr(): string {
-  return new Date().toISOString().split('T')[0];
+  return new Date().toISOString().split("T")[0];
 }
 
 function computeDynamicTopics(
@@ -47,7 +47,7 @@ function computeDynamicTopics(
   let customCount = 0;
 
   allChunks.forEach((c) => {
-    if (c.topicId && c.topicId !== 'CUSTOM' && c.topicId !== 'STUDIED') {
+    if (c.topicId && c.topicId !== "CUSTOM" && c.topicId !== "STUDIED") {
       counts[c.topicId] = (counts[c.topicId] || 0) + 1;
     }
     if (isUserOwnedChunk(c)) {
@@ -60,30 +60,28 @@ function computeDynamicTopics(
   }
 
   // Đếm chính xác số câu đã luyện tập từ progressMap (không phụ thuộc allChunks)
-  const studiedCount = Object.values(progressMap).filter(
-    (p) => p && p.repetitions > 0
-  ).length;
+  const studiedCount = Object.values(progressMap).filter((p) => p && p.repetitions > 0).length;
 
   const list = data.topics.map((t) => ({
     ...t,
-    chunkCount: counts[t.topicId] || 0,
+    chunkCount: counts[t.topicId] || 0
   }));
 
   if (customCount > 0) {
     list.unshift({
-      topicId: 'CUSTOM',
-      topicName: 'Từ vựng của tôi',
-      icon: '⭐',
-      chunkCount: customCount,
+      topicId: "CUSTOM",
+      topicName: "Từ vựng của tôi",
+      icon: "⭐",
+      chunkCount: customCount
     });
   }
 
   if (studiedCount > 0) {
     list.unshift({
-      topicId: 'STUDIED',
-      topicName: 'Đã luyện tập',
-      icon: '🧠',
-      chunkCount: studiedCount,
+      topicId: "STUDIED",
+      topicName: "Đã luyện tập",
+      icon: "🧠",
+      chunkCount: studiedCount
     });
   }
 
@@ -93,12 +91,12 @@ function computeDynamicTopics(
 function serializeFirestoreData<T>(obj: unknown): T {
   if (obj === null || obj === undefined) return obj as T;
 
-  if (typeof obj === 'object') {
-    if ('_seconds' in obj && '_nanoseconds' in obj) {
+  if (typeof obj === "object") {
+    if ("_seconds" in obj && "_nanoseconds" in obj) {
       const ts = obj as { _seconds: number; _nanoseconds: number };
       return new Date(ts._seconds * 1000).toISOString() as unknown as T;
     }
-    if (typeof (obj as { toDate?: () => Date }).toDate === 'function') {
+    if (typeof (obj as { toDate?: () => Date }).toDate === "function") {
       return (obj as { toDate: () => Date }).toDate().toISOString() as unknown as T;
     }
     if (obj instanceof Date) {
@@ -129,16 +127,16 @@ export async function getInitialServerData(): Promise<InitialServerResult> {
     lastActiveDate: getTodayDateStr(),
     todayReviewedCount: 0,
     totalPracticedCount: 0,
-    dailyGoal: 20,
+    dailyGoal: 20
   };
 
   const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get('__session')?.value;
+  const sessionCookie = cookieStore.get("__session")?.value;
 
   let initialUser: AuthUser | null = null;
   const progressMap: Record<string, ChunkProgress> = {};
   let userStats: UserStats = defaultStats;
-  let adminDb: ReturnType<typeof getAdminInstances>['db'] | null = null;
+  let adminDb: ReturnType<typeof getAdminInstances>["db"] | null = null;
 
   if (sessionCookie) {
     const decoded = await verifyUserSession(sessionCookie);
@@ -147,49 +145,45 @@ export async function getInitialServerData(): Promise<InitialServerResult> {
         uid: decoded.uid,
         email: decoded.email || null,
         displayName: decoded.name || null,
-        photoURL: decoded.picture || null,
+        photoURL: decoded.picture || null
       };
 
       const { db } = getAdminInstances();
       adminDb = db;
       if (db) {
         try {
-          const userDocRef = db.collection('users').doc(decoded.uid);
+          const userDocRef = db.collection("users").doc(decoded.uid);
 
           // Tối ưu hóa: Chỉ đọc 2 document cần thiết (progress_summary và stats/current)
           // Không đọc rootUserDoc hay gọi aggregation count() trên customChunks để giảm thiểu network round-trips
           const fetchPromise = Promise.all([
-            userDocRef.collection('progress_summary').doc('current').get(),
-            userDocRef.collection('stats').doc('current').get(),
+            userDocRef.collection("progress_summary").doc("current").get(),
+            userDocRef.collection("stats").doc("current").get()
           ]);
 
           // SSR Fail-safe timeout: Nếu mạng Firestore vượt quá 1200ms thì ngắt sớm,
           // trả về dữ liệu mặc định để gửi HTML ngay lập tức, client sẽ hydrate qua LocalStorage/Background Sync
           const timeoutPromise = new Promise<never>((_, reject) => {
-            const timer = setTimeout(() => reject(new Error('Firestore SSR timeout')), 1200);
-            if (typeof timer.unref === 'function') timer.unref();
+            const timer = setTimeout(() => reject(new Error("Firestore SSR timeout")), 1200);
+            if (typeof timer.unref === "function") timer.unref();
           });
 
-          const [progressSummaryDoc, statsDoc] = await Promise.race([
-            fetchPromise,
-            timeoutPromise,
-          ]);
-
+          const [progressSummaryDoc, statsDoc] = await Promise.race([fetchPromise, timeoutPromise]);
           if (progressSummaryDoc.exists) {
             const rawSummary = serializeFirestoreData<Record<string, unknown>>(progressSummaryDoc.data() || {});
             for (const [key, value] of Object.entries(rawSummary)) {
-              if (key !== 'updatedAt' && value && typeof value === 'object') {
+              if (key !== "updatedAt" && value && typeof value === "object") {
                 const d = value as Record<string, unknown>;
                 progressMap[key] = {
                   chunkId: (d.chunkId as string) || key,
                   repetitions: Number(d.repetitions) || 0,
                   intervalDays: Number(d.intervalDays) || 1,
                   easeFactor: Number(d.easeFactor) || 2.5,
-                  dueDate: typeof d.dueDate === 'string' ? d.dueDate : new Date().toISOString(),
-                  lastReviewed: typeof d.lastReviewed === 'string' ? d.lastReviewed : new Date().toISOString(),
+                  dueDate: typeof d.dueDate === "string" ? d.dueDate : new Date().toISOString(),
+                  lastReviewed: typeof d.lastReviewed === "string" ? d.lastReviewed : new Date().toISOString(),
                   confidenceScore: ((d.confidenceScore as number) || 3) as SRSRating,
                   accuracyHistory: Array.isArray(d.accuracyHistory) ? (d.accuracyHistory as number[]) : [],
-                  bestAccuracy: Number(d.bestAccuracy) || 0,
+                  bestAccuracy: Number(d.bestAccuracy) || 0
                 };
               }
             }
@@ -205,9 +199,7 @@ export async function getInitialServerData(): Promise<InitialServerResult> {
             if (lastActiveDate !== today) {
               const lastDate = new Date(lastActiveDate);
               const currentDate = new Date(today);
-              const diffDays = Math.round(
-                (currentDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24)
-              );
+              const diffDays = Math.round((currentDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
 
               if (diffDays === 1) {
                 streakDays += 1;
@@ -218,9 +210,16 @@ export async function getInitialServerData(): Promise<InitialServerResult> {
             }
 
             const customChunksCount = Number(raw.customChunksCount) || 0;
-            const savedTotalChunksCount = typeof raw.totalChunksCount === 'number'
-              ? Number(raw.totalChunksCount)
-              : undefined;
+            const savedTotalChunksCount =
+              typeof raw.totalChunksCount === "number" ? Number(raw.totalChunksCount) : undefined;
+            const customChunkBucketIds = Array.isArray(raw.customChunkBucketIds)
+              ? (raw.customChunkBucketIds as string[])
+              : Array.isArray(raw.summaryBuckets)
+                ? (raw.summaryBuckets as string[])
+                : undefined;
+            const activeCustomChunkBucket =
+              typeof raw.activeCustomChunkBucket === "string" ? raw.activeCustomChunkBucket : undefined;
+            const lastCustomChunksUpdatedAt = Number(raw.lastCustomChunksUpdatedAt) || undefined;
 
             userStats = {
               streakDays,
@@ -230,10 +229,16 @@ export async function getInitialServerData(): Promise<InitialServerResult> {
               dailyGoal: Number(raw.dailyGoal) || 20,
               customChunksCount,
               totalChunksCount: savedTotalChunksCount,
+              customChunkBucketIds,
+              activeCustomChunkBucket,
+              lastCustomChunksUpdatedAt
             };
           }
         } catch (error) {
-          console.warn('[Server Data] Warning: Pre-fetching user data skipped or timed out, relying on client cache:', error);
+          console.warn(
+            "[Server Data] Warning: Pre-fetching user data skipped or timed out, relying on client cache:",
+            error
+          );
         }
       }
     }
@@ -253,40 +258,31 @@ export async function getInitialServerData(): Promise<InitialServerResult> {
       if (firstChunkId) {
         // Timeout riêng 400ms, không block SSR quá lâu
         const fetchWithTimeout = Promise.race([
-          adminDb
-            .collection('users')
-            .doc(initialUser.uid)
-            .collection('customChunks')
-            .doc(firstChunkId)
-            .get(),
+          adminDb.collection("users").doc(initialUser.uid).collection("customChunks").doc(firstChunkId).get(),
           new Promise<null>((resolve) => {
             const t = setTimeout(() => resolve(null), 400);
-            if (typeof t.unref === 'function') t.unref();
-          }),
+            if (typeof t.unref === "function") t.unref();
+          })
         ]);
 
         const customChunkDoc = await fetchWithTimeout;
-        if (customChunkDoc && 'exists' in customChunkDoc && customChunkDoc.exists) {
+        if (customChunkDoc && "exists" in customChunkDoc && customChunkDoc.exists) {
           firstChunk = serializeFirestoreData<SpeakingChunk>(customChunkDoc.data() as SpeakingChunk);
         }
       }
     } catch (e) {
-      console.warn('[SSR] Could not prefetch first custom chunk:', e);
+      console.warn("[SSR] Could not prefetch first custom chunk:", e);
     }
   }
 
-  const dynamicTopics = computeDynamicTopics(
-    baseChunks,
-    progressMap,
-    userStats.customChunksCount || 0
-  );
+  const dynamicTopics = computeDynamicTopics(baseChunks, progressMap, userStats.customChunksCount || 0);
 
   const reviewDueCount = Object.values(progressMap).filter((prog) => {
     if (!prog || prog.repetitions === 0) return false;
     return new Date(prog.dueDate).getTime() <= todayTimestamp;
   }).length;
 
-  const totalChunksCount = userStats.totalChunksCount ?? (baseChunks.length + (userStats.customChunksCount || 0));
+  const totalChunksCount = userStats.totalChunksCount ?? baseChunks.length + (userStats.customChunksCount || 0);
   const studiedKeysCount = Object.keys(progressMap).filter((k) => progressMap[k]?.repetitions > 0).length;
   const unstudiedCount = Math.max(0, totalChunksCount - studiedKeysCount);
 
@@ -299,7 +295,7 @@ export async function getInitialServerData(): Promise<InitialServerResult> {
       dynamicTopics,
       reviewDueCount,
       unstudiedCount,
-      totalChunksCount,
-    },
+      totalChunksCount
+    }
   });
 }

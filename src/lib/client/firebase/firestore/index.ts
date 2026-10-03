@@ -4,3 +4,5 @@ export * from './stats';
 export * from './customChunks';
 export * from './youtubeTranscript';
 export * from './youtubeHistory';
+export * from './userYTKeys';
+export * from './tracer';
