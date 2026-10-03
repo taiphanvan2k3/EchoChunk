@@ -1,6 +1,6 @@
-﻿"use client";
+"use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { PracticeMode, UserStats } from "@/types";
@@ -23,7 +23,7 @@ import {
   Settings
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { usePractice } from "@/context/PracticeContext";
+import { useProgressStore, useSessionStore, useModalStore, useChunkStore } from "@/stores";
 import { NotificationSettingsModal } from "@/components/settings/NotificationSettingsModal";
 import { initNotificationLifecycle } from "@/lib/client/notifications";
 
@@ -41,7 +41,6 @@ interface NavbarProps {
 
 export function Navbar(props: NavbarProps) {
   const pathname = usePathname();
-  const practice = usePractice();
   const { user, loading, isSigningIn, signInWithGoogle, logout } = useAuth();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
@@ -51,14 +50,35 @@ export function Navbar(props: NavbarProps) {
     initNotificationLifecycle();
   }, []);
 
-  // Use props if passed, otherwise fallback to PracticeContext
-  const stats = props.stats ?? practice.userStats;
-  const dueCount = props.dueCount ?? practice.reviewDueCount;
-  const unstudiedCount = props.unstudiedCount ?? practice.unstudiedCount;
-  const soundEnabled = props.soundEnabled ?? practice.soundEnabled;
-  const onToggleSound = props.onToggleSound ?? practice.toggleSound;
-  const onOpenAnalytics = props.onOpenAnalytics ?? practice.openAnalytics;
-  const onOpenAddChunk = props.onOpenAddChunk ?? practice.openAddChunk;
+  // Zustand Store Selectors
+  const storeUserStats = useProgressStore((s) => s.userStats);
+  const progressMap = useProgressStore((s) => s.progressMap);
+  const todayTimestamp = useProgressStore((s) => s.todayTimestamp);
+  const allChunks = useChunkStore((s) => s.allChunks);
+
+  const storeSoundEnabled = useSessionStore((s) => s.soundEnabled);
+  const storeToggleSound = useSessionStore((s) => s.toggleSound);
+  const storeOpenAnalytics = useModalStore((s) => s.openAnalytics);
+
+  const stats = props.stats ?? storeUserStats;
+  const soundEnabled = props.soundEnabled ?? storeSoundEnabled;
+  const onToggleSound = props.onToggleSound ?? storeToggleSound;
+  const onOpenAnalytics = props.onOpenAnalytics ?? storeOpenAnalytics;
+  const onOpenAddChunk = props.onOpenAddChunk ?? (() => useModalStore.getState().openAddChunk(user));
+
+  const computedDueCount = useMemo(() => {
+    return Object.values(progressMap).filter((prog) => {
+      if (!prog || prog.repetitions === 0) return false;
+      return new Date(prog.dueDate).getTime() <= todayTimestamp;
+    }).length;
+  }, [progressMap, todayTimestamp]);
+
+  const computedUnstudiedCount = useMemo(() => {
+    return allChunks.filter((c) => !progressMap[c.id]).length;
+  }, [allChunks, progressMap]);
+
+  const dueCount = props.dueCount ?? computedDueCount;
+  const unstudiedCount = props.unstudiedCount ?? computedUnstudiedCount;
 
   // Active path detection (supports both Vietnamese rewritten URLs and original paths)
   const isShadowingActive =

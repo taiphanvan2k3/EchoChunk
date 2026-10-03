@@ -1,11 +1,12 @@
-﻿'use client';
+'use client';
 
-import { usePractice } from '@/context/PracticeContext';
+import { usePracticeQueue } from '@/hooks/usePracticeQueue';
+import { useIsClient } from '@/hooks/useIsClient';
 import { TopicExplorerMode } from '@/components/TopicExplorerMode';
 
 export default function ExplorerPage() {
+  const isClient = useIsClient();
   const {
-    isClient,
     dynamicTopics,
     allChunks,
     progressMap,
@@ -14,7 +15,7 @@ export default function ExplorerPage() {
     openAddChunk,
     openEditChunk,
     handleDeleteChunk,
-  } = usePractice();
+  } = usePracticeQueue();
 
   if (!isClient && allChunks.length === 0) {
     return (

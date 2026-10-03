@@ -45,7 +45,7 @@
   --sar: env(safe-area-inset-right, 0px);
 
   --font-sans: var(--font-jakarta), 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: var(--font-jetbrains), 'JetBrains Mono', Consolas, Menlo, monospace;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --font-serif: var(--font-lora), 'Lora', Georgia, 'Times New Roman', serif;
   --font-ipa: var(--font-sans), 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Lucida Sans Unicode', 'Arial Unicode MS', sans-serif;
 

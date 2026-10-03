@@ -1,14 +1,15 @@
-﻿'use client';
+'use client';
 
-import { usePractice } from '@/context/PracticeContext';
+import { usePracticeQueue } from '@/hooks/usePracticeQueue';
+import { useIsClient } from '@/hooks/useIsClient';
 import { TopicFilterBar } from '@/components/TopicFilterBar';
 import { QuickReflexMode } from '@/components/QuickReflexMode';
 import { SearchX, RotateCcw, Plus } from 'lucide-react';
 import { soundManager } from '@/lib/client/sound';
 
 export default function ReflexPage() {
+  const isClient = useIsClient();
   const {
-    isClient,
     dynamicTopics,
     selectedTopicId,
     setSelectedTopicId,
@@ -27,7 +28,7 @@ export default function ReflexPage() {
     handleShuffle,
     queueIndex,
     totalChunksCount,
-  } = usePractice();
+  } = usePracticeQueue();
 
   if (!isClient && !currentChunk) {
     return (

@@ -230,8 +230,6 @@ export async function getInitialServerData(): Promise<InitialServerResult> {
               dailyGoal: Number(raw.dailyGoal) || 20,
               customChunksCount,
               totalChunksCount: savedTotalChunksCount,
-              deletedChunkIds: Array.isArray(raw.deletedChunkIds) ? (raw.deletedChunkIds as string[]) : [],
-              lastCustomChunksUpdatedAt: Number(raw.lastCustomChunksUpdatedAt) || 0,
             };
           }
         } catch (error) {

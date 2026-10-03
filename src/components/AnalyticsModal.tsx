@@ -1,27 +1,19 @@
-﻿"use client";
+"use client";
 
-import { useState, ChangeEvent } from "react";
 import { ChunkProgress, UserStats } from "@/types";
 import { useAuth } from "@/context/AuthContext";
-import { exportBackupJSON, importBackupJSON } from "@/lib/client/storage";
-import { soundManager } from "@/lib/client/sound";
 import { useEscapeKey } from "@/hooks/useEscapeKey";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 import {
   X,
   Flame,
   CheckCircle2,
-  Download,
-  Upload,
   BarChart3,
   ShieldCheck,
   BookOpen,
   Sparkles,
-  AlertCircle,
   Cloud,
   CloudOff,
-  ChevronDown,
-  ChevronUp,
 } from "lucide-react";
 
 interface AnalyticsModalProps {
@@ -29,59 +21,16 @@ interface AnalyticsModalProps {
   stats: UserStats;
   progressMap: Record<string, ChunkProgress>;
   totalChunks: number;
-  onReload: () => void;
 }
 
-export function AnalyticsModal({ onClose, stats, progressMap, totalChunks, onReload }: AnalyticsModalProps) {
+export function AnalyticsModal({ onClose, stats, progressMap, totalChunks }: AnalyticsModalProps) {
   const { user } = useAuth();
-  const [showBackupOptions, setShowBackupOptions] = useState(false);
-  const [importStatus, setImportStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   const studiedChunks = Object.keys(progressMap).length;
   const masteredChunks = Object.values(progressMap).filter((p) => p.repetitions >= 3).length;
   const learningChunks = Math.max(0, studiedChunks - masteredChunks);
   const unlearnedChunks = Math.max(0, totalChunks - studiedChunks);
   const masteryPercentage = Math.round((studiedChunks / totalChunks) * 100) || 0;
-
-  const handleExport = () => {
-    soundManager.playSuccess();
-    const dataStr = exportBackupJSON();
-    const blob = new Blob([dataStr], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `echochunk_backup_${new Date().toISOString().split("T")[0]}.json`;
-    link.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const handleImport = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const content = event.target?.result as string;
-      if (content) {
-        const ok = importBackupJSON(content);
-        if (ok) {
-          setImportStatus({
-            type: "success",
-            message: "Khôi phục dữ liệu thành công! Tiến độ đã được nạp lại.",
-          });
-          soundManager.playSuccess();
-          onReload();
-        } else {
-          setImportStatus({
-            type: "error",
-            message: "Tệp sao lưu không hợp lệ hoặc bị lỗi định dạng!",
-          });
-          soundManager.playError();
-        }
-      }
-    };
-    reader.readAsText(file);
-  };
 
   useEscapeKey(onClose);
   useBodyScrollLock();
@@ -279,62 +228,6 @@ export function AnalyticsModal({ onClose, stats, progressMap, totalChunks, onRel
                 </span>
               </div>
             </div>
-          </div>
-
-          {/* Collapsible Backup & Restore (Tùy chọn sao lưu dự phòng cá nhân) */}
-          <div className="border border-gray-200/80 rounded-xl overflow-hidden bg-gray-50/50">
-            <button
-              type="button"
-              onClick={() => setShowBackupOptions((prev) => !prev)}
-              className="w-full flex items-center justify-between p-3 text-xs font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-100/70 transition-colors cursor-pointer"
-            >
-              <span>Tùy chọn tải sao lưu offline (JSON dự phòng)</span>
-              {showBackupOptions ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
-            </button>
-
-            {showBackupOptions && (
-              <div className="p-3.5 pt-1 border-t border-gray-200/60 bg-white space-y-3 animate-[fadeIn_0.15s_ease]">
-                <p className="text-[0.72rem] text-gray-500 m-0 leading-relaxed">
-                  {user
-                    ? "Dữ liệu của bạn đã được tự động lưu lên đám mây theo tài khoản Google. Bạn chỉ cần tải file JSON nếu muốn giữ một bản sao lưu ngoại tuyến trên máy tính."
-                    : "Bạn đang ở chế độ Khách. Bạn có thể xuất file JSON để lưu giữ tiến độ nếu chưa muốn đăng nhập tài khoản."}
-                </p>
-
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={handleExport}
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 text-xs font-semibold transition-all cursor-pointer shadow-2xs"
-                  >
-                    <Download size={14} className="text-blue-600" />
-                    <span>Xuất file JSON</span>
-                  </button>
-
-                  <label className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 text-xs font-semibold transition-all cursor-pointer shadow-2xs">
-                    <Upload size={14} className="text-purple-600" />
-                    <span>Nạp file JSON</span>
-                    <input type="file" accept=".json" onChange={handleImport} className="hidden" />
-                  </label>
-                </div>
-
-                {importStatus && (
-                  <div
-                    className={`p-2.5 rounded-lg border flex items-center gap-2 text-xs font-medium ${
-                      importStatus.type === "success"
-                        ? "bg-emerald-50 border-emerald-200 text-emerald-800"
-                        : "bg-rose-50 border-rose-200 text-rose-800"
-                    }`}
-                  >
-                    {importStatus.type === "success" ? (
-                      <CheckCircle2 size={15} className="text-emerald-600 shrink-0" />
-                    ) : (
-                      <AlertCircle size={15} className="text-rose-600 shrink-0" />
-                    )}
-                    <span>{importStatus.message}</span>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         </div>
       </div>
