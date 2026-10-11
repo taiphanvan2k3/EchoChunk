@@ -4,6 +4,8 @@
   <img src="public/demo-shadowing.png" alt="EchoChunk Shadowing Mode Interface" width="850" style="border-radius: 12px; border: 1px solid #e3e2de; box-shadow: 0 8px 30px rgba(0,0,0,0.08);" />
 </p>
 
+  > **Live Demo:** [https://speaking-english.taiphanvan.id.vn](https://speaking-english.taiphanvan.id.vn)
+
 <p align="center">
   <b>Ứng dụng web chuyên sâu luyện phản xạ nói tiếng Anh theo cụm (Speaking Chunks) & Luyện Shadowing qua YouTube với mốc thời gian từng từ.</b>
 </p>
